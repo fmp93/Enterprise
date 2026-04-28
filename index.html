@@ -1,574 +1,158 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Enterprise OS</title>
-
+  <title>Enterprise OS | 8 Hours in 8 Minutes</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
-      background: #05060A;
-      color: white;
-      overflow-x: hidden;
+    :root{
+      --bg:#060812; --panel:rgba(255,255,255,.075); --panel2:rgba(255,255,255,.11);
+      --line:rgba(255,255,255,.14); --text:#f6f7fb; --muted:#aeb6c8;
+      --blue:#7cc7ff; --violet:#9b8cff; --green:#74f2bd; --gold:#ffd98a;
+      --shadow:0 30px 90px rgba(0,0,0,.45);
     }
-
-    .page {
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background:
-        radial-gradient(circle at 50% 0%, rgba(108,63,232,.38), transparent 35%),
-        radial-gradient(circle at 85% 20%, rgba(59,130,246,.18), transparent 28%),
-        linear-gradient(180deg, #080A12 0%, #05060A 100%);
-      min-height: 100vh;
+        radial-gradient(circle at 20% 10%, rgba(124,199,255,.25), transparent 30%),
+        radial-gradient(circle at 80% 20%, rgba(155,140,255,.22), transparent 32%),
+        radial-gradient(circle at 50% 80%, rgba(116,242,189,.12), transparent 35%),
+        var(--bg);
+      color:var(--text); overflow-x:hidden;
     }
+    body:before{
+      content:""; position:fixed; inset:0; pointer-events:none;
+      background-image:linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size:44px 44px; mask-image:radial-gradient(circle at center, black, transparent 78%);
+    }
+    .nav{max-width:1180px;margin:auto;padding:26px 24px;display:flex;justify-content:space-between;align-items:center}
+    .brand{display:flex;gap:12px;align-items:center;font-weight:700;letter-spacing:.3px}
+    .mark{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--violet));box-shadow:0 0 30px rgba(124,199,255,.45)}
+    .nav a{color:var(--muted);text-decoration:none;margin-left:24px;font-size:14px}
+    .hero{max-width:1180px;margin:38px auto 0;padding:0 24px 80px;display:grid;grid-template-columns:.92fr 1.08fr;gap:44px;align-items:center}
+    .eyebrow{display:inline-flex;border:1px solid var(--line);background:rgba(255,255,255,.06);border-radius:999px;padding:8px 13px;color:var(--blue);font-size:13px;margin-bottom:22px}
+    h1{font-size:68px;line-height:.94;margin:0 0 24px;letter-spacing:-3.8px}
+    .gradient{background:linear-gradient(90deg,#fff,var(--blue),var(--violet));-webkit-background-clip:text;color:transparent}
+    .sub{font-size:20px;line-height:1.6;color:var(--muted);max-width:560px;margin-bottom:32px}
+    .actions{display:flex;gap:14px;flex-wrap:wrap}
+    .btn{padding:14px 20px;border-radius:16px;text-decoration:none;font-weight:650;border:1px solid var(--line);color:#fff;background:rgba(255,255,255,.07)}
+    .btn.primary{background:linear-gradient(135deg,var(--blue),var(--violet));color:#07101e;border:0}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:32px;max-width:540px}
+    .stat{border:1px solid var(--line);background:rgba(255,255,255,.055);border-radius:20px;padding:16px}
+    .stat b{font-size:24px}.stat span{display:block;color:var(--muted);font-size:12px;margin-top:5px}
 
-    .nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 48px;
-      z-index: 20;
-      backdrop-filter: blur(18px);
-      background: rgba(5,6,10,.55);
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-
-    .logo {
-      font-weight: 700;
-      letter-spacing: -.03em;
-      font-size: 18px;
-    }
-
-    .nav a {
-      color: rgba(255,255,255,.72);
-      text-decoration: none;
-      margin-left: 28px;
-      font-size: 14px;
-    }
-
-    .nav .cta {
-      color: white;
-      background: rgba(255,255,255,.1);
-      border: 1px solid rgba(255,255,255,.16);
-      padding: 10px 16px;
-      border-radius: 999px;
-    }
-
-    .hero {
-      padding: 150px 24px 70px;
-      text-align: center;
-      max-width: 1180px;
-      margin: auto;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      gap: 8px;
-      align-items: center;
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.07);
-      border: 1px solid rgba(255,255,255,.12);
-      color: #C4B5FD;
-      font-size: 13px;
-      margin-bottom: 26px;
-    }
-
-    h1 {
-      font-size: clamp(54px, 8vw, 104px);
-      line-height: .92;
-      letter-spacing: -.075em;
-      margin-bottom: 26px;
-    }
-
-    .grad {
-      background: linear-gradient(90deg, #F5F3FF, #A78BFA 45%, #60A5FA);
-      -webkit-background-clip: text;
-      color: transparent;
-    }
-
-    .subtitle {
-      max-width: 780px;
-      margin: 0 auto 36px;
-      color: rgba(255,255,255,.68);
-      font-size: 21px;
-      line-height: 1.55;
-    }
-
-    .actions {
-      display: flex;
-      justify-content: center;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 70px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 15px 24px;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 15px;
-      transition: .25s ease;
-    }
-
-    .primary {
-      background: white;
-      color: #05060A;
-    }
-
-    .primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 20px 60px rgba(255,255,255,.18);
-    }
-
-    .secondary {
-      color: white;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.07);
-    }
-
-    .secondary:hover {
-      transform: translateY(-2px);
-      background: rgba(255,255,255,.12);
-    }
-
-    .product-frame {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 12px;
-      border-radius: 32px;
-      background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.04));
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 50px 160px rgba(0,0,0,.65);
-      animation: float 6s ease-in-out infinite;
-    }
-
-    .command-center {
-      height: 620px;
-      border-radius: 24px;
-      overflow: hidden;
-      background: #F3F5FA;
-      display: grid;
-      grid-template-columns: 230px 1fr 315px;
-      color: #111827;
-    }
-
-    .side {
-      background: #0B0E17;
-      padding: 24px 16px;
-      color: white;
-    }
-
-    .side-logo {
-      font-weight: 800;
-      margin-bottom: 28px;
-    }
-
-    .side-item {
-      padding: 11px 12px;
-      border-radius: 10px;
-      margin-bottom: 6px;
-      color: rgba(255,255,255,.55);
-      font-size: 13px;
-    }
-
-    .side-item.active {
-      color: white;
-      background: rgba(108,63,232,.28);
-    }
-
-    .main {
-      padding: 28px;
-      overflow: hidden;
-    }
-
-    .topline {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 22px;
-    }
-
-    .topline h2 {
-      font-size: 28px;
-      letter-spacing: -.04em;
-    }
-
-    .live {
-      background: #DCFCE7;
-      color: #16A34A;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .kpis {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin-bottom: 22px;
-    }
-
-    .kpi {
-      background: white;
-      border: 1px solid #E5E7EB;
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: 0 8px 24px rgba(15,23,42,.06);
-    }
-
-    .kpi span {
-      display: block;
-      color: #6B7280;
-      font-size: 12px;
-      margin-bottom: 10px;
-    }
-
-    .kpi strong {
-      font-size: 28px;
-      letter-spacing: -.05em;
-    }
-
-    .spine {
-      background: white;
-      border: 1px solid #E5E7EB;
-      border-radius: 22px;
-      padding: 22px;
-      margin-bottom: 22px;
-    }
-
-    .spine-title {
-      font-weight: 800;
-      margin-bottom: 18px;
-    }
-
-    .flow {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 10px;
-    }
-
-    .node {
-      background: #F8FAFC;
-      border: 1px solid #E5E7EB;
-      border-radius: 16px;
-      padding: 14px 10px;
-      text-align: center;
-      position: relative;
-    }
-
-    .node:not(:last-child)::after {
-      content: "→";
-      position: absolute;
-      right: -13px;
-      top: 38%;
-      color: #9CA3AF;
-      z-index: 2;
-    }
-
-    .node b {
-      display: block;
-      font-size: 13px;
-      margin-bottom: 5px;
-    }
-
-    .node small {
-      color: #6B7280;
-      font-size: 11px;
-    }
-
-    .agent-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-    }
-
-    .agent {
-      background: #0B0E17;
-      color: white;
-      border-radius: 18px;
-      padding: 18px;
-    }
-
-    .agent b {
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    .agent p {
-      color: rgba(255,255,255,.55);
-      font-size: 12px;
-      line-height: 1.4;
-    }
-
-    .panel {
-      background: white;
-      border-left: 1px solid #E5E7EB;
-      padding: 24px;
-    }
-
-    .panel h3 {
-      font-size: 18px;
-      margin-bottom: 8px;
-    }
-
-    .panel .muted {
-      color: #6B7280;
-      font-size: 13px;
-      margin-bottom: 22px;
-    }
-
-    .alert {
-      padding: 14px;
-      border-radius: 14px;
-      background: #FEF3C7;
-      color: #92400E;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
-
-    .task {
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid #E5E7EB;
-      margin-bottom: 10px;
-      font-size: 13px;
-    }
-
-    .section {
-      max-width: 1120px;
-      margin: auto;
-      padding: 110px 24px;
-    }
-
-    .section h2 {
-      text-align: center;
-      font-size: clamp(38px, 5vw, 64px);
-      letter-spacing: -.06em;
-      margin-bottom: 20px;
-    }
-
-    .section-sub {
-      text-align: center;
-      max-width: 720px;
-      margin: 0 auto 50px;
-      color: rgba(255,255,255,.62);
-      font-size: 18px;
-      line-height: 1.55;
-    }
-
-    .features {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-    }
-
-    .feature {
-      padding: 28px;
-      border-radius: 24px;
-      background: rgba(255,255,255,.055);
-      border: 1px solid rgba(255,255,255,.1);
-    }
-
-    .feature h3 {
-      font-size: 21px;
-      margin-bottom: 12px;
-    }
-
-    .feature p {
-      color: rgba(255,255,255,.58);
-      line-height: 1.5;
-      font-size: 15px;
-    }
-
-    .cta-box {
-      text-align: center;
-      padding: 70px 30px;
-      border-radius: 34px;
-      background: linear-gradient(135deg, rgba(108,63,232,.34), rgba(59,130,246,.16));
-      border: 1px solid rgba(255,255,255,.12);
-    }
-
-    footer {
-      text-align: center;
-      color: rgba(255,255,255,.35);
-      padding: 40px;
-      font-size: 14px;
-    }
-
-    @keyframes float {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-
-    @media(max-width: 900px) {
-      .nav { padding: 0 20px; }
-      .command-center { grid-template-columns: 1fr; height: auto; }
-      .side, .panel { display: none; }
-      .kpis, .features, .agent-row { grid-template-columns: 1fr; }
-      .flow { grid-template-columns: 1fr 1fr; }
-    }
+    .mockup{position:relative;border:1px solid var(--line);border-radius:34px;background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.045));box-shadow:var(--shadow);padding:18px;backdrop-filter:blur(24px);animation:float 7s ease-in-out infinite}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    .screen{border-radius:26px;background:rgba(7,10,22,.78);border:1px solid rgba(255,255,255,.12);overflow:hidden}
+    .topbar{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line)}
+    .dots span{display:inline-block;width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.3);margin-right:7px}
+    .live{font-size:12px;color:var(--green);letter-spacing:.4px}
+    .dash{display:grid;grid-template-columns:170px 1fr 210px;min-height:520px}
+    .side,.right{border-right:1px solid var(--line);padding:18px;background:rgba(255,255,255,.035)}
+    .right{border-right:0;border-left:1px solid var(--line)}
+    .menu{font-size:12px;color:var(--muted);padding:10px 11px;border-radius:12px;margin-bottom:7px}
+    .menu.active{background:rgba(124,199,255,.16);color:#fff}
+    .main{padding:18px}
+    .head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .head h3{margin:0;font-size:22px;letter-spacing:-.8px}.head p{margin:6px 0 0;color:var(--muted);font-size:12px}
+    .pill{font-size:11px;padding:7px 10px;border-radius:999px;background:rgba(116,242,189,.14);color:var(--green);border:1px solid rgba(116,242,189,.22)}
+    .spine{margin:20px 0;padding:18px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.05)}
+    .nodes{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;position:relative}
+    .node{text-align:center;font-size:10px;color:var(--muted)}
+    .ball{width:30px;height:30px;margin:0 auto 8px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--violet));box-shadow:0 0 22px rgba(124,199,255,.38)}
+    .cards{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
+    .card{border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.055);padding:14px}
+    .card h4{margin:0 0 12px;font-size:13px}
+    .bar{height:8px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden;margin:12px 0}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--blue))}
+    .task{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:10px 0;font-size:12px;color:var(--muted)}
+    .task b{color:#fff;font-weight:600}
+    .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.day{height:24px;border-radius:8px;background:rgba(255,255,255,.07);font-size:10px;display:grid;place-items:center;color:var(--muted)}.day.hot{background:rgba(124,199,255,.22);color:#fff}
+    .metric{border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;background:rgba(255,255,255,.05)}
+    .metric small{color:var(--muted)}.metric strong{display:block;font-size:22px;margin-top:4px}
+    .pulse{position:absolute;right:18px;top:72px;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(116,242,189,.8);animation:pulse 1.8s infinite}
+    @keyframes pulse{70%{box-shadow:0 0 0 18px rgba(116,242,189,0)}100%{box-shadow:0 0 0 0 rgba(116,242,189,0)}}
+    .section{max-width:1180px;margin:auto;padding:40px 24px 90px}
+    .features{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.feature{border:1px solid var(--line);border-radius:24px;background:rgba(255,255,255,.055);padding:22px}
+    .icon{width:34px;height:34px;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;margin-bottom:14px;color:var(--blue)}
+    .feature h3{margin:0 0 9px}.feature p{margin:0;color:var(--muted);line-height:1.5;font-size:14px}
+    @media(max-width:950px){.hero{grid-template-columns:1fr}h1{font-size:48px}.dash{grid-template-columns:1fr}.side,.right{display:none}.features{grid-template-columns:1fr 1fr}}
+    @media(max-width:560px){.features,.stats{grid-template-columns:1fr}.cards{grid-template-columns:1fr}}
   </style>
 </head>
-
 <body>
-  <div class="page">
-    <div class="nav">
-      <div class="logo">Enterprise OS</div>
-      <div>
-        <a href="#features">Features</a>
-        <a href="/Enterprise/demo/index.htmlindex.htmlindex.html">Demo</a>
-        <a href="#contact" class="cta">Request Service</a>
-      </div>
-    </div>
+  <nav class="nav">
+    <div class="brand"><div class="mark"></div>Enterprise OS</div>
+    <div><a href="/Enterprise/demo/index.htmlindex.html">Demo</a><a href="mailto:franco.morante@dfx5.com?subject=Enterprise%20OS%20Demo%20Request">Request Access</a></div>
+  </nav>
 
-    <main class="hero">
-      <div class="eyebrow">AI Process Architect · Operational Command Center</div>
-
-      <h1>
-        8 hours of operations.<br/>
-        <span class="grad">In 8 minutes.</span>
-      </h1>
-
-      <p class="subtitle">
-        A premium AI-powered command center that connects processes, tasks, agents,
-        alerts and decision-making into one executive operating system.
-      </p>
-
+  <main class="hero">
+    <section>
+      <div class="eyebrow">CEO Command Center for agentic operations</div>
+      <h1>Run <span class="gradient">8 hours</span> of enterprise work in 8 minutes.</h1>
+      <p class="sub">Enterprise OS unifies revenue, delivery, finance, HR, approvals, agents, live processes and executive decisions into one operating command center.</p>
       <div class="actions">
-        <a href="/Enterprise/demo/index.htmlindex.htmlindex.html" class="btn primary">View Command Center</a>
-        <a href="#contact" class="btn secondary">Request the Service</a>
+        <a class="btn primary" href="/Enterprise/demo/index.htmlindex.html">View Live Demo</a>
+        <a class="btn" href="mailto:franco.morante@dfx5.com?subject=Enterprise%20OS%20Demo%20Request">Request Enterprise Access</a>
       </div>
+      <div class="stats">
+        <div class="stat"><b>360°</b><span>CEO visibility</span></div>
+        <div class="stat"><b>80%</b><span>less manual chasing</span></div>
+        <div class="stat"><b>Live</b><span>process intelligence</span></div>
+      </div>
+    </section>
 
-      <div class="product-frame">
-        <div class="command-center">
+    <section class="mockup">
+      <div class="pulse"></div>
+      <div class="screen">
+        <div class="topbar"><div class="dots"><span></span><span></span><span></span></div><div class="live">LIVE ENTERPRISE CONTROL</div></div>
+        <div class="dash">
           <aside class="side">
-            <div class="side-logo">Enterprise OS</div>
-            <div class="side-item active">CEO View</div>
-            <div class="side-item">Revenue Spine</div>
-            <div class="side-item">Active Cases</div>
-            <div class="side-item">AI Agents</div>
-            <div class="side-item">Process Map</div>
-            <div class="side-item">Settings</div>
+            <div class="menu active">CEO Overview</div><div class="menu">Revenue Spine</div><div class="menu">Delivery</div><div class="menu">Finance</div><div class="menu">Approvals</div><div class="menu">AI Agents</div>
           </aside>
-
           <section class="main">
-            <div class="topline">
-              <div>
-                <h2>CEO Command Center</h2>
-                <p style="color:#6B7280;margin-top:6px;">Company-level control tower</p>
-              </div>
-              <div class="live">LIVE</div>
-            </div>
-
-            <div class="kpis">
-              <div class="kpi"><span>Revenue</span><strong>$428K</strong></div>
-              <div class="kpi"><span>Open Cases</span><strong>37</strong></div>
-              <div class="kpi"><span>SLA Health</span><strong>94%</strong></div>
-              <div class="kpi"><span>AI Actions</span><strong>128</strong></div>
-            </div>
-
+            <div class="head"><div><h3>Revenue Command</h3><p>Lead to cash, state machines, blockers and execution in one view.</p></div><div class="pill">6 agents active</div></div>
             <div class="spine">
-              <div class="spine-title">Revenue Spine</div>
-              <div class="flow">
-                <div class="node"><b>Lead</b><small>24 active</small></div>
-                <div class="node"><b>Qualified</b><small>13 ready</small></div>
-                <div class="node"><b>Contract</b><small>5 blocked</small></div>
-                <div class="node"><b>Delivery</b><small>18 running</small></div>
-                <div class="node"><b>Invoice</b><small>9 pending</small></div>
-                <div class="node"><b>Payment</b><small>3 at risk</small></div>
+              <div class="nodes">
+                <div class="node"><div class="ball"></div>Lead</div><div class="node"><div class="ball"></div>Qualified</div><div class="node"><div class="ball"></div>SOW</div><div class="node"><div class="ball"></div>Delivery</div><div class="node"><div class="ball"></div>Invoice</div><div class="node"><div class="ball"></div>Paid</div>
               </div>
             </div>
-
-            <div class="agent-row">
-              <div class="agent"><b>Finance Agent</b><p>Tracks invoices, payments and revenue risks.</p></div>
-              <div class="agent"><b>Delivery Agent</b><p>Detects blocked cases and SLA delays.</p></div>
-              <div class="agent"><b>CEO Agent</b><p>Summarizes decisions and escalations.</p></div>
+            <div class="cards">
+              <div class="card">
+                <h4>Critical Path</h4>
+                <div class="task"><b>Cloud migration program</b><span>Contract review</span></div>
+                <div class="task"><b>Enterprise Client C invoice</b><span>Finance validation</span></div>
+                <div class="task"><b>Retail AI Assessment</b><span>Technical gate</span></div>
+                <div class="bar"><i style="width:74%"></i></div>
+              </div>
+              <div class="card">
+                <h4>Executive Calendar</h4>
+                <div class="cal">
+                  <div class="day">M</div><div class="day hot">T</div><div class="day">W</div><div class="day hot">T</div><div class="day">F</div><div class="day">S</div><div class="day">S</div>
+                  <div class="day">9</div><div class="day hot">10</div><div class="day">11</div><div class="day hot">12</div><div class="day">13</div><div class="day">14</div><div class="day">15</div>
+                </div>
+              </div>
             </div>
           </section>
-
-          <aside class="panel">
-            <h3>Critical Context</h3>
-            <p class="muted">Right-side detail panel</p>
-
-            <div class="alert">Payment risk detected · 3 invoices overdue</div>
-            <div class="task"><b>Next Action</b><br/>Send collection follow-up to Finance owner.</div>
-            <div class="task"><b>System</b><br/>Zoho · Slack · Jira</div>
-            <div class="task"><b>Agent Suggestion</b><br/>Escalate client risk to CEO view.</div>
+          <aside class="right">
+            <div class="metric"><small>Revenue at risk</small><strong>$142K</strong></div>
+            <div class="metric"><small>Approvals waiting</small><strong>7</strong></div>
+            <div class="metric"><small>Agent actions today</small><strong>284</strong></div>
+            <div class="metric"><small>Margin health</small><strong>31%</strong></div>
           </aside>
         </div>
       </div>
-    </main>
-
-    <section class="section" id="features">
-      <h2>More than a dashboard.</h2>
-      <p class="section-sub">
-        Enterprise OS turns operational chaos into a connected execution layer where every process has an owner,
-        every task has a next action, and every agent knows what to do.
-      </p>
-
-      <div class="features">
-        <div class="feature">
-          <h3>CEO View</h3>
-          <p>Executive visibility across revenue, risks, blockers, clients, payments and strategic alerts.</p>
-        </div>
-
-        <div class="feature">
-          <h3>Process Flows</h3>
-          <p>Visualize how work moves from lead to payment, including states, dependencies and handoffs.</p>
-        </div>
-
-        <div class="feature">
-          <h3>AI Agents</h3>
-          <p>Agents monitor processes, detect exceptions, suggest actions and guide teams step by step.</p>
-        </div>
-
-        <div class="feature">
-          <h3>User Execution</h3>
-          <p>Each user sees what to do, where to do it, which system to use and what output is expected.</p>
-        </div>
-
-        <div class="feature">
-          <h3>Live Operations</h3>
-          <p>Track active cases, blockers, SLA risks, approvals and operational status in real time.</p>
-        </div>
-
-        <div class="feature">
-          <h3>Right Panel Logic</h3>
-          <p>Every click opens context: details, tasks, systems, documents, blockers and next action.</p>
-        </div>
-      </div>
     </section>
+  </main>
 
-    <section class="section" id="contact">
-      <div class="cta-box">
-        <h2>Build your company command center.</h2>
-        <p class="section-sub">
-          Request the service and explore how Enterprise OS can be adapted to your company operations.
-        </p>
-
-        <div class="actions">
-          <a href="mailto:franco.morante@dfx5.com?subject=Enterprise OS Service Request" class="btn primary">Request the Service</a>
-          <a href="/Enterprise/demo/index.htmlindex.htmlindex.html" class="btn secondary">View Demo First</a>
-        </div>
-      </div>
-    </section>
-
-    <footer>
-      Enterprise OS · AI-powered process architecture
-    </footer>
-  </div>
+  <section class="section">
+    <div class="features">
+      <div class="feature"><div class="icon">⌁</div><h3>Revenue Spine</h3><p>Visual lead-to-cash flow with every object, state, owner and blocker.</p></div>
+      <div class="feature"><div class="icon">□</div><h3>Executive Tasks</h3><p>Approvals, decisions and follow-ups prioritized by business impact.</p></div>
+      <div class="feature"><div class="icon">◇</div><h3>AI Agents</h3><p>Agents monitor events, move work forward and escalate only when needed.</p></div>
+      <div class="feature"><div class="icon">◌</div><h3>All-in-One OS</h3><p>One control layer across Jira, Slack, email, finance, CRM and delivery.</p></div>
+    </div>
+  </section>
 </body>
 </html>
