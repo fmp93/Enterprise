@@ -1,31 +1,388 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Enterprise OS</title>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise OS | 8 Hours in 8 Minutes</title>
   <style>
-    body { margin:0; font-family:Arial; background:#0B0E17; color:white; text-align:center; }
-    .container { max-width:900px; margin:auto; padding:80px 20px; }
-    h1 { font-size:48px; margin-bottom:20px; }
-    p { font-size:18px; color:#aaa; margin-bottom:40px; }
-    .btn { display:inline-block; padding:14px 28px; margin:10px; border-radius:8px; text-decoration:none; font-weight:bold; }
-    .primary { background:#6C3FE8; color:white; }
-    .secondary { border:1px solid #6C3FE8; color:#8B5CF6; }
-    .section { margin-top:80px; }
+    :root{
+      --bg:#050712;
+      --text:#f7f8ff;
+      --muted:#a8b0c3;
+      --line:rgba(255,255,255,.14);
+      --glass:rgba(255,255,255,.07);
+      --blue:#7cc7ff;
+      --violet:#9b8cff;
+      --green:#75f2bd;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 20% 10%,rgba(124,199,255,.22),transparent 28%),
+        radial-gradient(circle at 80% 18%,rgba(155,140,255,.20),transparent 30%),
+        radial-gradient(circle at 50% 90%,rgba(117,242,189,.10),transparent 35%),
+        var(--bg);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+    body:before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+      background-size:46px 46px;
+      mask-image:radial-gradient(circle at center,black,transparent 78%);
+    }
+    .nav{
+      max-width:1180px;
+      margin:auto;
+      padding:26px 24px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      position:relative;
+      z-index:2;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:750;
+      letter-spacing:.2px;
+    }
+    .logo{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--blue),var(--violet));
+      box-shadow:0 0 34px rgba(124,199,255,.38);
+    }
+    .nav a{
+      color:var(--muted);
+      text-decoration:none;
+      margin-left:22px;
+      font-size:14px;
+    }
+    .hero{
+      max-width:1180px;
+      margin:40px auto 0;
+      padding:0 24px 80px;
+      display:grid;
+      grid-template-columns:.92fr 1.08fr;
+      gap:46px;
+      align-items:center;
+      position:relative;
+      z-index:1;
+    }
+    .eyebrow{
+      display:inline-flex;
+      padding:8px 13px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.055);
+      border-radius:999px;
+      color:var(--blue);
+      font-size:13px;
+      margin-bottom:22px;
+      backdrop-filter:blur(18px);
+    }
+    h1{
+      font-size:66px;
+      line-height:.96;
+      letter-spacing:-3.4px;
+      margin:0 0 22px;
+    }
+    .grad{
+      background:linear-gradient(90deg,#fff,var(--blue),var(--violet));
+      -webkit-background-clip:text;
+      color:transparent;
+    }
+    .sub{
+      max-width:570px;
+      font-size:20px;
+      line-height:1.55;
+      color:var(--muted);
+      margin:0 0 32px;
+    }
+    .actions{display:flex;gap:14px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:14px 20px;
+      border-radius:16px;
+      text-decoration:none;
+      font-weight:750;
+      border:1px solid var(--line);
+      color:white;
+      background:rgba(255,255,255,.07);
+      backdrop-filter:blur(18px);
+    }
+    .btn.primary{
+      border:0;
+      color:#06111f;
+      background:linear-gradient(135deg,var(--blue),var(--violet));
+      box-shadow:0 18px 50px rgba(124,199,255,.22);
+    }
+    .trust{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:32px;
+      max-width:540px;
+    }
+    .trust div{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.052);
+      border-radius:20px;
+      padding:16px;
+      backdrop-filter:blur(18px);
+    }
+    .trust b{font-size:24px}
+    .trust span{display:block;margin-top:5px;color:var(--muted);font-size:12px}
+
+    .mock{
+      border:1px solid var(--line);
+      border-radius:34px;
+      padding:18px;
+      background:linear-gradient(145deg,rgba(255,255,255,.15),rgba(255,255,255,.045));
+      box-shadow:0 34px 100px rgba(0,0,0,.44);
+      backdrop-filter:blur(26px);
+      animation:float 7s ease-in-out infinite;
+    }
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    .screen{
+      min-height:520px;
+      border-radius:26px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(7,10,22,.82);
+    }
+    .top{
+      height:48px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:0 18px;
+      border-bottom:1px solid var(--line);
+    }
+    .dots span{
+      display:inline-block;
+      width:9px;
+      height:9px;
+      border-radius:50%;
+      background:rgba(255,255,255,.32);
+      margin-right:7px;
+    }
+    .live{font-size:12px;color:var(--green);letter-spacing:.4px}
+    .dash{
+      display:grid;
+      grid-template-columns:156px 1fr 178px;
+      min-height:472px;
+    }
+    .side,.right{
+      padding:16px;
+      background:rgba(255,255,255,.035);
+    }
+    .side{border-right:1px solid var(--line)}
+    .right{border-left:1px solid var(--line)}
+    .menu{
+      font-size:11px;
+      color:var(--muted);
+      padding:10px;
+      border-radius:12px;
+      margin-bottom:7px;
+    }
+    .menu.active{background:rgba(124,199,255,.15);color:white}
+    .main{padding:18px}
+    .main h3{margin:0;font-size:22px;letter-spacing:-.7px}
+    .main p{margin:6px 0 0;color:var(--muted);font-size:12px}
+    .spine{
+      margin:18px 0;
+      padding:16px;
+      border:1px solid var(--line);
+      border-radius:22px;
+      background:rgba(255,255,255,.05);
+    }
+    .nodes{
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      gap:8px;
+    }
+    .node{text-align:center;font-size:10px;color:var(--muted)}
+    .ball{
+      width:28px;
+      height:28px;
+      margin:0 auto 8px;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--blue),var(--violet));
+      box-shadow:0 0 24px rgba(124,199,255,.45);
+    }
+    .cards{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:12px;
+    }
+    .card{
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:rgba(255,255,255,.055);
+      padding:14px;
+    }
+    .card h4{margin:0 0 10px;font-size:13px}
+    .task{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      border-top:1px solid var(--line);
+      padding:10px 0;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .task b{color:white}
+    .metric{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      margin-bottom:10px;
+      background:rgba(255,255,255,.05);
+    }
+    .metric small{color:var(--muted)}
+    .metric strong{display:block;font-size:21px;margin-top:4px}
+    .pulse{
+      display:inline-block;
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 0 0 rgba(117,242,189,.8);
+      animation:pulse 1.7s infinite;
+      margin-right:7px;
+    }
+    @keyframes pulse{70%{box-shadow:0 0 0 14px rgba(117,242,189,0)}100%{box-shadow:0 0 0 0 rgba(117,242,189,0)}}
+    .features{
+      max-width:1180px;
+      margin:auto;
+      padding:10px 24px 90px;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+      position:relative;
+      z-index:1;
+    }
+    .feature{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.052);
+      border-radius:24px;
+      padding:22px;
+      backdrop-filter:blur(20px);
+    }
+    .feature h3{margin:0 0 8px}
+    .feature p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+    @media(max-width:980px){
+      .hero{grid-template-columns:1fr}
+      h1{font-size:48px}
+      .dash{grid-template-columns:1fr}
+      .side,.right{display:none}
+      .features{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:560px){
+      .features,.trust,.cards{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Enterprise OS</h1>
-    <p>Run 8 hours of operational work in 8 minutes.</p>
-
-    <a href="#demo" class="btn primary">View Demo</a>
-    <a href="mailto:franco.morante@dfx5.com?subject=Enterprise OS Interest" class="btn secondary">I'm Interested</a>
-
-    <div class="section" id="demo">
-      <h2>Command Center Demo</h2>
-      <p>CEO View, Area Manager View and User View connected in one operational system.</p>
+  <nav class="nav">
+    <div class="brand"><div class="logo"></div>Enterprise OS</div>
+    <div>
+      <a href="/Enterprise/demo/index.html">Demo</a>
+      <a href="mailto:franco.morante@dfx5.com?subject=Enterprise%20OS%20Demo%20Request">Request Access</a>
     </div>
-  </div>
+  </nav>
+
+  <main class="hero">
+    <section>
+      <div class="eyebrow">CEO Command Center for modern operations</div>
+      <h1>Run <span class="grad">8 hours</span> of operational work in 8 minutes.</h1>
+      <p class="sub">Enterprise OS turns processes, tasks, approvals, alerts and operating data into one executive command center for faster decisions and cleaner execution.</p>
+      <div class="actions">
+        <a class="btn primary" href="/Enterprise/demo/index.html">View Demo</a>
+        <a class="btn" href="mailto:franco.morante@dfx5.com?subject=Enterprise%20OS%20Demo%20Request">Request Enterprise Access</a>
+      </div>
+      <div class="trust">
+        <div><b>360°</b><span>operational visibility</span></div>
+        <div><b>Live</b><span>process intelligence</span></div>
+        <div><b>AI</b><span>ready architecture</span></div>
+      </div>
+    </section>
+
+    <section class="mock">
+      <div class="screen">
+        <div class="top">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div class="live"><span class="pulse"></span>LIVE COMMAND CENTER</div>
+        </div>
+        <div class="dash">
+          <aside class="side">
+            <div class="menu active">CEO Overview</div>
+            <div class="menu">Revenue Spine</div>
+            <div class="menu">Running Cases</div>
+            <div class="menu">Approvals</div>
+            <div class="menu">Processes</div>
+            <div class="menu">Alerts</div>
+          </aside>
+
+          <section class="main">
+            <h3>Revenue Operating Flow</h3>
+            <p>Lead-to-cash visibility with states, blockers, ownership and executive actions.</p>
+
+            <div class="spine">
+              <div class="nodes">
+                <div class="node"><div class="ball"></div>Lead</div>
+                <div class="node"><div class="ball"></div>Qualified</div>
+                <div class="node"><div class="ball"></div>SOW</div>
+                <div class="node"><div class="ball"></div>Contract</div>
+                <div class="node"><div class="ball"></div>Invoice</div>
+                <div class="node"><div class="ball"></div>Paid</div>
+              </div>
+            </div>
+
+            <div class="cards">
+              <div class="card">
+                <h4>Critical Actions</h4>
+                <div class="task"><b>Belcorp POC</b><span>Signature pending</span></div>
+                <div class="task"><b>Aceros Invoice</b><span>21 days overdue</span></div>
+                <div class="task"><b>Rappi SOW</b><span>Margin rework</span></div>
+              </div>
+              <div class="card">
+                <h4>Today</h4>
+                <div class="task"><b>7</b><span>approvals</span></div>
+                <div class="task"><b>4</b><span>blocked cases</span></div>
+                <div class="task"><b>12</b><span>process updates</span></div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="right">
+            <div class="metric"><small>Revenue at Risk</small><strong>$142K</strong></div>
+            <div class="metric"><small>Cash Delayed</small><strong>$30K</strong></div>
+            <div class="metric"><small>Actions Today</small><strong>284</strong></div>
+            <div class="metric"><small>Margin Health</small><strong>31%</strong></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section class="features">
+    <div class="feature"><h3>Revenue Spine</h3><p>See every stage from lead to payment with blockers and ownership.</p></div>
+    <div class="feature"><h3>Process Library</h3><p>Standardized TO-BE processes, subprocesses and critical paths.</p></div>
+    <div class="feature"><h3>Action Center</h3><p>Prioritized decisions based on operational impact and risk.</p></div>
+    <div class="feature"><h3>Command View</h3><p>One executive layer across tasks, approvals, alerts and execution.</p></div>
+  </section>
 </body>
 </html>
