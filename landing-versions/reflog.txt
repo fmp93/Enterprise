@@ -1,0 +1,25 @@
+769148f HEAD@{0}: commit: Rebuild modern landing test
+abd9bcf HEAD@{1}: commit: Add landing test from 5cfe16e
+c4fcc1d HEAD@{2}: commit: Fix landing demo link to index html
+26b8e42 HEAD@{3}: commit: Restore improved landing page
+75025f6 HEAD@{4}: reset: moving to 75025f6
+75025f6 HEAD@{5}: reset: moving to 75025f6
+68dbab9 HEAD@{6}: reset: moving to HEAD~1
+75025f6 HEAD@{7}: reset: moving to 75025f6
+ac711c1 HEAD@{8}: reset: moving to HEAD~2
+c1c0295 HEAD@{9}: commit: Prioritize main workspace and reduce right sidebar width
+582aecb HEAD@{10}: commit: Improve layout hierarchy and compact right process panel
+ac711c1 HEAD@{11}: commit: Improve process library navigation and remove placeholder behavior
+3ad2fbc HEAD@{12}: commit: Add browse all processes content to demo
+3e096c3 HEAD@{13}: commit: Add quick actions to case detail panel
+4c2677c HEAD@{14}: commit: Populate navigator demo with revenue operating data
+4d1bb16 HEAD@{15}: commit: Make decisions update pipeline state
+e14cc1e HEAD@{16}: commit: Connect demo to process rules engine
+961ac12 HEAD@{17}: commit: Add executive impact summary to demo
+314531d HEAD@{18}: commit: Add simulated decision execution to action center
+df4b82a HEAD@{19}: commit: Add revenue timeline and bottlenecks to demo
+9838b41 HEAD@{20}: commit: Add CEO action center to command center demo
+9b9d49c HEAD@{21}: commit: Add live revenue deals to command center demo
+1a50f6c HEAD@{22}: commit: Revert landing to previous version (keep original design)
+cd280f4 HEAD@{23}: commit: Upgrade Enterprise OS landing and demo command center UI
+0990c83 HEAD@{24}: clone: from https://github.com/fmp93/Enterprise.git

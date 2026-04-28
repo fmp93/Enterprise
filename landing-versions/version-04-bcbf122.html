@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise OS | AI Command Center</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #070812;
+      color: #f8f7ff;
+      overflow-x: hidden;
+    }
+
+    .page {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(124, 58, 237, 0.35), transparent 34%),
+        radial-gradient(circle at top right, rgba(59, 130, 246, 0.22), transparent 30%),
+        linear-gradient(180deg, #070812 0%, #0d1020 50%, #070812 100%);
+    }
+
+    nav {
+      width: min(1180px, 92%);
+      margin: 0 auto;
+      padding: 28px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      font-size: 20px;
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #8b5cf6, #4f46e5);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 28px rgba(139, 92, 246, 0.55);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      color: #aeb7d5;
+      font-size: 14px;
+    }
+
+    .nav-links a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .nav-cta {
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.13);
+      color: white !important;
+    }
+
+    .hero {
+      width: min(1180px, 92%);
+      margin: 0 auto;
+      padding: 72px 0 40px;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 56px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.14);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      color: #c4b5fd;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: clamp(48px, 7vw, 86px);
+      line-height: 0.94;
+      letter-spacing: -0.075em;
+      max-width: 760px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #ffffff, #c4b5fd, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      margin-top: 26px;
+      font-size: 20px;
+      line-height: 1.6;
+      color: #aeb7d5;
+      max-width: 650px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 34px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 20px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 14px;
+      transition: 0.25s ease;
+    }
+
+    .btn-primary {
+      color: white;
+      background: linear-gradient(135deg, #7c3aed, #2563eb);
+      box-shadow: 0 18px 50px rgba(79, 70, 229, 0.35);
+    }
+
+    .btn-secondary {
+      color: #e5e7eb;
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .demo-card {
+      position: relative;
+      border-radius: 28px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.13);
+      box-shadow: 0 30px 100px rgba(0,0,0,0.45);
+      padding: 16px;
+      backdrop-filter: blur(20px);
+    }
+
+    .window {
+      border-radius: 20px;
+      overflow: hidden;
+      background: #eef2fb;
+      color: #0f172a;
+    }
+
+    .window-top {
+      height: 46px;
+      background: #0d1020;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+
+    .dot:nth-child(2) { background: #f59e0b; }
+    .dot:nth-child(3) { background: #22c55e; }
+
+    .mock {
+      display: grid;
+      grid-template-columns: 150px 1fr 190px;
+      min-height: 430px;
+    }
+
+    .mock-sidebar {
+      background: #101322;
+      color: white;
+      padding: 18px 12px;
+    }
+
+    .mock-logo {
+      font-size: 13px;
+      font-weight: 900;
+      margin-bottom: 22px;
+      color: #fff;
+    }
+
+    .mock-item {
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #aeb7d5;
+      font-size: 11px;
+      margin-bottom: 7px;
+    }
+
+    .mock-item.active {
+      background: #2f1d64;
+      color: white;
+    }
+
+    .mock-main {
+      padding: 20px;
+      background: #f2f5fb;
+    }
+
+    .mock-title {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin-bottom: 18px;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .kpi {
+      background: white;
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 10px 30px rgba(15,23,42,0.08);
+      font-size: 10px;
+      color: #64748b;
+    }
+
+    .kpi strong {
+      display: block;
+      font-size: 22px;
+      color: #111827;
+      margin-bottom: 2px;
+    }
+
+    .spine {
+      background: white;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .spine-title {
+      font-weight: 900;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    .nodes {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .node {
+      text-align: center;
+      font-size: 10px;
+      color: #64748b;
+    }
+
+    .circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      margin: 0 auto 7px;
+    }
+
+    .case {
+      background: white;
+      border-radius: 16px;
+      padding: 13px;
+      margin-bottom: 10px;
+      border-left: 4px solid #ef4444;
+    }
+
+    .case strong {
+      font-size: 13px;
+    }
+
+    .case p {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .mock-panel {
+      background: white;
+      border-left: 1px solid #e5e7eb;
+      padding: 18px;
+    }
+
+    .panel-label {
+      font-size: 10px;
+      color: #94a3b8;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.05;
+      margin-bottom: 18px;
+    }
+
+    .panel-row {
+      border-top: 1px solid #e5e7eb;
+      padding: 10px 0;
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .panel-row span {
+      color: #94a3b8;
+      font-weight: 800;
+    }
+
+    section {
+      width: min(1180px, 92%);
+      margin: 0 auto;
+      padding: 70px 0;
+    }
+
+    .section-header {
+      max-width: 760px;
+      margin-bottom: 34px;
+    }
+
+    .section-header h2 {
+      font-size: clamp(34px, 4vw, 56px);
+      letter-spacing: -0.06em;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .section-header p {
+      color: #aeb7d5;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .feature {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.11);
+      border-radius: 24px;
+      padding: 24px;
+      min-height: 210px;
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(139, 92, 246, 0.18);
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      font-size: 22px;
+    }
+
+    .feature h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+      letter-spacing: -0.03em;
+    }
+
+    .feature p {
+      color: #aeb7d5;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .docs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .doc-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      text-decoration: none;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.11);
+    }
+
+    .cta {
+      margin-top: 40px;
+      border-radius: 30px;
+      padding: 42px;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.28), rgba(37, 99, 235, 0.2));
+      border: 1px solid rgba(255,255,255,0.13);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .cta h2 {
+      font-size: 36px;
+      letter-spacing: -0.05em;
+      margin-bottom: 10px;
+    }
+
+    .cta p {
+      color: #cbd5e1;
+      font-size: 16px;
+    }
+
+    footer {
+      width: min(1180px, 92%);
+      margin: 0 auto;
+      padding: 40px 0 70px;
+      color: #7d87a6;
+      font-size: 14px;
+      border-top: 1px solid rgba(255,255,255,0.09);
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .mock {
+        grid-template-columns: 120px 1fr;
+      }
+
+      .mock-panel {
+        display: none;
+      }
+
+      .grid-3, .docs {
+        grid-template-columns: 1fr;
+      }
+
+      .cta {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <nav>
+      <div class="brand">
+        <div class="logo">◇</div>
+        Enterprise OS
+      </div>
+      <div class="nav-links">
+        <a href="#views">Views</a>
+        <a href="#system">System</a>
+        <a href="#docs">Handoff</a>
+        <a class="nav-cta" href="#access">Request Access</a>
+      </div>
+    </nav>
+
+    <main class="hero">
+      <div>
+        <div class="eyebrow">AI Process Architecture · Command Center</div>
+        <h1>
+          Run <span class="gradient-text">8 hours</span> of company operations in <span class="gradient-text">8 minutes.</span>
+        </h1>
+        <p class="subtitle">
+          Enterprise OS turns scattered processes, tasks, approvals, alerts and handoffs into one AI-powered operating system for executives, managers and users.
+        </p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#docs">View Handoff Docs →</a>
+          <a class="btn btn-secondary" href="#system">Explore System</a>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div class="window">
+          <div class="window-top">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+          <div class="mock">
+            <aside class="mock-sidebar">
+              <div class="mock-logo">Enterprise OS</div>
+              <div class="mock-item active">CEO View</div>
+              <div class="mock-item">Area View</div>
+              <div class="mock-item">User View</div>
+              <div class="mock-item">Process Map</div>
+              <div class="mock-item">Settings</div>
+            </aside>
+
+            <section class="mock-main">
+              <div class="mock-title">CEO Command Center</div>
+              <div class="kpis">
+                <div class="kpi"><strong>$247K</strong>Revenue</div>
+                <div class="kpi"><strong>34</strong>Open Cases</div>
+                <div class="kpi"><strong>87%</strong>SLA</div>
+              </div>
+
+              <div class="spine">
+                <div class="spine-title">Revenue Spine</div>
+                <div class="nodes">
+                  <div class="node"><div class="circle">142</div>Leads</div>
+                  <div class="node"><div class="circle">67</div>Qualified</div>
+                  <div class="node"><div class="circle">28</div>Contract</div>
+                  <div class="node"><div class="circle">19</div>Delivery</div>
+                  <div class="node"><div class="circle">9</div>Payment</div>
+                </div>
+              </div>
+
+              <div class="case">
+                <strong>ACME Corp Onboarding</strong>
+                <p>Blocked in KYC · HR + Compliance</p>
+              </div>
+              <div class="case" style="border-left-color:#f59e0b;">
+                <strong>Invoice Review — Overdue</strong>
+                <p>Finance · Payment delayed 14 days</p>
+              </div>
+            </section>
+
+            <aside class="mock-panel">
+              <div class="panel-label">Case Detail</div>
+              <div class="panel-title">ACME Corp Onboarding</div>
+              <div class="panel-row"><span>Process</span>Onboarding</div>
+              <div class="panel-row"><span>Status</span>Blocked</div>
+              <div class="panel-row"><span>Owner</span>HR</div>
+              <div class="panel-row"><span>SLA</span>Overdue</div>
+              <div class="panel-row"><span>Next</span>Escalate KYC</div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <section id="views">
+      <div class="section-header">
+        <h2>Three views. One operating logic.</h2>
+        <p>Enterprise OS separates decision-making, management and execution while keeping every process connected through the same sidebar, right panel and process map.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="feature">
+          <div class="feature-icon">👁️</div>
+          <h3>CEO View</h3>
+          <p>Company-level control tower with KPIs, revenue spine, critical alerts, active cases, risks and executive decision points.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🧭</div>
+          <h3>Area View</h3>
+          <p>Manager layer for HR, Finance, IT, Delivery or Sales with team workload, blockers, SLA status and running cases.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">✅</div>
+          <h3>User View</h3>
+          <p>Execution layer that tells each person what to do, where to do it, which system to use and what output is expected.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="system">
+      <div class="section-header">
+        <h2>Designed as a system, not just a dashboard.</h2>
+        <p>The architecture connects processes, cases, tasks, users, alerts and KPIs into one reusable operating model.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="feature">
+          <div class="feature-icon">🗺️</div>
+          <h3>Process Map</h3>
+          <p>Visualize the full company flow from lead to payment, including dependencies, bottlenecks and blocked nodes.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">⚡</div>
+          <h3>Right Panel Logic</h3>
+          <p>Click any case, task, alert or process node and the right panel opens with details, systems, next actions and documents.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🤖</div>
+          <h3>AI-Ready Structure</h3>
+          <p>Built around objects, states, tasks and workflows so future AI agents can execute, monitor and escalate work.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="docs">
+      <div class="section-header">
+        <h2>Developer handoff package.</h2>
+        <p>Five implementation documents define the foundation, components, views, logic and data model.</p>
+      </div>
+
+      <div class="docs">
+        <a class="doc-link" href="docs/Part1_Foundation.md"><span>Part 1 — Foundation</span><strong>Open →</strong></a>
+        <a class="doc-link" href="docs/Part2_Components.md"><span>Part 2 — Components</span><strong>Open →</strong></a>
+        <a class="doc-link" href="docs/Part3_Views.md"><span>Part 3 — Views</span><strong>Open →</strong></a>
+        <a class="doc-link" href="docs/Part4_Logic.md"><span>Part 4 — Logic</span><strong>Open →</strong></a>
+        <a class="doc-link" href="docs/Part5_Data.md"><span>Part 5 — Data</span><strong>Open →</strong></a>
+      </div>
+
+      <div class="cta" id="access">
+        <div>
+          <h2>Build the operating layer for modern companies.</h2>
+          <p>From scattered work to one AI-powered command center.</p>
+        </div>
+        <a class="btn btn-primary" href="mailto:hello@example.com?subject=Enterprise%20OS%20Access%20Request">Request Access →</a>
+      </div>
+    </section>
+
+    <footer>
+      Enterprise OS · AI Process Architecture · Command Center Prototype
+    </footer>
+  </div>
+</body>
+</html>
