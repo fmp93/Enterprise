@@ -2385,5 +2385,269 @@ setTimeout(()=>{
   renderMyWork();
 }, 0);
 </script>
+
+<!-- TEST 3: OWNERSHIP BRANCH MATRIX -->
+<style>
+  .ownershipBranch {
+    margin: 18px 0;
+    background: #111527;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 22px;
+    overflow: hidden;
+    color: white;
+  }
+
+  .ownershipHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px 22px;
+    border-top: 4px solid #7c3aed;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+
+  .ownershipHeader h2 {
+    margin: 0;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+  }
+
+  .ownershipHeader span {
+    color: #9aa4b2;
+    font-size: 14px;
+  }
+
+  .ownershipBadge {
+    background: rgba(124,58,237,.16);
+    color: #c4b5fd;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .ownershipGrid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(180px, 1fr));
+  }
+
+  .ownershipColumn {
+    min-height: 240px;
+    border-right: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.025);
+  }
+
+  .ownershipColumn:last-child {
+    border-right: 0;
+  }
+
+  .ownershipColumn.activeArea {
+    background: rgba(124,58,237,.12);
+  }
+
+  .ownershipColumnHeader {
+    padding: 14px 16px;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+
+  .ownershipTask {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    cursor: pointer;
+  }
+
+  .ownershipTask:hover {
+    background: rgba(255,255,255,.06);
+  }
+
+  .ownershipTaskTitle {
+    font-size: 14px;
+    font-weight: 750;
+    line-height: 1.35;
+    margin-bottom: 6px;
+  }
+
+  .ownershipMeta {
+    color: #8f9bad;
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .ownershipStatus {
+    display: inline-block;
+    background: rgba(250,204,21,.14);
+    color: #fde68a;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  @media(max-width: 1100px) {
+    .ownershipGrid {
+      grid-template-columns: 1fr;
+    }
+
+    .ownershipColumn {
+      border-right: 0;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+  }
+</style>
+
+<script>
+(function () {
+  const ownershipData = {
+    subprocess: "Day 1 Setup",
+    process: "Employee Onboarding",
+    areas: [
+      {
+        area: "HR",
+        role: "Contributor",
+        tasks: [
+          {
+            title: "Confirm employee profile is complete",
+            system: "BambooHR",
+            status: "Pending"
+          },
+          {
+            title: "Confirm role, manager and start date",
+            system: "BambooHR",
+            status: "Pending"
+          }
+        ]
+      },
+      {
+        area: "IT",
+        role: "Responsible",
+        active: true,
+        tasks: [
+          {
+            title: "Create Microsoft 365 account",
+            system: "Azure AD",
+            status: "Pending"
+          },
+          {
+            title: "Set up ITSM access",
+            system: "ITSM",
+            status: "Pending"
+          },
+          {
+            title: "Grant Slack / Teams access",
+            system: "Slack / Teams",
+            status: "Pending"
+          }
+        ]
+      },
+      {
+        area: "Manager",
+        role: "Contributor",
+        tasks: [
+          {
+            title: "Confirm tools needed for the role",
+            system: "Email / Jira",
+            status: "Pending"
+          },
+          {
+            title: "Validate first-week expectations",
+            system: "Calendar",
+            status: "Pending"
+          }
+        ]
+      },
+      {
+        area: "Finance",
+        role: "Informed",
+        tasks: [
+          {
+            title: "Confirm employee is added to payroll flow if required",
+            system: "Payroll / Finance System",
+            status: "Conditional"
+          }
+        ]
+      },
+      {
+        area: "Employee",
+        role: "Participant",
+        tasks: [
+          {
+            title: "Confirm access to company email",
+            system: "Email",
+            status: "Pending"
+          },
+          {
+            title: "Confirm access to communication tools",
+            system: "Slack / Teams",
+            status: "Pending"
+          }
+        ]
+      }
+    ]
+  };
+
+  function findMainContent() {
+    const cards = Array.from(document.querySelectorAll("div"))
+      .filter(el => {
+        const r = el.getBoundingClientRect();
+        const txt = (el.textContent || "").toLowerCase();
+        return txt.includes("process flow") &&
+               txt.includes("employee onboarding") &&
+               r.width > 500 &&
+               r.height > 90;
+      });
+
+    return cards[0];
+  }
+
+  function createOwnershipBranch() {
+    if (document.getElementById("ownershipBranch")) return;
+
+    const flowCard = findMainContent();
+    if (!flowCard) return;
+
+    const branch = document.createElement("section");
+    branch.id = "ownershipBranch";
+    branch.className = "ownershipBranch";
+
+    branch.innerHTML = `
+      <div class="ownershipHeader">
+        <div>
+          <h2>Ownership Branch — ${ownershipData.subprocess}</h2>
+          <span>${ownershipData.process} · click an area task to open its execution guide later</span>
+        </div>
+        <div class="ownershipBadge">5 areas · 10 tasks</div>
+      </div>
+
+      <div class="ownershipGrid">
+        ${ownershipData.areas.map(area => `
+          <div class="ownershipColumn ${area.active ? "activeArea" : ""}">
+            <div class="ownershipColumnHeader">${area.area} · ${area.role}</div>
+            ${area.tasks.map(task => `
+              <div class="ownershipTask">
+                <div class="ownershipTaskTitle">${task.title}</div>
+                <div class="ownershipMeta">${task.system}</div>
+                <span class="ownershipStatus">${task.status}</span>
+              </div>
+            `).join("")}
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+    flowCard.insertAdjacentElement("afterend", branch);
+  }
+
+  window.addEventListener("load", () => {
+    setTimeout(createOwnershipBranch, 300);
+  });
+})();
+</script>
+<!-- END TEST 3: OWNERSHIP BRANCH MATRIX -->
+
 </body>
 </html>
