@@ -1,2389 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Command Center — OS Navigator</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  /* Backgrounds */
-  --c0:#07090F;
-  --c1:#0C1020;
-  --c2:#101526;
-  --c3:#141C30;
-  --c4:#1A2340;
-
-  /* Borders */
-  --bdr:rgba(255,255,255,0.06);
-  --bdr2:rgba(255,255,255,0.1);
-  --bdr3:rgba(255,255,255,0.16);
-
-  /* Accents */
-  --ac:#00E5B4;
-  --acg:rgba(0,229,180,0.1);
-  --acg2:rgba(0,229,180,0.18);
-  --pu:#7B5FFF;
-  --pug:rgba(123,95,255,0.12);
-
-  /* Status colors */
-  --red:#F05252;
-  --redbg:rgba(240,82,82,0.1);
-  --amber:#F5A623;
-  --amberbg:rgba(245,166,35,0.1);
-  --green:#00E5B4;
-  --greenbg:rgba(0,229,180,0.08);
-  --blue:#4FA3FF;
-  --bluebg:rgba(79,163,255,0.1);
-
-  /* Text */
-  --t1:rgba(255,255,255,0.92);
-  --t2:rgba(255,255,255,0.5);
-  --t3:rgba(255,255,255,0.25);
-  --t4:rgba(255,255,255,0.08);
-
-  /* Fonts */
-  --fh:'Outfit',sans-serif;
-  --fb:'DM Sans',sans-serif;
-  --fm:'DM Mono',monospace;
-
-  /* Radii & Shadows */
-  --r8:8px;
-  --r10:10px;
-  --r12:12px;
-  --r14:14px;
-  --sh0:0 1px 3px rgba(0,0,0,0.4),0 4px 16px rgba(0,0,0,0.3);
-  --sh1:0 2px 8px rgba(0,0,0,0.5),0 12px 40px rgba(0,0,0,0.4);
-}
-
-body{font-family:var(--fb);background:var(--c0);color:var(--t1);display:flex;height:100vh;overflow:hidden;font-size:13px}
-
-/* ══════ SCROLLBAR ══════ */
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:4px}
-
-/* ══════ SIDEBAR ══════ */
-#sb{width:220px;min-width:220px;background:var(--c1);display:flex;flex-direction:column;border-right:1px solid var(--bdr);flex-shrink:0;overflow-y:auto}
-
-.sb-logo{padding:18px 16px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bdr);flex-shrink:0}
-.sb-logo-mark{width:30px;height:30px;background:linear-gradient(135deg,var(--pu),var(--ac));border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sb-logo-mark svg{width:16px;height:16px;fill:#fff}
-.sb-logo-text{font-family:var(--fh);font-size:13px;font-weight:700;color:var(--t1);letter-spacing:0.02em}
-.sb-logo-sub{font-size:9.5px;color:var(--t3);margin-top:1px;letter-spacing:0.08em;text-transform:uppercase}
-
-/* MODE SWITCHER */
-.mode-switcher{padding:10px 12px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:3px;border-bottom:1px solid var(--bdr);flex-shrink:0}
-.ms-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 3px;border-radius:7px;cursor:pointer;transition:all 0.15s;border:1px solid transparent;user-select:none}
-.ms-btn:hover{background:rgba(255,255,255,0.05)}
-.ms-btn.ms-act{background:rgba(0,229,180,0.08);border-color:rgba(0,229,180,0.18)}
-.ms-ico{font-size:14px;line-height:1;opacity:0.6}
-.ms-btn.ms-act .ms-ico{opacity:1}
-.ms-lbl{font-size:8.5px;font-weight:600;letter-spacing:0.05em;color:var(--t3);text-transform:uppercase}
-.ms-btn.ms-act .ms-lbl{color:var(--ac)}
-.ms-btn:hover .ms-lbl{color:var(--t2)}
-
-/* MODE STRIP */
-.mode-strip{padding:9px 16px 4px;display:flex;align-items:center;gap:7px;flex-shrink:0}
-.mode-strip-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
-.mode-strip-dot.exec{background:var(--amber)}
-.mode-strip-dot.manager{background:var(--green)}
-.mode-strip-dot.user{background:var(--pu)}
-.mode-strip-dot.process{background:var(--blue)}
-.mode-strip-lbl{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--t3)}
-
-/* SIDEBAR MENU */
-#sb-menu{flex:1;overflow-y:auto;padding:4px 10px 12px}
-.sb-lbl{font-size:8.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--t3);padding:0 6px;margin-bottom:4px}
-
-.ni{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;cursor:pointer;color:var(--t2);font-size:12.5px;font-weight:500;transition:all 0.13s;user-select:none;position:relative}
-.ni:hover{background:rgba(255,255,255,0.05);color:var(--t1)}
-.ni.act{background:rgba(0,229,180,0.08);color:var(--t1)}
-.ni.act::before{content:'';position:absolute;left:0;top:25%;height:50%;width:2px;background:var(--ac);border-radius:0 2px 2px 0}
-.ni-ico{font-size:13px;width:16px;text-align:center;flex-shrink:0;opacity:0.7}
-.ni.act .ni-ico{opacity:1}
-.ni-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:800;padding:2px 5px;border-radius:9px;font-family:var(--fm)}
-.ni-badge.v{background:var(--pu)}
-.ni-caret{margin-left:auto;font-size:9px;color:var(--t3);transition:transform 0.2s}
-.ni.open .ni-caret{transform:rotate(90deg)}
-
-.sb-children{display:none;padding-left:10px}
-.sb-children.open{display:block}
-.sb-child{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;cursor:pointer;color:var(--t3);font-size:12px;transition:all 0.13s;border-left:1.5px solid rgba(255,255,255,0.05);margin-left:6px}
-.sb-child:hover{color:var(--t1);border-left-color:var(--ac)}
-.sb-child.act{color:var(--ac);border-left-color:var(--ac)}
-
-.sb-div{height:1px;background:var(--bdr);margin:8px 6px}
-
-/* SIDEBAR STATS */
-.sb-stat-row{display:flex;gap:5px;padding:4px 6px 8px}
-.sb-stat{flex:1;background:rgba(255,255,255,0.04);border-radius:7px;padding:8px 8px;text-align:center;border:1px solid var(--bdr)}
-.sb-stat-n{font-family:var(--fm);font-size:17px;font-weight:500;color:var(--t1);line-height:1}
-.sb-stat-l{font-size:8px;color:var(--t3);margin-top:2px;text-transform:uppercase;letter-spacing:0.06em}
-.sb-stat-n.red{color:var(--red)}
-.sb-stat-n.amber{color:var(--amber)}
-.sb-stat-n.green{color:var(--ac)}
-
-/* AREA PILLS */
-.sb-area-sel{padding:6px 6px 4px}
-.area-sel-label{font-size:8.5px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
-.area-sel-pills{display:flex;flex-wrap:wrap;gap:4px}
-.area-pill{padding:3px 9px;border-radius:16px;font-size:10.5px;font-weight:600;cursor:pointer;background:rgba(255,255,255,0.04);color:var(--t3);border:1px solid var(--bdr);transition:all 0.13s}
-.area-pill:hover{background:rgba(255,255,255,0.08);color:var(--t1)}
-.area-pill.act{background:var(--acg);color:var(--ac);border-color:rgba(0,229,180,0.25)}
-
-/* SIDEBAR FOOTER */
-.sb-footer{padding:12px 14px;border-top:1px solid var(--bdr);display:flex;align-items:center;gap:9px;flex-shrink:0}
-.sb-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--pu),var(--ac));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;font-family:var(--fh)}
-.sb-un{font-size:12px;font-weight:600;color:var(--t1)}
-.sb-ur{font-size:10.5px;color:var(--t3)}
-
-/* ══════ MAIN ══════ */
-#main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--c0)}
-
-/* TOP BAR */
-.topbar{background:rgba(10,13,22,0.9);border-bottom:1px solid var(--bdr);padding:0 22px;display:flex;align-items:center;gap:12px;height:50px;flex-shrink:0;backdrop-filter:blur(10px);position:relative;z-index:50}
-.topbar-bc{display:flex;align-items:center;gap:5px;font-size:12.5px;min-width:0}
-.topbar-bc span{color:var(--t3);cursor:pointer;white-space:nowrap;font-weight:500;transition:color 0.13s;font-family:var(--fb)}
-.topbar-bc span:hover{color:var(--ac)}
-.topbar-bc span.cur{color:var(--t2);font-weight:600}
-.topbar-bc .sep{color:var(--bdr2);font-size:11px}
-
-.mode-pill{padding:3px 10px;border-radius:14px;font-size:10px;font-weight:700;letter-spacing:0.06em;flex-shrink:0;font-family:var(--fm);text-transform:uppercase}
-.mode-pill.global{background:var(--amberbg);color:var(--amber);border:1px solid rgba(245,166,35,0.2)}
-.mode-pill.personal{background:var(--pug);color:var(--pu);border:1px solid rgba(123,95,255,0.2)}
-
-.topbar-gap{flex:1}
-
-/* LIVE BADGE */
-.live-badge{display:flex;align-items:center;gap:5px;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ac);font-family:var(--fm)}
-.live-dot{width:5px;height:5px;border-radius:50%;background:var(--ac);animation:pulse-live 2s infinite}
-@keyframes pulse-live{0%,100%{opacity:1}50%{opacity:0.3}}
-
-/* SEARCH */
-.search-wrap{position:relative}
-.search-box{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.05);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;font-size:12.5px;color:var(--t2);cursor:text;width:220px;transition:all 0.18s}
-.search-box:focus-within{border-color:var(--ac);background:rgba(0,229,180,0.04);box-shadow:0 0 0 3px rgba(0,229,180,0.06)}
-.search-box input{border:none;background:transparent;outline:none;font-size:12.5px;color:var(--t1);font-family:var(--fb);width:100%}
-.search-box input::placeholder{color:var(--t3)}
-.search-dropdown{position:absolute;top:calc(100%+5px);left:0;right:0;background:var(--c2);border:1px solid var(--bdr2);border-radius:var(--r10);box-shadow:var(--sh1);z-index:200;display:none;overflow:hidden}
-.search-dropdown.open{display:block}
-.sd-section{padding:6px 0}
-.sd-lbl{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--t3);padding:5px 12px;font-family:var(--fm)}
-.sd-item{padding:7px 12px;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:9px;transition:background 0.1s;color:var(--t2)}
-.sd-item:hover{background:rgba(255,255,255,0.05);color:var(--t1)}
-.sd-item .sd-icon{font-size:13px;color:var(--t3);width:16px;text-align:center}
-.sd-item .sd-text{font-weight:500;color:var(--t1)}
-.sd-item .sd-sub{font-size:10.5px;color:var(--t3)}
-
-/* ROLE SELECTOR */
-.role-sel{position:relative}
-.role-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid var(--bdr2);color:var(--t2);border-radius:7px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all 0.13s;white-space:nowrap}
-.role-btn:hover{background:rgba(255,255,255,0.08);color:var(--t1);border-color:var(--bdr3)}
-.role-dd{position:absolute;top:calc(100%+5px);right:0;background:var(--c2);border:1px solid var(--bdr2);border-radius:var(--r10);box-shadow:var(--sh1);z-index:200;display:none;min-width:150px;overflow:hidden}
-.role-dd.open{display:block}
-.role-opt{padding:8px 14px;font-size:12.5px;cursor:pointer;font-weight:500;transition:background 0.1s;display:flex;align-items:center;gap:8px;color:var(--t2)}
-.role-opt:hover{background:rgba(255,255,255,0.06);color:var(--t1)}
-.role-opt.sel{color:var(--ac);font-weight:700;background:var(--acg)}
-
-.topbar-icon{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--t3);transition:all 0.13s;position:relative}
-.topbar-icon:hover{background:rgba(255,255,255,0.07);color:var(--t2)}
-.notif-dot{position:absolute;top:5px;right:5px;width:6px;height:6px;background:var(--red);border-radius:50%;border:2px solid var(--c0)}
-
-/* ══════ CONTENT ══════ */
-#content{flex:1;overflow:hidden;display:flex;position:relative}
-
-/* ══════ VIEW SYSTEM ══════ */
-.view{position:absolute;inset:0;display:none;overflow-y:auto}
-.view.active{display:block}
-.view.flex{display:none}
-.view.flex.active{display:flex}
-
-/* ══════════════════════════════════════
-   SHARED DARK COMPONENTS
-══════════════════════════════════════ */
-/* GLASS CARD */
-.gcard{background:var(--c2);border:1px solid var(--bdr);border-radius:var(--r12)}
-.gcard-sm{background:var(--c2);border:1px solid var(--bdr);border-radius:var(--r10)}
-
-/* KPI ROW — shared */
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.kpi{background:var(--c2);border-radius:var(--r12);padding:14px 16px;border:1px solid var(--bdr);display:flex;align-items:center;gap:12px;transition:border-color 0.15s}
-.kpi:hover{border-color:var(--bdr2)}
-.kpi-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:rgba(255,255,255,0.06)}
-.kpi-n{font-family:var(--fm);font-size:24px;font-weight:500;line-height:1;color:var(--t1)}
-.kpi-l{font-size:11.5px;color:var(--t2);margin-top:2px;font-weight:500}
-.kpi-s{font-size:10px;color:var(--t3);margin-top:1px}
-
-/* SECTION HEADING */
-.sec-h{font-family:var(--fh);font-size:13px;font-weight:700;color:var(--t2);letter-spacing:0.04em;margin-bottom:12px;display:flex;align-items:center;gap:8px;text-transform:uppercase}
-.sec-h .sc{font-size:10px;font-weight:500;color:var(--t3);font-family:var(--fm);text-transform:none;letter-spacing:0}
-
-/* PILL / TAG */
-.pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:0.04em;font-family:var(--fm)}
-.pill-red{background:var(--redbg);color:var(--red);border:1px solid rgba(240,82,82,0.2)}
-.pill-amber{background:var(--amberbg);color:var(--amber);border:1px solid rgba(245,166,35,0.2)}
-.pill-green{background:var(--greenbg);color:var(--ac);border:1px solid rgba(0,229,180,0.2)}
-.pill-blue{background:var(--bluebg);color:var(--blue);border:1px solid rgba(79,163,255,0.2)}
-.pill-purple{background:var(--pug);color:var(--pu);border:1px solid rgba(123,95,255,0.2)}
-
-/* ══════════════════════════════════════
-   MY WORK VIEW (USER)
-══════════════════════════════════════ */
-#v-mywork{padding:24px;display:none}
-#v-mywork.active{display:block}
-.vh{margin-bottom:20px}
-.vh h1{font-family:var(--fh);font-size:24px;font-weight:700;color:var(--t1);letter-spacing:-0.01em}
-.vh p{color:var(--t3);font-size:12.5px;margin-top:3px}
-
-/* TABS */
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);margin-bottom:20px}
-.tab{padding:8px 18px;font-size:12.5px;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.13s;display:flex;align-items:center;gap:6px}
-.tab:hover{color:var(--t2)}
-.tab.act{color:var(--ac);border-bottom-color:var(--ac);font-weight:600}
-.tab .tc{background:var(--red);color:#fff;font-size:9px;font-weight:800;padding:2px 5px;border-radius:8px;font-family:var(--fm)}
-.tab.act .tc{background:var(--pu)}
-
-/* PROCESS LIST */
-.sec-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:12px}
-.sec-head h2{font-family:var(--fh);font-size:15px;font-weight:700;color:var(--t1)}
-.sec-head p{font-size:11px;color:var(--t3);margin-top:2px}
-.sec-actions{display:flex;gap:7px;align-items:center}
-.fpill{background:rgba(255,255,255,0.05);border:1px solid var(--bdr);border-radius:6px;padding:5px 11px;font-size:11.5px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--fb);transition:all 0.13s}
-.fpill:hover{border-color:var(--ac);color:var(--ac)}
-
-.plist{display:flex;flex-direction:column;gap:8px}
-.prow{background:var(--c2);border-radius:var(--r12);border:1px solid var(--bdr);padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.18s}
-.prow:hover{border-color:var(--bdr2);background:var(--c3);transform:translateY(-1px);box-shadow:var(--sh0)}
-.prow.hl{border-color:rgba(123,95,255,0.3);background:linear-gradient(135deg,rgba(123,95,255,0.06),rgba(0,229,180,0.03))}
-
-.p-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:rgba(255,255,255,0.06)}
-.p-info{flex:0 0 150px}
-.p-name{font-weight:700;font-size:13.5px;font-family:var(--fh);color:var(--t1)}
-.p-sub{font-size:11.5px;font-weight:500;margin-top:2px}
-.p-sub.v{color:var(--ac)}
-.p-sub.m{color:var(--t3);font-weight:400}
-
-/* MINI FLOW */
-.flow-mini{display:flex;align-items:center;flex:1}
-.fd{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-size:9.5px;color:var(--t3);background:var(--c3);flex-shrink:0;transition:all 0.18s}
-.fd.d{background:var(--ac);border-color:var(--ac);color:var(--c0)}
-.fd.a{background:var(--pu);border-color:var(--pu);color:#fff;box-shadow:0 0 0 3px rgba(123,95,255,0.2)}
-.fd.e{background:var(--red);border-color:var(--red);color:#fff}
-.fd.w{background:var(--amber);border-color:var(--amber);color:var(--c0)}
-.fl{flex:1;height:1px;background:var(--bdr2);min-width:6px}
-.fl.d{background:var(--ac)}
-.fl.a{background:linear-gradient(to right,var(--ac),var(--pu))}
-.flow-wrap{flex:1;display:flex;flex-direction:column}
-.flow-mini{margin-bottom:3px}
-.fstep{font-size:10px;color:var(--t3)}
-
-.p-tc{flex:0 0 55px;text-align:center}
-.p-tc .cn{font-family:var(--fm);font-size:20px;font-weight:500;color:var(--ac)}
-.p-tc .cl{font-size:10px;color:var(--t3)}
-
-.p-next{flex:0 0 180px}
-.pnl{font-size:9.5px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:2px}
-.pnt{font-size:12.5px;font-weight:600;color:var(--t1)}
-.pnd{font-size:10.5px;color:var(--t3);margin-top:1px}
-.pnd.ov{color:var(--red);font-weight:700}
-.pnd.td{color:var(--red)}
-
-.p-arr{color:var(--t3);font-size:16px;flex-shrink:0;transition:all 0.15s}
-.prow:hover .p-arr{color:var(--ac);transform:translateX(3px)}
-
-.show-more{text-align:center;padding:10px;font-size:12.5px;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:color 0.13s}
-.show-more:hover{color:var(--ac)}
-
-/* ══════ DETAIL VIEW ══════ */
-#v-detail{display:none;flex-direction:row;overflow:hidden}
-#v-detail.active{display:flex}
-#detail-main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px}
-#detail-panel{width:320px;min-width:320px;background:var(--c1);border-left:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden}
-
-/* DONE BANNER */
-.state-done-banner{background:linear-gradient(135deg,var(--ac),#00B890);color:var(--c0);border-radius:var(--r12);padding:16px 20px;display:flex;align-items:center;gap:12px;animation:fadeUp 0.3s ease}
-.sdb-icon{font-size:22px}
-.sdb-text h3{font-family:var(--fh);font-size:14px;font-weight:700}
-.sdb-text p{font-size:11.5px;opacity:0.8;margin-top:1px}
-.sdb-btn{margin-left:auto;background:rgba(0,0,0,0.2);color:var(--c0);border:1.5px solid rgba(0,0,0,0.3);border-radius:7px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--fb);white-space:nowrap;transition:all 0.13s}
-.sdb-btn:hover{background:rgba(0,0,0,0.3)}
-
-/* BIG FLOW */
-.flow-big{background:var(--c2);border-radius:var(--r12);border:1px solid var(--bdr);padding:20px 22px}
-.flow-big-lbl{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--t3);margin-bottom:16px;font-family:var(--fm)}
-.flow-big-track{display:flex;align-items:flex-start}
-.fs{display:flex;flex-direction:column;align-items:center;flex:1}
-.fsd{width:32px;height:32px;border-radius:50%;border:2px solid var(--bdr2);background:var(--c3);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--t3);transition:all 0.25s;position:relative;z-index:1;cursor:pointer}
-.fsd:hover{border-color:var(--ac);color:var(--ac)}
-.fsd.d{background:var(--ac);border-color:var(--ac);color:var(--c0)}
-.fsd.a{background:var(--pu);border-color:var(--pu);color:#fff;box-shadow:0 0 0 5px rgba(123,95,255,0.15)}
-.fsd.a{animation:pulse-glow 2.5s infinite}
-@keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(123,95,255,0.3)}50%{box-shadow:0 0 0 8px rgba(123,95,255,0)}}
-.fsn{font-size:10px;font-weight:600;color:var(--t3);text-align:center;margin-top:7px;max-width:80px;line-height:1.3}
-.fsn.a{color:var(--pu);font-weight:700}
-.fsn.d{color:var(--ac)}
-.fc{flex:1;height:1.5px;background:var(--bdr2);margin-top:15px}
-.fc.d{background:var(--ac)}
-.fc.a{background:linear-gradient(to right,var(--ac),var(--pu))}
-
-/* CHECKLIST */
-.cl-panel{background:var(--c2);border-radius:var(--r12);border:1px solid var(--bdr);overflow:hidden}
-.cl-head{padding:16px 20px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
-.cl-head-left h2{font-family:var(--fh);font-size:15px;font-weight:700;color:var(--t1)}
-.cl-head-left p{font-size:11.5px;color:var(--t3);margin-top:2px}
-.prog-wrap{display:flex;align-items:center;gap:9px}
-.prog-bar{width:90px;height:3px;background:var(--bdr2);border-radius:2px;overflow:hidden}
-.prog-fill{height:100%;background:var(--pu);border-radius:2px;transition:width 0.4s ease}
-.prog-txt{font-size:11.5px;font-weight:700;color:var(--pu);font-family:var(--fm);white-space:nowrap}
-
-.tl{padding:4px 0}
-.ti{display:flex;align-items:center;gap:11px;padding:11px 20px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background 0.12s;position:relative}
-.ti:last-child{border-bottom:none}
-.ti:hover{background:rgba(255,255,255,0.03)}
-.ti.sel{background:rgba(123,95,255,0.08);border-left:2px solid var(--pu);padding-left:18px}
-.ti.done{opacity:0.5}
-.ti.done .ti-lbl{text-decoration:line-through;color:var(--t3)}
-.chk{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--bdr2);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;background:transparent;transition:all 0.15s;font-size:10px;color:transparent}
-.chk:hover:not(.done){border-color:var(--pu);background:var(--pug)}
-.chk.done{background:var(--ac);border-color:var(--ac);color:var(--c0)}
-.ti-lbl{font-size:13px;font-weight:500;flex:1;color:var(--t1)}
-.ti-meta{display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap}
-.sys-tag{background:rgba(255,255,255,0.05);border:1px solid var(--bdr);border-radius:4px;font-size:10px;color:var(--t3);padding:1px 6px;font-family:var(--fm)}
-.due-tag{font-size:10.5px;color:var(--t3)}
-.due-tag.ov{color:var(--red);font-weight:700}
-.ti-info{flex:1}
-.ti-arr{color:var(--t3);font-size:13px;transition:all 0.13s}
-.ti:hover .ti-arr{color:var(--ac);transform:translateX(2px)}
-.ti.sel .ti-arr{color:var(--pu)}
-
-.waiting-box{background:rgba(255,255,255,0.03);border-radius:var(--r8);border:1px solid var(--bdr);padding:14px 16px;margin:12px 20px;font-size:12.5px;color:var(--t2)}
-.waiting-box strong{color:var(--t1)}
-
-/* ACTION GUIDE PANEL */
-.ag-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;color:var(--t3)}
-.ag-empty .e-ico{font-size:30px;margin-bottom:12px;opacity:0.3}
-.ag-empty h4{font-family:var(--fh);font-size:14px;font-weight:600;color:var(--t2)}
-.ag-empty p{font-size:11.5px;margin-top:6px;line-height:1.6;color:var(--t3)}
-
-.ag-head{padding:16px 18px;background:linear-gradient(135deg,var(--pu),#6344E8);color:#fff;flex-shrink:0}
-.ag-head .ag-label{font-size:9px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;opacity:0.6;margin-bottom:4px;font-family:var(--fm)}
-.ag-head h3{font-family:var(--fh);font-size:15px;font-weight:700;line-height:1.25}
-.ag-close{float:right;cursor:pointer;opacity:0.5;font-size:15px;margin-left:8px;transition:opacity 0.13s}
-.ag-close:hover{opacity:1}
-.ag-body{flex:1;overflow-y:auto;padding-bottom:20px}
-.ag-sect{padding:14px 18px 0}
-.ag-sec-title{font-size:9px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:var(--t3);margin-bottom:9px;display:flex;align-items:center;gap:7px;font-family:var(--fm)}
-.ag-sec-title::after{content:'';flex:1;height:1px;background:var(--bdr)}
-.step-list{display:flex;flex-direction:column;gap:7px}
-.step{display:flex;gap:8px;align-items:flex-start}
-.sn{width:18px;height:18px;border-radius:50%;background:var(--pug);color:var(--pu);font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-family:var(--fm)}
-.st2{font-size:12px;color:var(--t1);line-height:1.4;padding-top:1px}
-.sys-chips{display:flex;flex-wrap:wrap;gap:5px}
-.sc{background:var(--acg);color:var(--ac);border-radius:6px;padding:4px 10px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all 0.13s;display:flex;align-items:center;gap:4px;border:1px solid rgba(0,229,180,0.15)}
-.sc:hover{background:var(--ac);color:var(--c0)}
-.nt-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr)}
-.nt-row:last-child{border-bottom:none}
-.nt-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
-.nt-name{font-size:12px;font-weight:700;color:var(--t1)}
-.nt-role{font-size:10.5px;color:var(--t3)}
-.nt-btn{margin-left:auto;background:rgba(255,255,255,0.05);border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;font-size:10.5px;font-weight:600;color:var(--t2);cursor:pointer;font-family:var(--fb);transition:all 0.13s}
-.nt-btn:hover{background:var(--acg);color:var(--ac);border-color:rgba(0,229,180,0.25)}
-.msg-box{background:rgba(255,255,255,0.04);border-radius:7px;border:1px solid var(--bdr);padding:10px 12px;font-size:12px;color:var(--t2);line-height:1.5;font-style:italic}
-.ev-list{display:flex;flex-direction:column;gap:5px}
-.ev{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border-radius:6px;border:1px solid var(--bdr);padding:7px 10px;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.13s;color:var(--t2)}
-.ev:hover{background:var(--acg);border-color:rgba(0,229,180,0.2);color:var(--ac)}
-.ev-ico{font-size:13px}
-.next-box{background:rgba(123,95,255,0.08);border-radius:8px;border:1px solid rgba(123,95,255,0.2);padding:11px 13px}
-.next-arr{font-size:10px;color:var(--pu);font-weight:700;margin-bottom:3px;letter-spacing:0.04em;font-family:var(--fm)}
-.next-txt{font-size:12px;color:var(--t1);line-height:1.5}
-.complete-btn{margin:14px 18px 0;background:var(--pu);color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:700;font-family:var(--fb);cursor:pointer;width:calc(100%-36px);transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:7px;width:calc(100% - 36px)}
-.complete-btn:hover{background:#8B70FF;transform:translateY(-1px);box-shadow:0 4px 20px rgba(123,95,255,0.4)}
-.complete-btn:disabled{background:var(--ac);color:var(--c0);opacity:0.8;cursor:default;transform:none}
-
-.view-my-btn{background:rgba(255,255,255,0.05);color:var(--t2);border:1px solid var(--bdr2);border-radius:8px;padding:8px 16px;font-size:12.5px;font-weight:600;font-family:var(--fb);cursor:pointer;transition:all 0.13s}
-.view-my-btn:hover{border-color:var(--ac);color:var(--ac);background:var(--acg)}
-.add-btn{background:var(--pu);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12.5px;font-weight:600;font-family:var(--fb);cursor:pointer;transition:all 0.15s}
-.add-btn:hover{background:#8B70FF;transform:translateY(-1px);box-shadow:0 4px 16px rgba(123,95,255,0.35)}
-
-/* ══════ GLOBAL NAVIGATOR VIEW ══════ */
-#v-nav{display:none;flex-direction:column;overflow:hidden}
-#v-nav.active{display:flex}
-#nav-top{padding:20px 24px 16px;background:var(--c1);flex-shrink:0;border-bottom:1px solid var(--bdr)}
-.nav-proc-title{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.nav-proc-ico{width:42px;height:42px;border-radius:10px;background:var(--pug);display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid rgba(123,95,255,0.2)}
-.nav-proc-name{font-family:var(--fh);font-size:20px;font-weight:700;color:var(--t1);letter-spacing:-0.01em}
-.nav-proc-sub{font-size:12px;color:var(--t3);margin-top:2px}
-.nav-proc-actions{display:flex;align-items:center;gap:9px;margin-left:auto}
-
-/* PROCESS FLOW NAV */
-.nav-flow{background:var(--c2);border-radius:var(--r12);border:1px solid var(--bdr);padding:18px 22px}
-.nav-flow-lbl{font-size:9.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--t3);margin-bottom:14px;font-family:var(--fm)}
-
-#nav-body{flex:1;display:flex;overflow:hidden}
-#dept-grid-wrap{flex:1;overflow:auto;padding:18px 24px}
-.dept-grid-title{font-family:var(--fh);font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:7px;color:var(--t2)}
-.dept-grid-title .state-badge{background:var(--pug);color:var(--pu);border-radius:5px;padding:2px 9px;font-size:11px;font-family:var(--fm)}
-.dept-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;min-width:860px}
-.dept-col{background:var(--c2);border-radius:var(--r12);border:1px solid var(--bdr);overflow:hidden;cursor:pointer;transition:all 0.16s}
-.dept-col:hover{border-color:var(--bdr2)}
-.dept-col.sel{border-color:var(--pu);box-shadow:0 0 0 3px rgba(123,95,255,0.1)}
-.dept-col-head{padding:11px 13px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:8px}
-.dept-col-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;background:rgba(255,255,255,0.06)}
-.dept-col-name{font-family:var(--fh);font-size:12.5px;font-weight:700;color:var(--t1)}
-.dept-col-count{margin-left:auto;background:rgba(255,255,255,0.07);border-radius:9px;padding:2px 7px;font-size:10px;font-weight:700;color:var(--t2);font-family:var(--fm)}
-.dept-tasks{padding:6px 0}
-.dt{padding:8px 12px;border-bottom:1px solid var(--bdr);transition:background 0.1s;cursor:pointer}
-.dt:last-child{border-bottom:none}
-.dt:hover{background:rgba(255,255,255,0.03)}
-.dt.sel{background:var(--pug)}
-.dt-top{display:flex;align-items:flex-start;gap:6px}
-.dt-num{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,0.07);font-size:9px;font-weight:700;color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-family:var(--fm)}
-.dt-lbl{font-size:11.5px;font-weight:500;line-height:1.3;flex:1;color:var(--t1)}
-.dt-sys{font-size:10px;color:var(--t3);margin-top:3px;margin-left:22px}
-.status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px}
-.status-dot.p{background:var(--amber)}
-.status-dot.c{background:var(--ac)}
-.status-dot.b{background:var(--red)}
-.status-dot.cond{background:var(--blue)}
-
-#dept-panel{width:300px;min-width:300px;background:var(--c1);border-left:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden}
-.dp-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;color:var(--t3)}
-.dp-empty .e-ico{font-size:28px;margin-bottom:10px;opacity:0.25}
-.dp-empty h4{font-family:var(--fh);font-size:13px;font-weight:700;color:var(--t2)}
-.dp-empty p{font-size:11.5px;margin-top:5px;line-height:1.6;color:var(--t3)}
-.dp-head{padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:9px}
-.dp-head-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:rgba(255,255,255,0.06)}
-.dp-head-name{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--t1)}
-.dp-head-sub{font-size:10.5px;color:var(--t3)}
-.dp-body{flex:1;overflow-y:auto;padding:0 0 20px}
-.dp-sect{padding:12px 16px 0}
-.dp-sec-title{font-size:9px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:var(--t3);margin-bottom:8px;display:flex;align-items:center;gap:6px;font-family:var(--fm)}
-.dp-sec-title::after{content:'';flex:1;height:1px;background:var(--bdr)}
-.dp-task{padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:7px;border:1px solid var(--bdr);margin-bottom:6px;cursor:pointer;transition:all 0.12s}
-.dp-task:hover{background:var(--acg);border-color:rgba(0,229,180,0.15)}
-.dp-task-lbl{font-size:12px;font-weight:600;color:var(--t1)}
-.dp-task-sys{font-size:10px;color:var(--t3);margin-top:2px}
-.dp-sys-wrap{display:flex;flex-wrap:wrap;gap:5px}
-.dp-sys{background:var(--acg);color:var(--ac);border-radius:5px;padding:3px 9px;font-size:11px;font-weight:600;border:1px solid rgba(0,229,180,0.15)}
-.dp-next-box{background:var(--greenbg);border-radius:7px;border:1px solid rgba(0,229,180,0.15);padding:10px 12px}
-.dp-next-arr{font-size:9.5px;color:var(--ac);font-weight:700;margin-bottom:3px;font-family:var(--fm);letter-spacing:0.04em}
-.dp-next-txt{font-size:11.5px;color:var(--t1);line-height:1.5}
-.policy-item{font-size:11.5px;color:var(--t2);display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--bdr)}
-.policy-item:last-child{border-bottom:none}
-
-/* ══════ CEO VIEW ══════ */
-#v-ceo{display:none;overflow:hidden}
-#v-ceo.active{display:flex}
-#ceo-main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:20px}
-#ceo-panel{width:340px;min-width:340px;background:var(--c1);border-left:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden;transition:width 0.22s}
-#ceo-panel.collapsed{width:0;min-width:0}
-
-/* CEO HEADER */
-.ceo-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px}
-.ceo-title{font-family:var(--fh);font-size:22px;font-weight:700;color:var(--t1);letter-spacing:-0.01em}
-.ceo-subtitle{font-size:12px;color:var(--t3);margin-top:3px;max-width:480px;line-height:1.5}
-.ceo-header-actions{display:flex;align-items:center;gap:8px}
-.agents-badge{display:flex;align-items:center;gap:6px;background:var(--acg2);border:1px solid rgba(0,229,180,0.25);color:var(--ac);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;font-family:var(--fm)}
-.agents-dot{width:6px;height:6px;border-radius:50%;background:var(--ac);animation:pulse-live 1.5s infinite}
-
-/* REVENUE SPINE */
-.rev-spine{background:var(--c2);border:1px solid var(--bdr);border-radius:var(--r12);padding:18px 20px}
-.spine-track{display:flex;align-items:stretch;gap:0}
-.spine-node{display:flex;flex-direction:column;align-items:center;flex:1;cursor:pointer;position:relative;transition:all 0.15s}
-.spine-node:hover .spine-bubble{border-color:var(--bdr3)}
-.spine-bubble{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(123,95,255,0.4),rgba(0,229,180,0.2));border:2px solid rgba(123,95,255,0.35);display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:16px;font-weight:500;color:var(--t1);position:relative;transition:all 0.15s}
-.spine-bubble.r{background:linear-gradient(135deg,rgba(240,82,82,0.3),rgba(240,82,82,0.15));border-color:rgba(240,82,82,0.35)}
-.spine-bubble.a{background:linear-gradient(135deg,rgba(245,166,35,0.3),rgba(245,166,35,0.15));border-color:rgba(245,166,35,0.35)}
-.spine-flag{position:absolute;top:-5px;right:-4px;background:var(--red);color:#fff;font-size:8.5px;font-weight:800;border-radius:10px;padding:1px 5px;font-family:var(--fm);border:1.5px solid var(--c2)}
-.spine-label{font-size:10.5px;font-weight:600;color:var(--t2);margin-top:8px;text-align:center}
-.spine-val{font-size:9.5px;color:var(--t3);margin-top:2px;text-align:center}
-
-.spine-arr{display:flex;align-items:center;color:var(--t3);font-size:14px;flex-shrink:0;margin-top:18px;padding:0 2px}
-
-/* CEO SECTION TITLE */
-.ceo-section-title{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--t3);display:flex;align-items:center;gap:8px;margin-bottom:12px;font-family:var(--fm)}
-.ceo-section-title .csub{font-size:10px;color:var(--t3);font-weight:500;text-transform:none;letter-spacing:0;font-family:var(--fb)}
-.ceo-section-title .csub.red{color:var(--red)}
-
-/* CASES GRID */
-.cases-grid{display:flex;flex-direction:column;gap:7px}
-.case-card{background:var(--c2);border:1px solid var(--bdr);border-radius:var(--r10);padding:12px 14px;display:flex;align-items:flex-start;gap:11px;cursor:pointer;transition:all 0.16s}
-.case-card:hover{border-color:var(--bdr2);background:var(--c3)}
-.case-card.blocked{border-left:3px solid var(--red)}
-.case-card.warning{border-left:3px solid var(--amber)}
-.case-card.selected{border-color:var(--pu);background:rgba(123,95,255,0.06)}
-.case-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:rgba(255,255,255,0.06)}
-.case-name{font-weight:700;font-size:12.5px;font-family:var(--fh);color:var(--t1)}
-.case-sub{font-size:10.5px;color:var(--t3);margin-top:1px}
-.case-info{flex:1;min-width:0}
-.case-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
-.ctag{font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;font-family:var(--fm)}
-.ctag-r{background:var(--redbg);color:var(--red);border:1px solid rgba(240,82,82,0.2)}
-.ctag-a{background:var(--amberbg);color:var(--amber);border:1px solid rgba(245,166,35,0.2)}
-.ctag-v{background:var(--pug);color:var(--pu);border:1px solid rgba(123,95,255,0.2)}
-.ctag-info{background:var(--bluebg);color:var(--blue);border:1px solid rgba(79,163,255,0.2)}
-.case-meta{text-align:right;flex-shrink:0;min-width:100px}
-.case-owner{font-size:10.5px;color:var(--t3);margin-top:3px}
-.case-arr{color:var(--t3);font-size:14px;margin-left:4px;flex-shrink:0;transition:all 0.13s}
-.case-card:hover .case-arr{color:var(--ac);transform:translateX(2px)}
-
-/* ALERTS */
-.alert-list{display:flex;flex-direction:column;gap:7px}
-.alert-item{background:var(--c2);border:1px solid var(--bdr);border-radius:var(--r10);padding:11px 14px;display:flex;align-items:flex-start;gap:10px;cursor:pointer;transition:all 0.15s}
-.alert-item:hover{border-color:var(--bdr2)}
-.alert-item.crit{border-left:2px solid var(--red)}
-.alert-item.warn{border-left:2px solid var(--amber)}
-.alert-item.info{border-left:2px solid var(--blue)}
-.alert-item.selected{border-color:var(--pu)}
-.alert-ico{font-size:13px;flex-shrink:0;margin-top:1px}
-.alert-title{font-weight:600;font-size:12px;color:var(--t1)}
-.alert-desc{font-size:11px;color:var(--t3);margin-top:2px;line-height:1.4}
-.alert-time{font-size:10px;color:var(--t3);margin-top:4px;font-family:var(--fm)}
-.alert-badge{flex-shrink:0;margin-top:1px}
-
-/* RISK CARDS */
-.risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.risk-card{background:var(--c2);border:1px solid var(--bdr);border-radius:var(--r10);padding:14px 16px;cursor:pointer;transition:all 0.15s}
-.risk-card:hover{border-color:var(--bdr2)}
-.risk-card.selected{border-color:var(--pu)}
-.risk-client{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--t1);margin-bottom:6px}
-.risk-issue{font-size:11.5px;color:var(--t2);line-height:1.5;margin-bottom:10px}
-.risk-status{display:flex;align-items:center;gap:6px}
-.risk-dot{width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0}
-.risk-dot.a{background:var(--amber)}
-.risk-status-text{font-size:10px;font-weight:700;color:var(--red);font-family:var(--fm);letter-spacing:0.04em}
-.risk-status-text.a{color:var(--amber)}
-
-/* CEO DETAIL PANEL */
-.cdp-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;color:var(--t3)}
-.cdp-empty .e-ico{font-size:26px;margin-bottom:10px;opacity:0.2}
-.cdp-empty h4{font-family:var(--fh);font-size:13px;font-weight:700;color:var(--t2)}
-.cdp-empty p{font-size:11.5px;margin-top:5px;line-height:1.5;color:var(--t3)}
-.cdp-head{padding:14px 16px;background:linear-gradient(135deg,rgba(240,82,82,0.15),rgba(123,95,255,0.1));border-bottom:1px solid var(--bdr);flex-shrink:0}
-.cdp-type{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
-.cdp-type span:first-child{font-size:8.5px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:var(--t3);font-family:var(--fm)}
-.cdp-head h3{font-family:var(--fh);font-size:15px;font-weight:700;color:var(--t1);line-height:1.2}
-.cdp-sub{font-size:11px;color:var(--t3);margin-top:3px}
-.cdp-body{flex:1;overflow-y:auto;padding:0 0 20px}
-.cdp-sect{padding:14px 16px 0}
-.cdp-sec-title{font-size:9px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:var(--t3);margin-bottom:9px;display:flex;align-items:center;gap:6px;font-family:var(--fm)}
-.cdp-sec-title::after{content:'';flex:1;height:1px;background:var(--bdr)}
-.cdp-field{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bdr)}
-.cdp-field:last-child{border-bottom:none}
-.cdp-field-lbl{font-size:11px;color:var(--t3);font-weight:500}
-.cdp-field-val{font-size:12px;color:var(--t1);font-weight:600;text-align:right}
-.cdp-field-val.red{color:var(--red)}
-.cdp-field-val.green{color:var(--ac)}
-.cdp-field-val.amber{color:var(--amber)}
-.blocker-item{background:var(--redbg);border:1px solid rgba(240,82,82,0.15);border-radius:6px;padding:8px 11px;font-size:11.5px;color:var(--red);margin-bottom:5px;line-height:1.4}
-.doc-item{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--t2);cursor:pointer;transition:color 0.12s}
-.doc-item:last-child{border-bottom:none}
-.doc-item:hover{color:var(--ac)}
-
-/* TIMELINE */
-.timeline-item{display:flex;align-items:flex-start;gap:10px;padding:7px 0;position:relative}
-.tl-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;font-family:var(--fm)}
-.tl-dot.done{background:var(--ac);color:var(--c0)}
-.tl-dot.act{background:var(--pu);color:#fff}
-.tl-dot.blocked{background:var(--red);color:#fff}
-.tl-dot.future{background:rgba(255,255,255,0.07);color:var(--t3);border:1px solid var(--bdr)}
-.tl-label{font-size:12px;font-weight:600;color:var(--t1)}
-.tl-date{font-size:10.5px;color:var(--t3);margin-top:1px;font-family:var(--fm)}
-.cdp-action-btn{margin:14px 16px 0;background:var(--pu);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;font-family:var(--fb);cursor:pointer;width:calc(100%-32px);transition:all 0.15s;display:block;text-align:center;width:calc(100% - 32px)}
-.cdp-action-btn:hover{background:#8B70FF;transform:translateY(-1px)}
-.cdp-action-btn.red-btn{background:var(--red)}
-.cdp-action-btn.red-btn:hover{background:#FF6464}
-
-/* ══════ AREA MANAGER VIEW ══════ */
-#v-area{display:none;overflow:hidden}
-#v-area.active{display:flex}
-#area-main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:20px}
-#area-panel{width:320px;min-width:320px;background:var(--c1);border-left:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden}
-
-.area-header{display:flex;align-items:center;gap:14px}
-.area-ico{width:44px;height:44px;border-radius:11px;background:var(--pug);border:1px solid rgba(123,95,255,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.area-title-wrap h1{font-family:var(--fh);font-size:20px;font-weight:700;color:var(--t1);letter-spacing:-0.01em}
-.area-title-wrap p{font-size:12px;color:var(--t3);margin-top:2px}
-
-/* WORKLOAD TABLE */
-.workload-table{background:var(--c2);border:1px solid var(--bdr);border-radius:var(--r12);overflow:hidden}
-.wt-head{display:grid;grid-template-columns:1.4fr 1.6fr 0.7fr 1fr 0.7fr 0.5fr;padding:10px 16px;border-bottom:1px solid var(--bdr)}
-.wt-hcell{font-size:9.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--t3);font-family:var(--fm)}
-.wt-row{display:grid;grid-template-columns:1.4fr 1.6fr 0.7fr 1fr 0.7fr 0.5fr;padding:11px 16px;border-bottom:1px solid var(--bdr);cursor:pointer;transition:background 0.12s;align-items:center}
-.wt-row:last-child{border-bottom:none}
-.wt-row:hover{background:rgba(255,255,255,0.03)}
-.wt-cell{font-size:12.5px;color:var(--t2)}
-.wt-cell.name{font-weight:600;color:var(--t1)}
-.wt-cell.muted{color:var(--t3);font-size:11px}
-.wload-bar{width:100%;height:3px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;margin-top:4px}
-.wload-fill{height:100%;background:var(--ac);border-radius:2px;transition:width 0.4s}
-.wload-fill.med{background:var(--amber)}
-.wload-fill.hi{background:var(--red)}
-.sla-badge{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:8px;font-family:var(--fm)}
-.sla-ok{background:var(--greenbg);color:var(--ac)}
-.sla-risk{background:var(--amberbg);color:var(--amber)}
-.sla-breach{background:var(--redbg);color:var(--red)}
-
-/* PROC FILTER TABS */
-.proc-filter-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px}
-.proc-ftab{padding:5px 13px;border-radius:16px;font-size:11.5px;font-weight:600;cursor:pointer;border:1px solid var(--bdr);background:rgba(255,255,255,0.04);color:var(--t3);transition:all 0.12s}
-.proc-ftab:hover{border-color:var(--bdr2);color:var(--t2)}
-.proc-ftab.act{background:var(--pug);color:var(--pu);border-color:rgba(123,95,255,0.25)}
-
-/* AREA CASES */
-.area-cases{display:flex;flex-direction:column;gap:7px}
-.acase{background:var(--c2);border:1px solid var(--bdr);border-radius:var(--r10);padding:12px 14px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:all 0.15s}
-.acase:hover{border-color:var(--bdr2)}
-.acase.sel{border-color:var(--pu);background:rgba(123,95,255,0.06)}
-.acase.blocked{border-left:3px solid var(--red)}
-.acase-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:rgba(255,255,255,0.06)}
-.acase-name{font-weight:700;font-size:12.5px;font-family:var(--fh);color:var(--t1)}
-.acase-sub{font-size:10.5px;color:var(--t3);margin-top:1px}
-.acase-state{font-size:10.5px;font-weight:600;margin-top:4px;display:flex;align-items:center;gap:4px}
-.acase-info{flex:1}
-.acase-right{text-align:right;flex-shrink:0}
-.acase-owner{font-size:10.5px;color:var(--t3)}
-.acase-due{font-size:11px;font-weight:600;margin-top:3px}
-.acase-due.ov{color:var(--red)}
-.acase-due.ok{color:var(--ac)}
-.acase-arr{color:var(--t3);font-size:14px;margin-left:4px;flex-shrink:0;transition:all 0.13s}
-.acase:hover .acase-arr{color:var(--ac);transform:translateX(2px)}
-
-/* TOAST */
-#toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;flex-direction:column;gap:7px;align-items:center;pointer-events:none}
-.toast{background:rgba(15,20,35,0.95);color:var(--t1);border-radius:9px;padding:10px 18px;font-size:12.5px;font-weight:600;box-shadow:var(--sh1);display:flex;align-items:center;gap:8px;white-space:nowrap;animation:toastIn 0.25s ease,toastOut 0.3s ease 2.7s forwards;pointer-events:none;border:1px solid var(--bdr2);backdrop-filter:blur(16px)}
-@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(7px)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:translateY(0)}}
-.hidden{display:none!important}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise OS | Onboarding Sandbox</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #07080d;
+      color: #f5f7fb;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+    aside {
+      border-right: 1px solid rgba(255,255,255,.08);
+      padding: 24px;
+      background: rgba(255,255,255,.03);
+    }
+    main { padding: 32px; }
+    .logo {
+      font-size: 14px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #9aa4b2;
+      margin-bottom: 32px;
+    }
+    .nav-item {
+      padding: 12px 14px;
+      border-radius: 14px;
+      color: #c9d1df;
+      margin-bottom: 8px;
+      background: rgba(255,255,255,.04);
+    }
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(120,119,255,.25), rgba(0,212,255,.15));
+      color: white;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-start;
+      margin-bottom: 28px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 42px;
+      letter-spacing: -0.04em;
+    }
+    .subtitle {
+      color: #a7b0c0;
+      max-width: 780px;
+      line-height: 1.6;
+      margin-top: 12px;
+    }
+    .search {
+      width: 340px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      color: white;
+      border-radius: 16px;
+      padding: 14px 16px;
+      outline: none;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+    .card {
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+    .span-4 { grid-column: span 4; }
+    .span-6 { grid-column: span 6; }
+    .span-8 { grid-column: span 8; }
+    .span-12 { grid-column: span 12; }
+    .label {
+      font-size: 12px;
+      color: #8f9bad;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin-bottom: 10px;
+    }
+    h2, h3 { margin: 0 0 14px; }
+    .pill {
+      display: inline-block;
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.08);
+      margin: 5px 5px 0 0;
+      color: #d9e0ee;
+      font-size: 13px;
+    }
+    .state {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      margin-bottom: 10px;
+    }
+    .arrow { color: #7dd3fc; }
+    .small { color: #a7b0c0; font-size: 13px; line-height: 1.5; }
+    ul { padding-left: 18px; margin: 0; color: #d9e0ee; line-height: 1.8; }
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .check-card {
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.075);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .risk {
+      color: #fecaca;
+      background: rgba(239,68,68,.08);
+      border-color: rgba(239,68,68,.18);
+    }
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; }
+      aside { display: none; }
+      .hero { flex-direction: column; }
+      .search { width: 100%; }
+      .span-4, .span-6, .span-8, .span-12 { grid-column: span 12; }
+      .checklist { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
+  <div class="app">
+    <aside>
+      <div class="logo">Enterprise OS</div>
+      <div class="nav-item">Home</div>
+      <div class="nav-item active">Process Browser</div>
+      <div class="nav-item">Domain / Area View</div>
+      <div class="nav-item">CEO View</div>
+      <div class="nav-item">My Tasks</div>
+      <div class="nav-item">Approvals</div>
+    </aside>
 
-<!-- ════ SIDEBAR ════ -->
-<nav id="sb">
-
-  <!-- LOGO -->
-  <div class="sb-logo">
-    <div class="sb-logo-mark">
-      <svg viewBox="0 0 16 16"><path d="M8 1L14 4.5V11.5L8 15L2 11.5V4.5L8 1Z" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="#fff"/></svg>
-    </div>
-    <div>
-      <div class="sb-logo-text">Command Center</div>
-      <div class="sb-logo-sub" id="sb-tier-label">Enterprise OS</div>
-    </div>
-  </div>
-
-  <!-- MODE SWITCHER -->
-  <div class="mode-switcher">
-    <div class="ms-btn ms-act" id="ms-exec" onclick="setSidebarMode('exec')">
-      <span class="ms-ico">◈</span>
-      <span class="ms-lbl">Exec</span>
-    </div>
-    <div class="ms-btn" id="ms-manager" onclick="setSidebarMode('manager')">
-      <span class="ms-ico">⊞</span>
-      <span class="ms-lbl">Mgr</span>
-    </div>
-    <div class="ms-btn" id="ms-user" onclick="setSidebarMode('user')">
-      <span class="ms-ico">◉</span>
-      <span class="ms-lbl">User</span>
-    </div>
-    <div class="ms-btn" id="ms-process" onclick="setSidebarMode('process')">
-      <span class="ms-ico">⬡</span>
-      <span class="ms-lbl">Flow</span>
-    </div>
-  </div>
-
-  <!-- MODE STRIP -->
-  <div class="mode-strip">
-    <div class="mode-strip-dot exec" id="mode-strip-dot"></div>
-    <div class="mode-strip-lbl" id="mode-strip-lbl">Executive View</div>
-  </div>
-
-  <!-- CONTEXTUAL MENU -->
-  <div id="sb-menu"></div>
-
-  <!-- FOOTER -->
-  <div class="sb-footer">
-    <div class="sb-av" id="sb-av">JD</div>
-    <div>
-      <div class="sb-un" id="sb-un">Jordan Davis</div>
-      <div class="sb-ur" id="sb-ur">IT Operations</div>
-    </div>
-    <span style="color:var(--t3);cursor:pointer;margin-left:auto;font-size:16px" onclick="showToast('Settings coming soon','⚙')">⋯</span>
-  </div>
-</nav>
-
-<!-- ════ MAIN ════ -->
-<div id="main">
-
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <div class="topbar-bc" id="topbar-bc">
-      <span onclick="navTo('mywork')">OS</span>
-      <span class="sep">›</span>
-      <span class="cur" id="bc-view">My Work</span>
-    </div>
-    <div class="mode-pill personal" id="mode-pill">My Work</div>
-    <div class="topbar-gap"></div>
-    <div class="live-badge"><div class="live-dot"></div>Live Enterprise Control</div>
-
-    <!-- SEARCH -->
-    <div class="search-wrap">
-      <div class="search-box">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0;opacity:0.35"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M8.5 8.5L11 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <input type="text" placeholder="Search processes, cases, systems…" id="search-input" autocomplete="off" oninput="onSearch(this.value)" onfocus="openSearch()" onblur="setTimeout(closeSearch,150)"/>
-      </div>
-      <div class="search-dropdown" id="search-dd">
-        <div class="sd-section">
-          <div class="sd-lbl">Processes</div>
-          <div class="sd-item" onclick="openGlobalProcess('laptop','ops');closeSearch()"><span class="sd-icon">◻</span><div><div class="sd-text">Laptop Lifecycle</div><div class="sd-sub">Operations · 7 states</div></div></div>
-          <div class="sd-item" onclick="openGlobalProcess('equipment','ops');closeSearch()"><span class="sd-icon">◻</span><div><div class="sd-text">Equipment Return</div><div class="sd-sub">Operations · 5 states</div></div></div>
-          <div class="sd-item" onclick="openGlobalProcess('onboarding','hr');closeSearch()"><span class="sd-icon">◻</span><div><div class="sd-text">Employee Onboarding</div><div class="sd-sub">HR · 7 states</div></div></div>
-        </div>
-        <div class="sd-section" style="border-top:1px solid var(--bdr)">
-          <div class="sd-lbl">Tasks &amp; Systems</div>
-          <div class="sd-item" onclick="openDetailFromSearch('laptop','IT');closeSearch()"><span class="sd-icon">◇</span><div><div class="sd-text">Validate asset in ITSM</div><div class="sd-sub">IT · Ship to Employee</div></div></div>
-          <div class="sd-item" onclick="closeSearch()"><span class="sd-icon">◇</span><div><div class="sd-text">Generate shipping label</div><div class="sd-sub">Procurement · Ship to Employee</div></div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ROLE SELECTOR -->
-    <div class="role-sel">
-      <button class="role-btn" onclick="toggleRoleDD()">
-        <span id="role-ico" style="font-size:12px">◻</span> <span id="role-name">IT</span> ▾
-      </button>
-      <div class="role-dd" id="role-dd">
-        <div class="role-opt" onclick="setRole('Operations','⚙')"><span style="font-size:12px">⚙</span> Operations</div>
-        <div class="role-opt sel" onclick="setRole('IT','◻')"><span style="font-size:12px">◻</span> IT</div>
-        <div class="role-opt" onclick="setRole('Procurement','◈')"><span style="font-size:12px">◈</span> Procurement</div>
-        <div class="role-opt" onclick="setRole('Finance','◉')"><span style="font-size:12px">◉</span> Finance</div>
-        <div class="role-opt" onclick="setRole('HR','◐')"><span style="font-size:12px">◐</span> HR</div>
-      </div>
-    </div>
-
-    <div class="topbar-icon" onclick="showToast('3 new notifications','●')">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2C5.8 2 4 3.8 4 6V9L2.5 11H13.5L12 9V6C12 3.8 10.2 2 8 2Z" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M6.5 12.5C6.5 13.3 7.2 14 8 14C8.8 14 9.5 13.3 9.5 12.5" stroke="currentColor" stroke-width="1.3"/></svg>
-      <div class="notif-dot"></div>
-    </div>
-    <div class="topbar-icon">
-      <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--pu),var(--ac));display:flex;align-items:center;justify-content:center;color:var(--c0);font-size:10px;font-weight:800;font-family:var(--fh)">JD</div>
-    </div>
-  </div>
-
-  <!-- CONTENT AREA -->
-  <div id="content">
-
-    <!-- ═══ MY WORK VIEW ═══ -->
-    <div id="v-mywork" class="view active" style="overflow-y:auto">
-      <div style="padding:24px">
-        <div class="vh">
-          <h1>My Work</h1>
-          <p>All tasks across processes — <span id="mw-role-label">IT Operations</span></p>
-        </div>
-
-        <div class="tabs">
-          <div class="tab act" onclick="setTab(this)">Overview</div>
-          <div class="tab" onclick="setTab(this)">All Tasks</div>
-          <div class="tab" onclick="setTab(this)">Needs Attention <span class="tc">3</span></div>
-          <div class="tab" onclick="setTab(this)">Completed</div>
-        </div>
-
-        <div class="kpi-row">
-          <div class="kpi">
-            <div class="kpi-ico" style="background:rgba(123,95,255,0.12)"><span style="font-size:15px">◈</span></div>
-            <div><div class="kpi-n">12</div><div class="kpi-l">Total Tasks</div><div class="kpi-s">Across all processes</div></div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-ico" style="background:var(--greenbg)"><span style="font-size:15px;color:var(--ac)">✓</span></div>
-            <div><div class="kpi-n" style="color:var(--ac)">5</div><div class="kpi-l">Completed</div><div class="kpi-s">This week</div></div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-ico" style="background:rgba(79,163,255,0.1)"><span style="font-size:15px;color:var(--blue)">◉</span></div>
-            <div><div class="kpi-n" style="color:var(--blue)">4</div><div class="kpi-l">In Progress</div><div class="kpi-s">Due this week</div></div>
-          </div>
-          <div class="kpi" style="border-color:rgba(240,82,82,0.2)">
-            <div class="kpi-ico" style="background:var(--redbg)"><span style="font-size:15px;color:var(--red)">!</span></div>
-            <div><div class="kpi-n" style="color:var(--red)" id="kpi-ov">3</div><div class="kpi-l">Overdue</div><div class="kpi-s">Needs attention</div></div>
-          </div>
-        </div>
-
-        <div class="sec-head">
-          <div><h2>My Processes</h2><p>Filtered by your role</p></div>
-          <div class="sec-actions">
-            <div class="fpill">All Status ▾</div>
-            <div class="fpill">Sort: Due Date ▾</div>
-          </div>
-        </div>
-
-        <div class="plist" id="my-proc-list"></div>
-        <div class="show-more">Show completed processes (8) ▾</div>
-      </div>
-    </div>
-
-    <!-- ═══ PROCESS DETAIL ═══ -->
-    <div id="v-detail" class="view flex">
-      <div id="detail-main">
-        <div class="state-done-banner hidden" id="done-banner">
-          <div class="sdb-icon">✓</div>
-          <div class="sdb-text">
-            <h3 id="done-title">Stage Complete!</h3>
-            <p id="done-sub">All tasks done. Advancing…</p>
-          </div>
-          <button class="sdb-btn" onclick="advanceState()">→ Next Stage</button>
-        </div>
-        <div class="flow-big" id="detail-flow"></div>
-        <div class="cl-panel">
-          <div class="cl-head">
-            <div class="cl-head-left">
-              <h2 id="cl-state-name">Ship to Employee</h2>
-              <p id="cl-desc">Complete your assigned tasks for this stage</p>
-            </div>
-            <div class="prog-wrap">
-              <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
-              <div class="prog-txt" id="prog-txt">0 / 0</div>
-            </div>
-          </div>
-          <div class="tl" id="task-list"></div>
-        </div>
-        <div style="display:flex;gap:9px;margin-top:4px">
-          <button class="view-my-btn" onclick="navTo('nav')">View Full Process</button>
-          <button class="view-my-btn" onclick="navTo('mywork')">← Back to My Work</button>
-        </div>
-      </div>
-
-      <!-- ACTION GUIDE PANEL -->
-      <div id="detail-panel">
-        <div class="ag-empty" id="ag-empty">
-          <div class="e-ico">◈</div>
-          <h4>Select a task for your Action Guide</h4>
-          <p>Step-by-step instructions, systems, notifications, evidence and next steps.</p>
-        </div>
-        <div id="ag-content" class="hidden" style="display:flex;flex-direction:column;height:100%;overflow:hidden">
-          <div class="ag-head">
-            <span class="ag-close" onclick="closeAG()">✕</span>
-            <div class="ag-label">Action Guide</div>
-            <h3 id="ag-title">Task Name</h3>
-          </div>
-          <div class="ag-body">
-            <div class="ag-sect">
-              <div class="ag-sec-title">What to do</div>
-              <div class="step-list" id="ag-steps"></div>
-            </div>
-            <div class="ag-sect" style="margin-top:14px">
-              <div class="ag-sec-title">Where to do it</div>
-              <div class="sys-chips" id="ag-systems"></div>
-            </div>
-            <div class="ag-sect" style="margin-top:14px">
-              <div class="ag-sec-title">Who to notify</div>
-              <div id="ag-notify"></div>
-            </div>
-            <div class="ag-sect" style="margin-top:14px">
-              <div class="ag-sec-title">Suggested message</div>
-              <div class="msg-box" id="ag-message"></div>
-            </div>
-            <div class="ag-sect" style="margin-top:14px">
-              <div class="ag-sec-title">Evidence required</div>
-              <div class="ev-list" id="ag-evidence"></div>
-            </div>
-            <div class="ag-sect" style="margin-top:14px">
-              <div class="ag-sec-title">What happens next</div>
-              <div class="next-box">
-                <div class="next-arr">NEXT →</div>
-                <div class="next-txt" id="ag-next"></div>
-              </div>
-            </div>
-            <button class="complete-btn" id="ag-complete-btn" onclick="completeCurrentTask()">✓ &nbsp;Mark Task Complete</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ GLOBAL PROCESS NAVIGATOR ═══ -->
-    <div id="v-nav" class="view flex">
-      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-        <div id="nav-top">
-          <div class="nav-proc-title">
-            <div class="nav-proc-ico" id="nav-proc-ico">◻</div>
-            <div>
-              <div class="nav-proc-name" id="nav-proc-name">Laptop Lifecycle</div>
-              <div class="nav-proc-sub" id="nav-proc-sub">Operations · Full company process view</div>
-            </div>
-            <div class="nav-proc-actions">
-              <button class="view-my-btn" onclick="navTo('mywork')">← Back to My Work</button>
-              <button class="add-btn" onclick="addToMyWork()">+ Add to My Work</button>
-            </div>
-          </div>
-          <div class="nav-flow">
-            <div class="nav-flow-lbl" id="nav-flow-lbl">Process Flow — Laptop Lifecycle</div>
-            <div class="flow-big-track" id="nav-flow-track"></div>
-          </div>
-        </div>
-
-        <div id="nav-body">
-          <div id="dept-grid-wrap">
-            <div class="dept-grid-title">
-              Department Ownership —
-              <span class="state-badge" id="dept-state-badge">Ship to Employee</span>
-              <span style="font-size:11px;color:var(--t3);font-weight:400;margin-left:4px">(Click department for details)</span>
-            </div>
-            <div class="dept-grid" id="dept-grid"></div>
-          </div>
-
-          <div id="dept-panel">
-            <div class="dp-empty" id="dp-empty">
-              <div class="e-ico">⊞</div>
-              <h4>Select a department</h4>
-              <p>Click any department column to see responsibilities, systems, and next actions.</p>
-            </div>
-            <div id="dp-content" class="hidden" style="display:flex;flex-direction:column;height:100%;overflow:hidden">
-              <div class="dp-head">
-                <div class="dp-head-ico" id="dp-head-ico">⚙</div>
-                <div>
-                  <div class="dp-head-name" id="dp-head-name">Operations</div>
-                  <div class="dp-head-sub" id="dp-head-sub">Ship to Employee</div>
-                </div>
-                <span style="margin-left:auto;cursor:pointer;color:var(--t3);font-size:15px" onclick="closeDeptPanel()">✕</span>
-              </div>
-              <div class="dp-body">
-                <div class="dp-sect">
-                  <div class="dp-sec-title">Responsibilities</div>
-                  <div id="dp-tasks"></div>
-                </div>
-                <div class="dp-sect" style="margin-top:14px">
-                  <div class="dp-sec-title">Systems Used</div>
-                  <div class="dp-sys-wrap" id="dp-systems"></div>
-                </div>
-                <div class="dp-sect" style="margin-top:14px">
-                  <div class="dp-sec-title">Who They Notify Next</div>
-                  <div id="dp-notify"></div>
-                </div>
-                <div class="dp-sect" style="margin-top:14px">
-                  <div class="dp-sec-title">What happens after</div>
-                  <div class="dp-next-box">
-                    <div class="dp-next-arr">NEXT →</div>
-                    <div class="dp-next-txt" id="dp-after"></div>
-                  </div>
-                </div>
-                <div class="dp-sect" style="margin-top:14px">
-                  <div class="dp-sec-title">Related Policies</div>
-                  <div id="dp-policies"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ CEO VIEW ═══ -->
-    <div id="v-ceo" class="view flex">
-      <div id="ceo-main">
-
-        <!-- HEADER -->
+    <main>
+      <section class="hero">
         <div>
-          <div class="ceo-header">
-            <div>
-              <div class="ceo-title">Revenue Command</div>
-              <div class="ceo-subtitle">Lead to cash, state machines, blockers and execution in one view.</div>
-            </div>
-            <div class="ceo-header-actions">
-              <div class="agents-badge"><div class="agents-dot"></div>6 agents active</div>
-              <div class="fpill" style="background:rgba(255,255,255,0.04)">Today ▾</div>
-              <div class="fpill" style="background:rgba(255,255,255,0.04)">Export ↓</div>
-            </div>
-          </div>
+          <div class="label">Sandbox Process</div>
+          <h1 id="processName">Loading...</h1>
+          <p class="subtitle" id="processGoal"></p>
         </div>
+        <input class="search" id="search" placeholder="Search onboarding, Bamboo, HR, training..." />
+      </section>
 
-        <!-- KPI ROW -->
-        <div>
-          <div class="ceo-section-title">Company Health <span class="csub">Updated just now</span></div>
-          <div class="kpi-row" style="grid-template-columns:repeat(5,1fr);margin-bottom:0">
-            <div class="kpi" style="border-left:2px solid var(--ac)">
-              <div class="kpi-ico" style="background:var(--greenbg)"><span style="color:var(--ac);font-family:var(--fm);font-size:12px">$</span></div>
-              <div><div class="kpi-n" style="color:var(--ac);font-size:20px">€247K</div><div class="kpi-l">Revenue Today</div><div class="kpi-s">↑ 12% vs yesterday</div></div>
+      <section class="grid" id="content"></section>
+    </main>
+  </div>
+
+  <script>
+    async function loadProcess() {
+      const response = await fetch('./onboarding.json');
+      const data = await response.json();
+
+      document.getElementById('processName').textContent = data.process.name;
+      document.getElementById('processGoal').textContent =
+        `${data.process.domain} process triggered by "${data.process.trigger}". Goal: ${data.process.goal}.`;
+
+      render(data);
+
+      document.getElementById('search').addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase();
+        if (!q || JSON.stringify(data).toLowerCase().includes(q)) {
+          render(data);
+        } else {
+          document.getElementById('content').innerHTML = `
+            <div class="card span-12">
+              <h2>No results found</h2>
+              <p class="small">Try searching: onboarding, Bamboo, DocuSign, HR, IT, training, laptop, access.</p>
             </div>
-            <div class="kpi" style="border-left:2px solid var(--pu)">
-              <div class="kpi-ico" style="background:var(--pug)"><span style="color:var(--pu);font-size:14px">◈</span></div>
-              <div><div class="kpi-n" style="font-size:20px">34</div><div class="kpi-l">Open Cases</div><div class="kpi-s">Across all processes</div></div>
-            </div>
-            <div class="kpi" style="border-left:2px solid var(--amber)">
-              <div class="kpi-ico" style="background:var(--amberbg)"><span style="color:var(--amber);font-size:14px">%</span></div>
-              <div><div class="kpi-n" style="color:var(--amber);font-size:20px">87%</div><div class="kpi-l">SLA Compliance</div><div class="kpi-s">↓ 4% vs last week</div></div>
-            </div>
-            <div class="kpi" style="border-left:2px solid var(--red)">
-              <div class="kpi-ico" style="background:var(--redbg)"><span style="color:var(--red);font-size:14px">⊗</span></div>
-              <div><div class="kpi-n" style="color:var(--red);font-size:20px">7</div><div class="kpi-l">Blocked Tasks</div><div class="kpi-s">Need immediate action</div></div>
-            </div>
-            <div class="kpi" style="border-left:2px solid var(--blue)">
-              <div class="kpi-ico" style="background:var(--bluebg)"><span style="color:var(--blue);font-size:14px">◎</span></div>
-              <div><div class="kpi-n" style="color:var(--blue);font-size:20px">12</div><div class="kpi-l">Active Clients</div><div class="kpi-s">3 at risk</div></div>
-            </div>
-          </div>
+          `;
+        }
+      });
+    }
+
+    function render(data) {
+      const subprocesses = data.subprocesses.map(sp => `
+        <div class="card span-4">
+          <div class="label">Subprocess</div>
+          <h3>${sp.name}</h3>
+          <ul>${sp.tasks.map(t => `<li>${t}</li>`).join('')}</ul>
         </div>
+      `).join('');
 
-        <!-- REVENUE SPINE -->
-        <div class="rev-spine">
-          <div class="ceo-section-title" style="margin-bottom:16px">Revenue Spine <span class="csub">Lead → Payment pipeline</span></div>
-          <div class="spine-track" id="spine-track"></div>
-        </div>
-
-        <!-- TWO-COL: CASES + ALERTS -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      const states = data.state_machine.map(s => `
+        <div class="state">
           <div>
-            <div class="ceo-section-title">Running Cases <span class="csub">34 active</span></div>
-            <div class="cases-grid" id="ceo-cases"></div>
+            <strong>${s.state}</strong>
+            <div class="small">${s.trigger}</div>
           </div>
+          <div class="arrow">→</div>
           <div>
-            <div class="ceo-section-title">Critical Alerts <span class="csub red">5 need action</span></div>
-            <div class="alert-list" id="ceo-alerts"></div>
+            <strong>${s.next_state}</strong>
+            <div class="small">${s.action} · Owner: ${s.owner}</div>
           </div>
         </div>
+      `).join('');
 
-        <!-- CLIENTS AT RISK -->
-        <div>
-          <div class="ceo-section-title">Clients at Risk <span class="csub">Flagged for executive attention</span></div>
-          <div class="risk-grid" id="ceo-risk"></div>
+      const checklists = Object.entries(data.checklists).map(([role, items]) => `
+        <div class="check-card">
+          <h3>${role}</h3>
+          <ul>${items.map(i => `<li>☐ ${i}</li>`).join('')}</ul>
+        </div>
+      `).join('');
+
+      document.getElementById('content').innerHTML = `
+        <div class="card span-4">
+          <div class="label">Process</div>
+          <h2>${data.process.name}</h2>
+          <p class="small"><strong>Trigger:</strong> ${data.process.trigger}</p>
+          <p class="small"><strong>Domain:</strong> ${data.process.domain}</p>
         </div>
 
-        <!-- RIGHT STAT COLUMN (static for CEO header) -->
-
-      </div><!-- /ceo-main -->
-
-      <!-- CEO DETAIL PANEL -->
-      <div id="ceo-panel">
-        <div class="cdp-empty" id="cdp-empty">
-          <div class="e-ico">◈</div>
-          <h4>Select any item</h4>
-          <p>Click a case, alert, or client to see the full detail — owner, blockers, timeline, and next action.</p>
-        </div>
-        <div id="cdp-content" class="hidden" style="display:flex;flex-direction:column;height:100%;overflow:hidden">
-          <div class="cdp-head">
-            <div class="cdp-type">
-              <span id="cdp-type-label">CASE DETAIL</span>
-              <span style="cursor:pointer;opacity:0.5;font-size:14px" onclick="closeCDP()">✕</span>
-            </div>
-            <h3 id="cdp-title">—</h3>
-            <div class="cdp-sub" id="cdp-subtitle">—</div>
-          </div>
-          <div class="cdp-body">
-            <div class="cdp-sect">
-              <div class="cdp-sec-title">Case Overview</div>
-              <div id="cdp-fields"></div>
-            </div>
-            <div class="cdp-sect" style="margin-top:14px">
-              <div class="cdp-sec-title">Blockers</div>
-              <div id="cdp-blockers"></div>
-            </div>
-            <div class="cdp-sect" style="margin-top:14px">
-              <div class="cdp-sec-title">Documents</div>
-              <div id="cdp-docs"></div>
-            </div>
-            <div class="cdp-sect" style="margin-top:14px">
-              <div class="cdp-sec-title">Timeline</div>
-              <div id="cdp-timeline"></div>
-            </div>
-            <button class="cdp-action-btn" id="cdp-action-btn" onclick="showToast('Action triggered','✓')">Take Action</button>
-            <button class="cdp-action-btn red-btn" style="margin-top:8px" onclick="showToast('Escalation sent to CEO','!')">Escalate to CEO</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ AREA MANAGER VIEW ═══ -->
-    <div id="v-area" class="view flex">
-      <div id="area-main">
-
-        <!-- HEADER -->
-        <div class="area-header">
-          <div class="area-ico">◐</div>
-          <div class="area-title-wrap">
-            <h1>HR Area View</h1>
-            <p>Human Resources · Manager control panel · <span id="area-role-label">All Team Members</span></p>
-          </div>
-          <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-            <div class="agents-badge" style="font-size:10px"><div class="agents-dot"></div>Live</div>
-            <div class="fpill">This Week ▾</div>
-            <div class="fpill">Export ↓</div>
-          </div>
+        <div class="card span-4">
+          <div class="label">Systems</div>
+          <h2>Connected Tools</h2>
+          ${data.systems.map(s => `<span class="pill">${s}</span>`).join('')}
         </div>
 
-        <!-- AREA KPI -->
-        <div class="kpi-row" style="grid-template-columns:repeat(5,1fr);margin-bottom:0">
-          <div class="kpi" style="border-left:2px solid var(--pu)">
-            <div class="kpi-ico" style="background:var(--pug)"><span style="color:var(--pu);font-size:14px">◐</span></div>
-            <div><div class="kpi-n" style="font-size:20px">8</div><div class="kpi-l">HR Team Members</div><div class="kpi-s">2 at capacity</div></div>
-          </div>
-          <div class="kpi" style="border-left:2px solid var(--ac)">
-            <div class="kpi-ico" style="background:var(--greenbg)"><span style="color:var(--ac);font-size:13px">✓</span></div>
-            <div><div class="kpi-n" style="font-size:20px">14</div><div class="kpi-l">Active Cases</div><div class="kpi-s">Across HR processes</div></div>
-          </div>
-          <div class="kpi" style="border-left:2px solid var(--amber)">
-            <div class="kpi-ico" style="background:var(--amberbg)"><span style="color:var(--amber);font-size:13px">!</span></div>
-            <div><div class="kpi-n" style="color:var(--amber);font-size:20px">3</div><div class="kpi-l">SLA at Risk</div><div class="kpi-s">Due within 24h</div></div>
-          </div>
-          <div class="kpi" style="border-left:2px solid var(--red)">
-            <div class="kpi-ico" style="background:var(--redbg)"><span style="color:var(--red);font-size:13px">⊗</span></div>
-            <div><div class="kpi-n" style="color:var(--red);font-size:20px">2</div><div class="kpi-l">Blocked</div><div class="kpi-s">Immediate action</div></div>
-          </div>
-          <div class="kpi" style="border-left:2px solid var(--blue)">
-            <div class="kpi-ico" style="background:var(--bluebg)"><span style="color:var(--blue);font-size:13px">◉</span></div>
-            <div><div class="kpi-n" style="font-size:20px">6</div><div class="kpi-l">Due This Week</div><div class="kpi-s">On track</div></div>
-          </div>
+        <div class="card span-4 risk">
+          <div class="label">Risk Alerts</div>
+          <h2>What can go wrong</h2>
+          <ul>${data.risks.map(r => `<li>${r}</li>`).join('')}</ul>
         </div>
 
-        <!-- TEAM WORKLOAD -->
-        <div>
-          <div class="ceo-section-title">Team Workload <span class="csub">Click a row to drill into cases</span></div>
-          <div class="workload-table">
-            <div class="wt-head">
-              <div class="wt-hcell">Team Member</div>
-              <div class="wt-hcell">Workload</div>
-              <div class="wt-hcell">Tasks</div>
-              <div class="wt-hcell">SLA Status</div>
-              <div class="wt-hcell">Cases</div>
-              <div class="wt-hcell"></div>
-            </div>
-            <div id="area-workload-table"></div>
-          </div>
+        <div class="card span-12">
+          <div class="label">State Machine</div>
+          <h2>Critical Route</h2>
+          ${states}
         </div>
 
-        <!-- PROCESS FILTER + CASES -->
-        <div>
-          <div class="ceo-section-title">Running Cases by Process</div>
-          <div class="proc-filter-row" id="area-proc-filters"></div>
-          <div class="area-cases" id="area-cases"></div>
+        <div class="card span-12">
+          <div class="label">Role-Based Execution</div>
+          <h2>Checklists</h2>
+          <div class="checklist">${checklists}</div>
         </div>
 
-        <!-- SLA DASHBOARD -->
-        <div>
-          <div class="ceo-section-title">SLA Dashboard <span class="csub">Compliance this week</span></div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="area-sla"></div>
-        </div>
-
-      </div><!-- /area-main -->
-
-      <!-- AREA PANEL -->
-      <div id="area-panel">
-        <div class="cdp-empty" id="adp-empty">
-          <div class="e-ico">◈</div>
-          <h4>Select a case</h4>
-          <p>Click any team member row or case card to see full detail — assigned user, tasks, next action, and systems.</p>
-        </div>
-        <div id="adp-content" class="hidden" style="display:flex;flex-direction:column;height:100%;overflow:hidden">
-          <div class="cdp-head">
-            <div class="cdp-type">
-              <span id="adp-type-label">CASE DETAIL</span>
-              <span style="cursor:pointer;opacity:0.5;font-size:14px" onclick="closeADP()">✕</span>
-            </div>
-            <h3 id="adp-title">—</h3>
-            <div class="cdp-sub" id="adp-subtitle">—</div>
-          </div>
-          <div class="cdp-body">
-            <div class="cdp-sect">
-              <div class="cdp-sec-title">Case Details</div>
-              <div id="adp-fields"></div>
-            </div>
-            <div class="cdp-sect" style="margin-top:14px">
-              <div class="cdp-sec-title">Tasks Pending</div>
-              <div id="adp-tasks"></div>
-            </div>
-            <div class="cdp-sect" style="margin-top:14px">
-              <div class="cdp-sec-title">Systems Used</div>
-              <div class="dp-sys-wrap" id="adp-systems"></div>
-            </div>
-            <div class="cdp-sect" style="margin-top:14px">
-              <div class="cdp-sec-title">Next Action</div>
-              <div class="next-box">
-                <div class="next-arr">NEXT →</div>
-                <div class="next-txt" id="adp-next"></div>
-              </div>
-            </div>
-            <div class="cdp-sect" style="margin-top:14px">
-              <div class="cdp-sec-title">Who to Notify</div>
-              <div id="adp-notify"></div>
-            </div>
-            <button class="cdp-action-btn" onclick="showToast('Task assigned','✓')">Assign Task</button>
-            <button class="cdp-action-btn" style="margin-top:8px;background:var(--amber);color:var(--c0)" onclick="showToast('SLA flag added','!')">Flag SLA Risk</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /content -->
-</div><!-- /main -->
-
-<!-- TOAST -->
-<div id="toast-wrap"></div>
-
-<script>
-/* ══════════════════════════════════════
-   STATE
-══════════════════════════════════════ */
-let currentView = 'mywork';
-let currentRole = 'IT';
-let currentProcKey = null;
-let currentTaskId = null;
-let currentNavProcKey = null;
-let currentDept = null;
-let currentSidebarMode = 'exec';
-
-/* ══════════════════════════════════════
-   DEMO DATA
-══════════════════════════════════════ */
-const ROLES = {
-  Operations:{ ico:'⚙', color:'#F5A623', avatarBg:'#B45309' },
-  IT:        { ico:'◻', color:'#7B5FFF', avatarBg:'#4C2EC8' },
-  Procurement:{ ico:'◈', color:'#4FA3FF', avatarBg:'#1D4ED8' },
-  Finance:   { ico:'◉', color:'#00E5B4', avatarBg:'#00B890' },
-  HR:        { ico:'◐', color:'#F05252', avatarBg:'#B91C1C' }
-};
-
-const DEPT_META = {
-  Operations: { ico:'⚙', bg:'rgba(245,166,35,0.12)', color:'#F5A623' },
-  Procurement:{ ico:'◈', bg:'rgba(79,163,255,0.12)',  color:'#4FA3FF' },
-  IT:         { ico:'◻', bg:'rgba(123,95,255,0.12)',  color:'#7B5FFF' },
-  Finance:    { ico:'◉', bg:'rgba(0,229,180,0.12)',   color:'#00E5B4' },
-  HR:         { ico:'◐', bg:'rgba(240,82,82,0.12)',   color:'#F05252' }
-};
-
-const PROCESSES = {
-  laptop:{
-    name:'Laptop Lifecycle', icon:'◻', iconBg:'rgba(123,95,255,0.12)',
-    domain:'Operations',
-    currentStateIdx:3,
-    states:[
-      { name:'Request Approved',    short:'Approved',  status:'done' },
-      { name:'Purchase Completed',  short:'Purchased', status:'done' },
-      { name:'Prepare for Shipment',short:'Prepare',   status:'done' },
-      { name:'Ship to Employee',    short:'Ship',      status:'active',
-        desc:'Device is being shipped. Your role tasks are shown below.',
-        deptTasks:{
-          Operations:[
-            { id:'op1', lbl:'Confirm employee shipping address', sys:'Slack / Email', status:'p' },
-            { id:'op2', lbl:'Attach tracking number to Jira request', sys:'Jira', status:'p' },
-            { id:'op3', lbl:'Notify employee with tracking details and ETA', sys:'Outlook / Slack', status:'p' }
-          ],
-          Procurement:[
-            { id:'pr1', lbl:'Generate shipping label in carrier portal', sys:'FedEx / DHL Portal', status:'p' },
-            { id:'pr2', lbl:'Confirm carrier pickup window', sys:'FedEx Portal', status:'p' }
-          ],
-          IT:[
-            { id:'it1', lbl:'Validate asset assignment in ITSM', sys:'ITSM / Asset Register', status:'p' },
-            { id:'it2', lbl:'Confirm device status is In Transit', sys:'ITSM', status:'p' },
-            { id:'it3', lbl:'Attach ITSM confirmation to Jira', sys:'Jira', status:'p' }
-          ],
-          Finance:[
-            { id:'fi1', lbl:'Update asset register to In Transit status', sys:'Finance System', status:'cond' }
-          ],
-          HR:[
-            { id:'hr1', lbl:'Confirm employee availability to receive package', sys:'Email', status:'p' },
-            { id:'hr2', lbl:'Re-verify address if needed', sys:'HRIS', status:'p' },
-            { id:'hr3', lbl:'Notify employee about expected delivery', sys:'Slack', status:'p' },
-            { id:'hr4', lbl:'Update onboarding checklist', sys:'Notion', status:'p' },
-            { id:'hr5', lbl:'Coordinate with manager if delivery is delayed', sys:'Email / Slack', status:'cond' }
-          ]
-        },
-        deptInfo:{
-          Operations:{ systems:['Slack','Jira','Outlook'], notify:['IT Team','Employee'], after:'Procurement generates the shipping label. IT validates asset assignment.', policies:['Shipping Policy v2.1','Asset Tracking SOP'] },
-          Procurement:{ systems:['FedEx Portal','DHL Portal','Jira'], notify:['Operations Team','Finance'], after:'Operations attaches tracking to Jira. Finance updates asset register.', policies:['Carrier Selection Policy','Procurement SOP v3.0'] },
-          IT:{ systems:['ITSM','Asset Register','Jira'], notify:['Operations Team'], after:'Operations attaches tracking to Jira. Employee receives shipment notification.', policies:['Asset Management Policy','ITSM Workflow Guide'] },
-          Finance:{ systems:['Finance System','ERP','Asset Register'], notify:['IT Team','Procurement'], after:'Asset is marked In Transit in finance system.', policies:['Asset Register Policy','Finance Controls v4.2'] },
-          HR:{ systems:['Email','Slack','HRIS','Notion'], notify:['Employee','Hiring Manager'], after:'Employee is ready to receive device. Onboarding checklist updated.', policies:['Employee Experience Policy','Onboarding Handbook v5.1'] }
-        }
-      },
-      { name:'Employee Receives', short:'Received',  status:'next' },
-      { name:'Confirm Delivery',  short:'Confirmed', status:'next' },
-      { name:'In Use / Active',   short:'Active',    status:'next' }
-    ],
-    roleTasks:{
-      Operations:{3:[
-        { id:'op1', lbl:'Confirm employee shipping address', sys:'Slack / Email', due:'Today, 4:00 PM', done:false,
-          guide:{ steps:['Open Slack and message the employee directly','Confirm current home delivery address','Cross-check with HRIS employee record','If mismatch: update in HRIS and flag to HR','Log confirmation in Jira ticket comment'], where:['Slack','Jira','HRIS'], notify:[{name:'IT Team',role:'Asset Management',color:'#7B5FFF'},{name:'Procurement',role:'Logistics',color:'#4FA3FF'}], message:'Shipping address confirmed for [Employee Name]. Address verified against HRIS. Ready for label generation.', evidence:['Screenshot of employee Slack confirmation','Jira comment added'], next:'Procurement generates the shipping label. Operations attaches tracking to Jira ticket.' }
-        },
-        { id:'op2', lbl:'Attach tracking number to Jira request', sys:'Jira', due:'Today, 5:00 PM', done:false,
-          guide:{ steps:['Open Jira → Locate ticket for this device request','Click "Add Comment"','Paste tracking number from Procurement','Add carrier name and estimated delivery date','Change ticket status to "In Transit"','Tag the employee and HR in the comment'], where:['Jira'], notify:[{name:'Employee',role:'Device Recipient',color:'#00E5B4'},{name:'HR Team',role:'People Ops',color:'#F05252'}], message:'Tracking number attached to Jira. Carrier: FedEx. Tracking: [NUMBER]. ETA: [DATE].', evidence:['Jira ticket updated with tracking','Status changed to In Transit'], next:'Employee receives notification. IT confirms ITSM record.' }
-        },
-        { id:'op3', lbl:'Notify employee with tracking details and ETA', sys:'Outlook / Slack', due:'Today, 6:00 PM', done:false,
-          guide:{ steps:['Open Outlook or Slack','Draft a message to the employee','Include carrier name, tracking number, ETA, delivery address','Add instructions for signature on delivery','CC Hiring Manager and HR','Send and log in Jira'], where:['Outlook','Slack'], notify:[{name:'Employee',role:'Device Recipient',color:'#00E5B4'},{name:'Hiring Manager',role:'Department Head',color:'#F5A623'}], message:'Hi [Name], your laptop is on its way! Carrier: FedEx. Tracking: [NUM]. ETA: [DATE]. Please be available to sign.', evidence:['Copy of email/Slack message','Jira comment with message confirmation'], next:'Employee prepares to receive device. HR updates onboarding checklist.' }
-        }
-      ]},
-      IT:{3:[
-        { id:'it1', lbl:'Validate asset assignment in ITSM', sys:'ITSM', due:'Today, 6:00 PM', done:false,
-          guide:{ steps:['Open ITSM and navigate to Asset Management','Search for asset ID ASSET-2026-0089','Confirm assigned employee is Sarah Kim','Confirm status field shows "In Transit"','Verify serial number matches device record','Save changes and note timestamp'], where:['ITSM','Asset Register'], notify:[{name:'Operations Team',role:'Logistics',color:'#F5A623'}], message:'Asset assignment confirmed in ITSM. Device ASSET-2026-0089 assigned to Sarah Kim. Status: In Transit.', evidence:['ITSM asset record screenshot','Asset status updated to In Transit'], next:'Operations attaches tracking number to Jira. Employee receives shipment notification.' }
-        },
-        { id:'it2', lbl:'Confirm device status is In Transit', sys:'ITSM', due:'Today, 6:00 PM', done:false,
-          guide:{ steps:['In ITSM, navigate to the device record','Check the Status field — must read "In Transit"','If status is incorrect, update it now','Verify last-updated timestamp is current','Cross-check against Procurement confirmation','Log verification complete in Jira ticket'], where:['ITSM','Jira'], notify:[{name:'Finance',role:'Asset Register',color:'#00E5B4'}], message:'Device status confirmed as In Transit in ITSM. Finance can now update asset register.', evidence:['ITSM status screenshot','Jira comment confirming verification'], next:'Finance updates the asset register.' }
-        },
-        { id:'it3', lbl:'Attach ITSM confirmation to Jira', sys:'Jira', due:'Today, 6:00 PM', done:false,
-          guide:{ steps:['Take a screenshot of the ITSM asset record','Open Jira — navigate to the device request ticket','Click "Add Attachment" and upload the ITSM screenshot','Add a comment: "ITSM record verified — asset In Transit"','Tag Operations team in the comment','Change ticket status to "IT Verified"'], where:['Jira','ITSM'], notify:[{name:'Operations Team',role:'Logistics',color:'#F5A623'}], message:'ITSM confirmation attached to Jira. IT verification complete. Operations can proceed with final employee notification.', evidence:['ITSM screenshot attached to Jira','Jira comment added','Ticket status: IT Verified'], next:'Operations sends final tracking notification to employee.' }
-        }
-      ]},
-      Procurement:{3:[
-        { id:'pr1', lbl:'Generate shipping label in carrier portal', sys:'FedEx / DHL Portal', due:'Today, 3:00 PM', done:false,
-          guide:{ steps:['Log into FedEx/DHL carrier portal','Create a new shipment','Enter sender address (company warehouse)','Enter recipient address (confirmed by Operations)','Select overnight / 2-day delivery','Generate label and download PDF','Send label to Operations'], where:['FedEx Portal','DHL Portal','Jira'], notify:[{name:'Operations Team',role:'Logistics',color:'#F5A623'}], message:'Shipping label generated. Carrier: FedEx. Tracking: [NUM]. Label sent to Operations.', evidence:['Shipping label PDF','Tracking number confirmed'], next:'Operations packages device and attaches tracking to Jira.' }
-        },
-        { id:'pr2', lbl:'Confirm carrier pickup window', sys:'FedEx Portal', due:'Today, 4:00 PM', done:false,
-          guide:{ steps:['In FedEx portal, schedule a pickup','Confirm pickup window matches warehouse hours','Get pickup confirmation number','Notify Operations with pickup window','Log in Jira ticket'], where:['FedEx Portal'], notify:[{name:'Operations Team',role:'Warehouse',color:'#F5A623'}], message:'Carrier pickup scheduled. Window: [TIME]. Confirmation: [NUM].', evidence:['Pickup confirmation number','Jira comment added'], next:'Carrier picks up package. Tracking goes live.' }
-        }
-      ]},
-      Finance:{3:[
-        { id:'fi1', lbl:'Update asset register to In Transit status', sys:'Finance System', due:'Today, EOD', done:false,
-          guide:{ steps:['Open Finance System / ERP','Navigate to Asset Register','Search for asset ASSET-2026-0089','Update status to "In Transit"','Save and timestamp the record','Notify IT of completion'], where:['Finance System','ERP','Asset Register'], notify:[{name:'IT Team',role:'Asset Management',color:'#7B5FFF'}], message:'Asset register updated. ASSET-2026-0089 status: In Transit. Finance record synced.', evidence:['Finance system screenshot','Asset register updated'], next:'IT validates ITSM. Audit trail maintained.' }
-        }
-      ]},
-      HR:{3:[
-        { id:'hr1', lbl:'Confirm employee availability to receive package', sys:'Email', due:'Today, 3:00 PM', done:false,
-          guide:{ steps:['Email or Slack the employee','Ask about delivery availability this week','Confirm home address for delivery','Log response in onboarding tracker'], where:['Email','Slack'], notify:[{name:'Operations Team',role:'Logistics',color:'#F5A623'}], message:'Hi [Name], your laptop is being shipped. Please confirm your availability and home address.', evidence:['Employee response email','Address confirmed'], next:'Operations confirms address. Procurement generates label.' }
-        }
-      ]}
+        ${subprocesses}
+      `;
     }
-  },
-  equipment:{
-    name:'Equipment Return', icon:'◈', iconBg:'rgba(79,163,255,0.12)',
-    domain:'Operations',
-    currentStateIdx:1,
-    states:[
-      { name:'Return Initiated',    short:'Initiated',  status:'done' },
-      { name:'Device Retrieved',    short:'Retrieved',  status:'active',
-        desc:'Device is being retrieved from the employee.',
-        deptTasks:{
-          IT:[{ id:'it-r1', lbl:'Log return in ITSM', sys:'ITSM', status:'p' }],
-          HR:[{ id:'hr-r1', lbl:'Update offboarding checklist', sys:'HRIS', status:'p' }]
-        },
-        deptInfo:{
-          IT:{ systems:['ITSM'], notify:['Operations'], after:'Operations confirms device condition.', policies:['Asset Management Policy'] },
-          HR:{ systems:['HRIS'], notify:['IT Team'], after:'IT closes asset record.', policies:['Offboarding Handbook'] }
-        }
-      },
-      { name:'Condition Checked',   short:'Checked',    status:'next' },
-      { name:'Asset Decommissioned',short:'Decom',      status:'next' },
-      { name:'Closed',              short:'Closed',     status:'next' }
-    ],
-    roleTasks:{
-      IT:{1:[{ id:'it-r1', lbl:'Log return in ITSM', sys:'ITSM', due:'Today, EOD', done:false,
-        guide:{ steps:['Open ITSM','Find device record','Update status to "Return In Progress"','Log return date'], where:['ITSM'], notify:[{name:'Operations',role:'Logistics',color:'#F5A623'}], message:'Device return logged in ITSM.', evidence:['ITSM record screenshot'], next:'Operations confirms condition. Device decommissioned.' }
-      }]},
-      HR:{1:[{ id:'hr-r1', lbl:'Update offboarding checklist', sys:'HRIS', due:'Today, EOD', done:false,
-        guide:{ steps:['Open HRIS','Navigate to offboarding checklist','Mark device return as complete'], where:['HRIS'], notify:[{name:'IT Team',role:'Asset Management',color:'#7B5FFF'}], message:'Offboarding checklist updated — device return in progress.', evidence:['HRIS checklist screenshot'], next:'IT confirms asset decommission.' }
-      }]}
-    }
-  },
-  onboarding:{
-    name:'Employee Onboarding', icon:'◐', iconBg:'rgba(240,82,82,0.12)',
-    domain:'HR',
-    currentStateIdx:1,
-    states:[
-      { name:'Pre-boarding',        short:'Pre-board', status:'done' },
-      { name:'Day 1 Setup',         short:'Day 1',     status:'active',
-        desc:'Day 1 tasks must be completed before the employee arrives.',
-        deptTasks:{
-          IT:[{ id:'it-o1', lbl:'Create Microsoft 365 account', sys:'Azure AD', status:'p' },{ id:'it-o2', lbl:'Set up ITSM access', sys:'ITSM', status:'p' }],
-          HR:[{ id:'hr-o1', lbl:'Send welcome email package', sys:'Outlook', status:'p' }]
-        },
-        deptInfo:{
-          IT:{ systems:['Azure AD','ITSM','Jamf'], notify:['HR Team','New Employee'], after:'HR sends welcome package. Employee receives access credentials.', policies:['IT Provisioning Policy'] },
-          HR:{ systems:['HRIS','Outlook'], notify:['IT Team'], after:'IT completes provisioning. Day 1 experience begins.', policies:['Onboarding Handbook v5.1'] }
-        }
-      },
-      { name:'Induction Complete',  short:'Inducted',  status:'next' },
-      { name:'30-Day Check-in',     short:'30 Days',   status:'next' },
-      { name:'Probation Passed',    short:'Confirmed', status:'next' }
-    ],
-    roleTasks:{
-      IT:{1:[
-        { id:'it-o1', lbl:'Create Microsoft 365 account', sys:'Azure AD', due:'Today, 9:00 AM', done:false,
-          guide:{ steps:['Open Azure AD admin panel','Create new user account','Assign appropriate license','Set up MFA enrollment','Send credentials to employee'], where:['Azure AD'], notify:[{name:'HR Team',role:'People Ops',color:'#F05252'}], message:'Microsoft 365 account created for [Employee Name]. MFA enrollment email sent.', evidence:['Azure AD user created','License assigned'], next:'HR sends welcome package. Employee completes MFA setup.' }
-        },
-        { id:'it-o2', lbl:'Set up ITSM access', sys:'ITSM', due:'Today, 10:00 AM', done:false,
-          guide:{ steps:['Open ITSM','Create user profile for new employee','Assign department and role permissions','Confirm access level matches job title'], where:['ITSM'], notify:[{name:'New Employee',role:'Onboardee',color:'#00E5B4'}], message:'ITSM access configured. Login credentials sent to [Employee Name].', evidence:['ITSM profile screenshot'], next:'Employee logs in on Day 1.' }
-        }
-      ]},
-      HR:{1:[
-        { id:'hr-o1', lbl:'Send welcome email package', sys:'Outlook', due:'Today, 8:00 AM', done:false,
-          guide:{ steps:['Open Outlook','Use welcome email template','Customize with employee name and start date','Attach onboarding guide PDF','Send to employee personal email'], where:['Outlook'], notify:[{name:'IT Team',role:'IT Provisioning',color:'#7B5FFF'}], message:'Welcome to the team! Your start date is [DATE]. Please find attached your onboarding guide.', evidence:['Welcome email sent confirmation'], next:'IT completes account provisioning. Day 1 begins.' }
-        }
-      ]}
-    }
-  }
-};
 
-/* ══════════════════════════════════════
-   NAVIGATION
-══════════════════════════════════════ */
-function navTo(view, fromSbItem) {
-  if(view==='ceo'){
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    currentView='ceo';
-    document.getElementById('v-ceo').classList.add('active');
-    document.getElementById('bc-view').textContent='CEO View';
-    document.getElementById('mode-pill').className='mode-pill global';
-    document.getElementById('mode-pill').textContent='CEO Control Tower';
-    renderCEO();
-    if(fromSbItem) setActive(fromSbItem);
-    return;
-  }
-  if(view==='area'){
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    currentView='area';
-    document.getElementById('v-area').classList.add('active');
-    document.getElementById('bc-view').textContent='Area View — HR';
-    document.getElementById('mode-pill').className='mode-pill global';
-    document.getElementById('mode-pill').textContent='Area Manager View';
-    renderArea();
-    if(fromSbItem) setActive(fromSbItem);
-    return;
-  }
-
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  if(view==='mywork'){
-    currentView='mywork';
-    document.getElementById('v-mywork').classList.add('active');
-    document.getElementById('bc-view').textContent='My Work';
-    document.getElementById('mode-pill').className='mode-pill personal';
-    document.getElementById('mode-pill').textContent='My Work';
-    if(fromSbItem) setActive(fromSbItem);
-  } else if(view==='nav'){
-    currentView='nav';
-    document.getElementById('v-nav').classList.add('active');
-    document.getElementById('bc-view').textContent='Process Navigator';
-    document.getElementById('mode-pill').className='mode-pill global';
-    document.getElementById('mode-pill').textContent='Process View';
-    renderNav(currentNavProcKey||'laptop');
-    if(fromSbItem) setActive(fromSbItem);
-  } else if(view==='detail'){
-    currentView='detail';
-    document.getElementById('v-detail').classList.add('active');
-    document.getElementById('bc-view').textContent='Process Detail';
-    document.getElementById('mode-pill').className='mode-pill personal';
-    document.getElementById('mode-pill').textContent='My Work';
-  }
-}
-
-/* ══════════════════════════════════════
-   MY WORK RENDER
-══════════════════════════════════════ */
-const MY_PROCS = [
-  { key:'laptop', domain:'Operations', stage:'Ship to Employee', stageIdx:3, tasks:3, totalTasks:3, doneTask:0, next:'Confirm shipping address', due:'Today, 4:00 PM', dueClass:'td', highlight:true },
-  { key:'equipment', domain:'Operations', stage:'Device Retrieved', stageIdx:1, tasks:2, totalTasks:2, doneTask:0, next:'Log return in ITSM', due:'Today, EOD', dueClass:'', highlight:false },
-  { key:'onboarding', domain:'HR', stage:'Day 1 Setup', stageIdx:1, tasks:2, totalTasks:2, doneTask:0, next:'Create Microsoft 365 account', due:'Today, 9:00 AM', dueClass:'ov', highlight:false }
-];
-
-function renderMyWork(){
-  const el = document.getElementById('my-proc-list');
-  if(!el) return;
-  const proc = PROCESSES;
-  el.innerHTML = MY_PROCS.map(p => {
-    const pr = proc[p.key];
-    const flowHtml = pr.states.map((s,i) => {
-      const cl = s.status==='done'?'d':s.status==='active'?'a':s.status==='error'?'e':'';
-      const lc = s.status==='done'?'d':s.status==='active'?'a':'';
-      return (i<pr.states.length-1)
-        ? `<div class="fd ${cl}">${s.status==='done'?'✓':s.status==='active'?'●':''}</div><div class="fl ${lc}"></div>`
-        : `<div class="fd ${cl}">${s.status==='done'?'✓':s.status==='active'?'●':''}</div>`;
-    }).join('');
-    return `<div class="prow${p.highlight?' hl':''}" onclick="openMyProc('${p.key}')">
-      <div class="p-ico">${pr.icon}</div>
-      <div class="p-info">
-        <div class="p-name">${pr.name}</div>
-        <div class="p-sub ${p.highlight?'v':'m'}">${p.domain}</div>
-      </div>
-      <div class="flow-wrap">
-        <div class="flow-mini">${flowHtml}</div>
-        <div class="fstep">Current: ${p.stage}</div>
-      </div>
-      <div class="p-tc">
-        <div class="cn">${p.tasks}</div>
-        <div class="cl">tasks</div>
-      </div>
-      <div class="p-next">
-        <div class="pnl">Next Action</div>
-        <div class="pnt">${p.next}</div>
-        <div class="pnd ${p.dueClass}">${p.due}</div>
-      </div>
-      <div class="p-arr">›</div>
-    </div>`;
-  }).join('');
-}
-
-function openMyProc(procKey){
-  currentProcKey = procKey;
-  const proc = PROCESSES[procKey];
-  const s = proc.states[proc.currentStateIdx];
-  document.getElementById('cl-state-name').textContent = s.name;
-  document.getElementById('cl-desc').textContent = s.desc || 'Complete your assigned tasks for this stage.';
-  document.getElementById('bc-view').textContent = proc.name;
-  currentTaskId = null;
-  document.getElementById('done-banner').classList.add('hidden');
-  renderDetailFlow(procKey);
-  renderTaskList(procKey);
-  closeAG();
-  navTo('detail');
-}
-
-function openGlobalProcess(procKey){
-  currentNavProcKey = procKey;
-  navTo('nav');
-}
-
-function openDetailFromSearch(procKey, role){
-  openMyProc(procKey);
-}
-
-/* ══════════════════════════════════════
-   DETAIL FLOW
-══════════════════════════════════════ */
-function renderDetailFlow(procKey){
-  const proc = PROCESSES[procKey];
-  const el = document.getElementById('detail-flow');
-  let html = `<div class="flow-big-lbl">Process Flow — ${proc.name}</div><div class="flow-big-track">`;
-  proc.states.forEach((s,i)=>{
-    const cl = s.status==='done'?'d':s.status==='active'?'a':'';
-    const ic = s.status==='done'?'✓':s.status==='active'?'●':(i+1);
-    html += `<div class="fs"><div class="fsd ${cl}" onclick="clickFlowState(${i},'${procKey}')">${ic}</div><div class="fsn ${cl}">${s.name}</div></div>`;
-    if(i<proc.states.length-1){
-      const lc = s.status==='done'?'d':s.status==='active'?'a':'';
-      html += `<div class="fc ${lc}"></div>`;
-    }
-  });
-  html += `</div>`;
-  el.innerHTML = html;
-}
-
-function clickFlowState(idx, procKey){
-  const s = PROCESSES[procKey].states[idx];
-  if(s.status==='done') showToast(`${s.name} — completed`,'✓');
-  else if(s.status==='active') showToast(`${s.name} — current stage`,'●');
-  else showToast(`${s.name} — not yet reached`,'○');
-}
-
-/* ══════════════════════════════════════
-   TASK LIST
-══════════════════════════════════════ */
-function renderTaskList(procKey){
-  const proc = PROCESSES[procKey];
-  const stateIdx = proc.currentStateIdx;
-  const tasks = (proc.roleTasks[currentRole]||{})[stateIdx] || [];
-  const el = document.getElementById('task-list');
-
-  if(!tasks.length){
-    el.innerHTML=`<div class="waiting-box"><strong>No action required from your role in this state.</strong><br><span style="font-size:11.5px;margin-top:5px;display:block;color:var(--t3)">Waiting on: Operations · Procurement · HR to complete their tasks before this process advances.</span></div>`;
-    document.getElementById('prog-fill').style.width='100%';
-    document.getElementById('prog-txt').textContent='N/A';
-    return;
-  }
-
-  const done = tasks.filter(t=>t.done).length;
-  const total = tasks.length;
-  document.getElementById('prog-fill').style.width=(done/total*100)+'%';
-  document.getElementById('prog-txt').textContent=`${done} / ${total}`;
-
-  el.innerHTML = tasks.map(t=>{
-    const isSel = t.id===currentTaskId;
-    const isOv = t.due&&(t.due.includes('OVERDUE')||t.due.includes('Overdue'));
-    return `<div class="ti${t.done?' done':''}${isSel?' sel':''}" onclick="selectTask('${procKey}','${t.id}')">
-      <div class="chk${t.done?' done':''}" onclick="event.stopPropagation();toggleTask('${procKey}','${t.id}')">${t.done?'✓':''}</div>
-      <div class="ti-info">
-        <div class="ti-lbl">${t.lbl}</div>
-        <div class="ti-meta">
-          <span class="sys-tag">${t.sys}</span>
-          ${t.due?`<span class="due-tag${isOv?' ov':''}">${t.due}</span>`:''}
+    loadProcess().catch(err => {
+      document.getElementById('content').innerHTML = `
+        <div class="card span-12">
+          <h2>Error loading onboarding.json</h2>
+          <p class="small">${err.message}</p>
         </div>
-      </div>
-      <div class="ti-arr">›</div>
-    </div>`;
-  }).join('');
-}
-
-function selectTask(procKey, taskId){
-  currentTaskId = taskId;
-  renderTaskList(procKey);
-  const proc = PROCESSES[procKey];
-  const tasks = (proc.roleTasks[currentRole]||{})[proc.currentStateIdx]||[];
-  const task = tasks.find(t=>t.id===taskId);
-  if(!task) return;
-  const g = task.guide;
-  document.getElementById('ag-empty').classList.add('hidden');
-  const ac = document.getElementById('ag-content');
-  ac.classList.remove('hidden'); ac.style.display='flex';
-  document.getElementById('ag-title').textContent = task.lbl;
-  document.getElementById('ag-steps').innerHTML = g.steps.map((s,i)=>
-    `<div class="step"><div class="sn">${i+1}</div><div class="st2">${s}</div></div>`).join('');
-  document.getElementById('ag-systems').innerHTML = g.where.map(w=>
-    `<div class="sc">→ ${w}</div>`).join('');
-  document.getElementById('ag-notify').innerHTML = g.notify.map(n=>
-    `<div class="nt-row"><div class="nt-av" style="background:${n.color}">${n.name.charAt(0)}</div>
-    <div><div class="nt-name">${n.name}</div><div class="nt-role">${n.role}</div></div>
-    <button class="nt-btn" onclick="event.stopPropagation();this.textContent='Sent ✓';this.style.color='var(--ac)'">Notify</button></div>`).join('');
-  document.getElementById('ag-message').textContent = g.message;
-  document.getElementById('ag-evidence').innerHTML = g.evidence.map(e=>
-    `<div class="ev"><span class="ev-ico">◈</span>${e}</div>`).join('');
-  document.getElementById('ag-next').textContent = g.next;
-  const btn = document.getElementById('ag-complete-btn');
-  if(task.done){ btn.textContent='✓  Task Completed'; btn.disabled=true; }
-  else { btn.innerHTML='✓ &nbsp;Mark Task Complete'; btn.disabled=false; }
-}
-
-function closeAG(){
-  document.getElementById('ag-empty').classList.remove('hidden');
-  const ac = document.getElementById('ag-content');
-  ac.classList.add('hidden'); ac.style.display='none';
-  currentTaskId=null;
-  if(currentProcKey) renderTaskList(currentProcKey);
-}
-
-function toggleTask(procKey, taskId){
-  const proc = PROCESSES[procKey];
-  const tasks = (proc.roleTasks[currentRole]||{})[proc.currentStateIdx]||[];
-  const task = tasks.find(t=>t.id===taskId);
-  if(!task||task.done) return;
-  task.done=true;
-  renderTaskList(procKey);
-  if(currentTaskId===taskId) selectTask(procKey, taskId);
-  checkAllDone(procKey);
-  showToast(`"${task.lbl.substring(0,35)}…" completed`,'✓');
-}
-
-function completeCurrentTask(){
-  if(!currentProcKey||!currentTaskId) return;
-  const proc = PROCESSES[currentProcKey];
-  const tasks = (proc.roleTasks[currentRole]||{})[proc.currentStateIdx]||[];
-  const task = tasks.find(t=>t.id===currentTaskId);
-  if(!task||task.done) return;
-  task.done=true;
-  const idx = tasks.indexOf(task);
-  const next = tasks.find((t,i)=>i>idx&&!t.done);
-  renderTaskList(currentProcKey);
-  if(next){ setTimeout(()=>selectTask(currentProcKey, next.id), 200); }
-  else { setTimeout(()=>{ closeAG(); checkAllDone(currentProcKey); }, 200); }
-  showToast(`"${task.lbl.substring(0,35)}…" completed`,'✓');
-}
-
-function checkAllDone(procKey){
-  const proc = PROCESSES[procKey];
-  const tasks = (proc.roleTasks[currentRole]||{})[proc.currentStateIdx]||[];
-  if(!tasks.length) return;
-  const allDone = tasks.every(t=>t.done);
-  const banner = document.getElementById('done-banner');
-  if(allDone){
-    const cur = proc.states[proc.currentStateIdx];
-    const nxt = proc.states[proc.currentStateIdx+1];
-    document.getElementById('done-title').textContent = `"${cur.name}" — Your Tasks Complete!`;
-    document.getElementById('done-sub').textContent = nxt ? `Advancing to "${nxt.name}"…` : 'Process complete!';
-    banner.classList.remove('hidden');
-    banner.scrollIntoView({behavior:'smooth',block:'nearest'});
-    if(nxt) showToast(`${cur.name} complete → ${nxt.name}`,'✓');
-  } else { banner.classList.add('hidden'); }
-}
-
-function advanceState(){
-  const proc = PROCESSES[currentProcKey];
-  if(proc.currentStateIdx < proc.states.length-1){
-    proc.states[proc.currentStateIdx].status='done';
-    proc.currentStateIdx++;
-    proc.states[proc.currentStateIdx].status='active';
-    currentTaskId=null;
-    renderDetailFlow(currentProcKey);
-    const s = proc.states[proc.currentStateIdx];
-    document.getElementById('cl-state-name').textContent=s.name;
-    document.getElementById('cl-desc').textContent=s.desc||'Complete your assigned tasks.';
-    renderTaskList(currentProcKey);
-    document.getElementById('done-banner').classList.add('hidden');
-    closeAG();
-    showToast(`Now at: ${s.name}`,'●');
-  }
-}
-
-/* ══════════════════════════════════════
-   GLOBAL NAV
-══════════════════════════════════════ */
-function renderNav(procKey){
-  currentNavProcKey = procKey;
-  const proc = PROCESSES[procKey];
-  document.getElementById('nav-proc-ico').textContent = proc.icon;
-  document.getElementById('nav-proc-name').textContent = proc.name;
-  document.getElementById('nav-proc-sub').textContent = (proc.domain||'Operations') + ' · Full company process view';
-  document.getElementById('nav-flow-lbl').textContent = 'Process Flow — ' + proc.name;
-
-  const ft = document.getElementById('nav-flow-track');
-  ft.innerHTML = '';
-  proc.states.forEach((s,i)=>{
-    const cl = s.status==='done'?'d':s.status==='active'?'a':'';
-    const ic = s.status==='done'?'✓':s.status==='active'?'●':(i+1);
-    const fs = document.createElement('div'); fs.className='fs';
-    const dot = document.createElement('div'); dot.className=`fsd ${cl}`;
-    dot.textContent=ic; dot.onclick=()=>clickNavState(s);
-    const name = document.createElement('div'); name.className=`fsn ${cl}`; name.textContent=s.name;
-    fs.appendChild(dot); fs.appendChild(name); ft.appendChild(fs);
-    if(i<proc.states.length-1){
-      const fc=document.createElement('div'); fc.className=`fc ${cl}`; ft.appendChild(fc);
-    }
-  });
-
-  const active = proc.states[proc.currentStateIdx];
-  document.getElementById('dept-state-badge').textContent = active.name;
-  renderDeptGrid(procKey, proc.currentStateIdx);
-  closeDeptPanel();
-}
-
-function clickNavState(s){ showToast(`${s.name} — ${s.status==='done'?'completed':s.status==='active'?'current stage':'upcoming'}`,'●'); }
-
-function renderDeptGrid(procKey, stateIdx){
-  const proc = PROCESSES[procKey];
-  const state = proc.states[stateIdx];
-  const deptTasks = state.deptTasks || {};
-  const depts = ['Operations','Procurement','IT','Finance','HR'];
-  const el = document.getElementById('dept-grid');
-  el.innerHTML = depts.map(dept=>{
-    const tasks = deptTasks[dept]||[];
-    const m = DEPT_META[dept];
-    const taskHtml = tasks.map((t,i)=>`
-      <div class="dt${currentDept===dept?' sel':''}" onclick="event.stopPropagation();selectDeptTask('${procKey}','${dept}','${t.id}')">
-        <div class="dt-top">
-          <div class="dt-num">${i+1}</div>
-          <div style="flex:1"><div class="dt-lbl">${t.lbl}</div></div>
-          <div class="status-dot ${t.status}"></div>
-        </div>
-        <div class="dt-sys">${t.sys}</div>
-      </div>`).join('');
-    const empty = !tasks.length ? `<div style="padding:10px 12px;font-size:11px;color:var(--t3);font-style:italic">No tasks in this state</div>` : '';
-    return `<div class="dept-col${currentDept===dept?' sel':''}" onclick="selectDept('${procKey}','${dept}')">
-      <div class="dept-col-head">
-        <div class="dept-col-ico" style="background:${m.bg}">${m.ico}</div>
-        <div class="dept-col-name">${dept}</div>
-        <div class="dept-col-count">${tasks.length}</div>
-      </div>
-      <div class="dept-tasks">${taskHtml||empty}</div>
-    </div>`;
-  }).join('');
-}
-
-function selectDept(procKey, dept){
-  currentDept = dept;
-  const proc = PROCESSES[procKey];
-  const stateIdx = proc.currentStateIdx;
-  const state = proc.states[stateIdx];
-  const info = (state.deptInfo||{})[dept]||{systems:[],notify:[],after:'',policies:[]};
-  const tasks = (state.deptTasks||{})[dept]||[];
-  const m = DEPT_META[dept];
-
-  renderDeptGrid(procKey, stateIdx);
-  document.getElementById('dp-empty').classList.add('hidden');
-  const dp = document.getElementById('dp-content');
-  dp.classList.remove('hidden'); dp.style.display='flex';
-  document.getElementById('dp-head-ico').textContent=m.ico;
-  document.getElementById('dp-head-name').textContent=dept;
-  document.getElementById('dp-head-sub').textContent=state.name;
-
-  document.getElementById('dp-tasks').innerHTML = tasks.length
-    ? tasks.map((t,i)=>`<div class="dp-task"><div class="dp-task-lbl">${i+1}. ${t.lbl}</div><div class="dp-task-sys">${t.sys}</div></div>`).join('')
-    : '<div style="font-size:11.5px;color:var(--t3);padding:4px 0">No tasks for this department</div>';
-
-  document.getElementById('dp-systems').innerHTML = (info.systems||[]).map(s=>
-    `<div class="dp-sys">${s}</div>`).join('') || '<span style="font-size:11.5px;color:var(--t3)">—</span>';
-
-  document.getElementById('dp-notify').innerHTML = (info.notify||[]).map(n=>{
-    const nm = DEPT_META[n]||{ico:'◎',bg:'rgba(255,255,255,0.06)'};
-    return `<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--bdr)"><div style="width:24px;height:24px;border-radius:50%;background:${nm.bg};display:flex;align-items:center;justify-content:center;font-size:11px">${nm.ico}</div><div style="font-size:12px;font-weight:600;color:var(--t1)">${n}</div></div>`;
-  }).join('') || '<div style="font-size:11.5px;color:var(--t3);padding:4px 0">—</div>';
-
-  document.getElementById('dp-after').textContent = info.after||'—';
-
-  document.getElementById('dp-policies').innerHTML = (info.policies||[]).map(p=>
-    `<div class="policy-item">◈ ${p}</div>`).join('') || '<div style="font-size:11.5px;color:var(--t3)">—</div>';
-}
-
-function selectDeptTask(procKey, dept, taskId){ selectDept(procKey, dept); }
-
-function closeDeptPanel(){
-  currentDept=null;
-  document.getElementById('dp-empty').classList.remove('hidden');
-  const dp=document.getElementById('dp-content');
-  dp.classList.add('hidden'); dp.style.display='none';
-  if(currentNavProcKey) renderDeptGrid(currentNavProcKey, PROCESSES[currentNavProcKey].currentStateIdx);
-}
-
-function addToMyWork(){
-  const proc = PROCESSES[currentNavProcKey];
-  showToast(`${proc.name} added to My Work`,'✓');
-  setTimeout(()=>{ navTo('mywork'); renderMyWork(); },800);
-}
-
-/* ══════════════════════════════════════
-   ROLE SELECTOR
-══════════════════════════════════════ */
-function setRole(role, ico){
-  currentRole = role;
-  document.getElementById('role-name').textContent = role;
-  document.getElementById('role-ico').textContent = ico;
-  document.querySelectorAll('.role-opt').forEach(o=>o.classList.remove('sel'));
-  document.querySelectorAll('.role-opt').forEach(o=>{ if(o.textContent.includes(role)) o.classList.add('sel'); });
-  document.getElementById('role-dd').classList.remove('open');
-  document.getElementById('sb-ur').textContent = role+' Team';
-  document.getElementById('mw-role-label').textContent = role+' Operations';
-  if(currentView==='mywork') renderMyWork();
-  else if(currentView==='detail' && currentProcKey){ renderTaskList(currentProcKey); closeAG(); }
-  showToast(`Role changed to ${role}`,'◎');
-}
-function toggleRoleDD(){ document.getElementById('role-dd').classList.toggle('open'); }
-
-/* ══════════════════════════════════════
-   SEARCH
-══════════════════════════════════════ */
-function openSearch(){ document.getElementById('search-dd').classList.add('open'); }
-function closeSearch(){ document.getElementById('search-dd').classList.remove('open'); document.getElementById('search-input').value=''; }
-function onSearch(v){ if(v.length>0) document.getElementById('search-dd').classList.add('open'); }
-
-/* ══════════════════════════════════════
-   TOAST
-══════════════════════════════════════ */
-function showToast(msg, ico='●'){
-  const wrap = document.getElementById('toast-wrap');
-  const t = document.createElement('div');
-  t.className='toast';
-  t.innerHTML=`<span style="color:var(--ac)">${ico}</span> ${msg}`;
-  wrap.appendChild(t);
-  setTimeout(()=>t.remove(),3000);
-}
-
-/* ══════════════════════════════════════
-   TABS
-══════════════════════════════════════ */
-function setTab(el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('act'));
-  el.classList.add('act');
-}
-
-/* ══════════════════════════════════════
-   TIER 2 DATA
-══════════════════════════════════════ */
-const REVENUE_SPINE = [
-  { label:'Leads',     value:'142', sub:'This month',      color:'v',  flag:null },
-  { label:'Qualified', value:'67',  sub:'43% conv. rate',  color:'v',  flag:null },
-  { label:'Contract',  value:'28',  sub:'42% close rate',  color:'v',  flag:null },
-  { label:'Delivery',  value:'19',  sub:'3 delayed',       color:'a',  flag:'3'  },
-  { label:'Invoiced',  value:'12',  sub:'€180K outstanding',color:'a', flag:'2'  },
-  { label:'Payment',   value:'9',   sub:'€74K overdue',    color:'r',  flag:'!'  }
-];
-
-const CEO_CASES = [
-  { id:'cc1', icon:'◈', iconBg:'rgba(123,95,255,0.12)', name:'ACME Corp Onboarding', sub:'Employee Onboarding · KYC Verification', state:'Blocked in KYC', stateColor:'r', owner:'Maria Santos', ownerRole:'HR', tags:[{t:'BLOCKED',c:'r'},{t:'KYC',c:'v'},{t:'HIGH',c:'r'}], sla:'Overdue 2 days',
-    fields:[{l:'Client',v:'ACME Corp'},{l:'Process',v:'Employee Onboarding'},{l:'State',v:'KYC Verification',vc:'red'},{l:'Owner',v:'Maria Santos — HR'},{l:'SLA',v:'Apr 25, 2026 — OVERDUE',vc:'red'}],
-    blockers:['KYC provider API returning 503 errors since Apr 24','Employee passport scan rejected — re-submission pending','Compliance team approval queue backlogged (12 items)'],
-    docs:['◈ ACME Onboarding Contract','◈ KYC Submission Form','◈ Compliance escalation email'],
-    timeline:[{dot:'done',label:'Onboarding Initiated',date:'Apr 22'},{dot:'done',label:'IT Setup Completed',date:'Apr 23'},{dot:'blocked',label:'KYC Verification — BLOCKED',date:'Apr 24'},{dot:'future',label:'Background Check',date:'Pending'},{dot:'future',label:'System Access Granted',date:'Pending'}],
-    next:'Unblock KYC by contacting provider support (ticket #KYC-8821) and re-submit passport scan.', action:'Unblock KYC Process' },
-  { id:'cc2', icon:'◻', iconBg:'rgba(123,95,255,0.12)', name:'Laptop Lifecycle — Sarah Kim', sub:'Asset Lifecycle · Ship to Employee', state:'In Transit — Delayed', stateColor:'a', owner:'Jordan Davis', ownerRole:'IT', tags:[{t:'DELAYED',c:'a'},{t:'SHIPPING',c:'v'}], sla:'Due today 6:00 PM',
-    fields:[{l:'Employee',v:'Sarah Kim'},{l:'Process',v:'Laptop Lifecycle'},{l:'State',v:'Ship to Employee',vc:'amber'},{l:'Asset ID',v:'ASSET-2026-0089'},{l:'SLA',v:'Today, 6:00 PM',vc:'amber'}],
-    blockers:['FedEx carrier portal returned error — tracking not generated','ITSM record not updated to In Transit'],
-    docs:['◈ ITSM Asset Record','◈ Shipping Request #SR-441','◈ Employee notification draft'],
-    timeline:[{dot:'done',label:'Request Approved',date:'Apr 20'},{dot:'done',label:'Purchase Completed',date:'Apr 21'},{dot:'done',label:'Prepared for Shipment',date:'Apr 24'},{dot:'act',label:'Ship to Employee — IN PROGRESS',date:'Today'},{dot:'future',label:'Employee Receives',date:'Tomorrow'},{dot:'future',label:'Confirmed & Active',date:'Pending'}],
-    next:'IT to complete ITSM update and Procurement to retry FedEx label generation.', action:'Resolve Shipping Blocker' },
-  { id:'cc3', icon:'◉', iconBg:'rgba(0,229,180,0.1)', name:'BPD Invoice — Overdue', sub:'Finance · Invoice Processing', state:'Payment Overdue', stateColor:'r', owner:'Elena Rossi', ownerRole:'Finance', tags:[{t:'OVERDUE',c:'r'},{t:'INVOICE',c:'v'},{t:'€42K',c:'a'}], sla:'14 days overdue',
-    fields:[{l:'Client',v:'BPD Group'},{l:'Process',v:'Invoice Processing'},{l:'Amount',v:'€42,000',vc:'red'},{l:'Invoice',v:'INV-2026-0312'},{l:'Due Date',v:'Apr 13 — 14 days overdue',vc:'red'}],
-    blockers:['Client disputed line item 3 (€8,000 consulting fee)','Finance manager approval pending for write-off'],
-    docs:['◈ Invoice INV-2026-0312','◈ Dispute log','◈ Client correspondence'],
-    timeline:[{dot:'done',label:'Invoice Raised',date:'Apr 1'},{dot:'done',label:'Sent to Client',date:'Apr 2'},{dot:'blocked',label:'Payment Due — OVERDUE',date:'Apr 13'},{dot:'act',label:'Dispute Resolution — In Progress',date:'Today'},{dot:'future',label:'Payment Received',date:'TBD'}],
-    next:'Finance to schedule call with BPD CFO. Resolve line item dispute. Issue revised invoice if needed.', action:'Contact BPD CFO' },
-  { id:'cc4', icon:'⊗', iconBg:'rgba(240,82,82,0.1)', name:'Sarah M. Offboarding', sub:'Employee Offboarding · Access Revocation', state:'Access NOT Revoked — CRITICAL', stateColor:'r', owner:'Jordan Davis', ownerRole:'IT', tags:[{t:'CRITICAL',c:'r'},{t:'SECURITY',c:'r'},{t:'OVERDUE',c:'r'}], sla:'Overdue — same day required',
-    fields:[{l:'Employee',v:'Sarah Mitchell'},{l:'Process',v:'Employee Offboarding'},{l:'State',v:'Access Revocation — OVERDUE',vc:'red'},{l:'Exit Date',v:'Apr 25, 2026'},{l:'SLA',v:'Same day — BREACHED',vc:'red'}],
-    blockers:['Okta admin permission error — IT cannot deactivate without super-admin','Azure AD sync delayed (known infra issue)'],
-    docs:['◈ Offboarding Checklist','◈ Access Revocation Log','◈ IT Security ticket #SEC-2291'],
-    timeline:[{dot:'done',label:'Exit Initiated',date:'Apr 25'},{dot:'blocked',label:'Access Revocation — CRITICAL',date:'Apr 25'},{dot:'future',label:'Device Retrieval',date:'Pending'},{dot:'future',label:'Data Backup',date:'Pending'},{dot:'future',label:'Final Settlement',date:'Pending'}],
-    next:'Super-admin must manually revoke Okta access immediately. IT Security to escalate Azure AD sync issue.', action:'Emergency Access Revoke' }
-];
-
-const CEO_ALERTS = [
-  { id:'al1', type:'crit', ico:'●', title:'Access revocation OVERDUE — Sarah M.', desc:'Employee offboarding: system access not revoked 2 days after exit. Security risk.', time:'2 days overdue', caseId:'cc4' },
-  { id:'al2', type:'crit', ico:'●', title:'KYC blocked — ACME Corp onboarding', desc:'API errors blocking KYC verification. Employee start date at risk.', time:'Overdue 48h', caseId:'cc1' },
-  { id:'al3', type:'warn', ico:'○', title:'BPD invoice €42K overdue 14 days', desc:'Client dispute unresolved. CFO escalation not yet initiated.', time:'14 days', caseId:'cc3' },
-  { id:'al4', type:'warn', ico:'○', title:'Laptop shipment delayed — Sarah Kim', desc:'FedEx tracking not generated. Employee device SLA at risk.', time:'Due today', caseId:'cc2' },
-  { id:'al5', type:'info', ico:'◎', title:'3 invoices pending Finance sign-off', desc:'€126K held in approval queue. Finance manager OOO until tomorrow.', time:'Due tomorrow', caseId:null }
-];
-
-const CEO_RISK = [
-  { id:'r1', name:'ACME Corp', issue:'Employee onboarding blocked in KYC. Start date April 28 at risk.', status:'CRITICAL', dot:'', caseId:'cc1' },
-  { id:'r2', name:'BPD Group', issue:'€42K invoice overdue 14 days. CFO not yet contacted. Relationship risk.', status:'HIGH RISK', dot:'', caseId:'cc3' },
-  { id:'r3', name:'TechVenture SA', issue:'Contract renewal due May 1. Delivery milestone pending sign-off.', status:'WATCH', dot:'a', caseId:null }
-];
-
-const AREA_TEAM = [
-  { name:'Maria Santos',  role:'Senior HR Manager',    tasks:6, pct:85, sla:'breach', cases:3 },
-  { name:'James Liu',     role:'HR Business Partner',  tasks:4, pct:60, sla:'risk',   cases:2 },
-  { name:'Priya Nair',    role:'Onboarding Specialist', tasks:3, pct:45, sla:'ok',    cases:2 },
-  { name:'Carlos Mendes', role:'HR Coordinator',       tasks:5, pct:70, sla:'risk',   cases:3 },
-  { name:'Aisha Johnson', role:'L&D Manager',          tasks:2, pct:30, sla:'ok',     cases:1 },
-  { name:'Tom Fischer',   role:'Payroll Specialist',   tasks:4, pct:55, sla:'ok',     cases:2 }
-];
-
-const AREA_CASES = [
-  { id:'ac1', procFilter:'onboarding', icon:'◐', iconBg:'rgba(240,82,82,0.1)', name:'John D. Onboarding', sub:'New Hire — IT Requirements', state:'Pre-boarding', stateColor:'v', owner:'Priya Nair', due:'May 21, 9:00 AM', dueClass:'ok',
-    fields:[{l:'Employee',v:'John Davis'},{l:'Process',v:'Employee Onboarding'},{l:'State',v:'Pre-boarding'},{l:'Assigned To',v:'Priya Nair'},{l:'SLA',v:'On Track',vc:'green'}],
-    tasks:['Create Microsoft 365 account','Complete IT requirements checklist','Send welcome email package'],
-    systems:['Azure AD','ITSM','Notion','HRIS'],
-    notify:[{name:'IT Team',role:'IT Provisioning',color:'#7B5FFF'},{name:'Hiring Manager',role:'Dept Head',color:'#F5A623'}],
-    next:'IT to complete account creation. HR to send welcome package before May 21.' },
-  { id:'ac2', procFilter:'offboarding', icon:'⊗', iconBg:'rgba(240,82,82,0.1)', name:'Sarah M. Offboarding', sub:'Exit — Access Revocation CRITICAL', state:'OVERDUE — Access Not Revoked', stateColor:'r', owner:'Maria Santos', due:'OVERDUE', dueClass:'ov',
-    fields:[{l:'Employee',v:'Sarah Mitchell'},{l:'Process',v:'Employee Offboarding'},{l:'State',v:'Access Revocation — BLOCKED',vc:'red'},{l:'SLA',v:'BREACHED',vc:'red'}],
-    tasks:['Revoke system access — URGENT','Deactivate all accounts','Retrieve company devices'],
-    systems:['Okta','Azure AD','HRIS','ITSM'],
-    notify:[{name:'IT Security',role:'Compliance',color:'#F05252'},{name:'IT Manager',role:'IT Ops',color:'#7B5FFF'}],
-    next:'CRITICAL: Super-admin must manually revoke Okta access. HR to escalate to IT manager immediately.' },
-  { id:'ac3', procFilter:'onboarding', icon:'◐', iconBg:'rgba(240,82,82,0.1)', name:'Rebecca Chen Onboarding', sub:'New Hire — Finance Department', state:'Day 1 Setup', stateColor:'v', owner:'James Liu', due:'Apr 29, 10:00 AM', dueClass:'ok',
-    fields:[{l:'Employee',v:'Rebecca Chen'},{l:'Process',v:'Employee Onboarding'},{l:'State',v:'Day 1 Setup'},{l:'SLA',v:'On Track',vc:'green'}],
-    tasks:['Confirm desk assignment','Issue access badge','Complete finance system onboarding'],
-    systems:['HRIS','Badge System','Finance System'],
-    notify:[{name:'Finance Manager',role:'Dept Head',color:'#00E5B4'}],
-    next:'HR to confirm desk and badge. Finance manager to complete system onboarding walk-through on Day 1.' },
-  { id:'ac4', procFilter:'review', icon:'◈', iconBg:'rgba(79,163,255,0.1)', name:'Q1 30-Day Review — 5 Employees', sub:'Performance · 30-Day Check-ins', state:'Review Meetings Pending', stateColor:'a', owner:'Carlos Mendes', due:'Apr 30, EOD', dueClass:'ok',
-    fields:[{l:'Employees',v:'5 pending reviews'},{l:'Process',v:'30-Day Performance Review'},{l:'Deadline',v:'Apr 30, 2026'},{l:'SLA',v:'At Risk',vc:'amber'}],
-    tasks:['Schedule review meetings','Send self-assessment forms','Complete manager scoring'],
-    systems:['HRIS','Notion','Google Calendar'],
-    notify:[{name:'Department Managers',role:'All departments',color:'#F5A623'}],
-    next:'Carlos to send calendar invites for remaining 3 employees to meet April 30 deadline.' },
-  { id:'ac5', procFilter:'offboarding', icon:'◉', iconBg:'rgba(0,229,180,0.1)', name:'Mike R. Offboarding', sub:'Voluntary Exit — Standard Process', state:'Final Settlement', stateColor:'g', owner:'Aisha Johnson', due:'May 2, EOD', dueClass:'ok',
-    fields:[{l:'Employee',v:'Mike Rogers'},{l:'Process',v:'Employee Offboarding'},{l:'State',v:'Final Settlement'},{l:'SLA',v:'On Track',vc:'green'}],
-    tasks:['Process final payroll','Close benefits','Archive HRIS record'],
-    systems:['Payroll System','HRIS','Finance System'],
-    notify:[{name:'Finance Team',role:'Payroll',color:'#00E5B4'}],
-    next:'Payroll to process final payment by April 30. HR to archive record and send reference letter.' }
-];
-
-const AREA_SLA = [
-  { proc:'Employee Onboarding', total:5, ok:3, risk:1, breach:1, pct:72 },
-  { proc:'Employee Offboarding', total:3, ok:1, risk:0, breach:2, pct:40 },
-  { proc:'30-Day Reviews', total:6, ok:4, risk:2, breach:0, pct:78 }
-];
-
-let currentAreaFilter = 'all';
-let selectedCDP = null;
-let selectedADP = null;
-
-/* ══════════════════════════════════════
-   RENDER CEO
-══════════════════════════════════════ */
-function renderCEO(){ renderSpine(); renderCEOCases(); renderCEOAlerts(); renderCEORisk(); }
-
-function renderSpine(){
-  const el = document.getElementById('spine-track');
-  el.innerHTML = REVENUE_SPINE.map((s,i)=>`
-    <div class="spine-node" onclick="showToast('${s.label}: ${s.value} — ${s.sub}','◈')">
-      <div class="spine-bubble ${s.color}">
-        ${s.value}
-        ${s.flag?`<div class="spine-flag">${s.flag}</div>`:''}
-      </div>
-      <div class="spine-label">${s.label}</div>
-      <div class="spine-val">${s.sub}</div>
-    </div>
-    ${i<REVENUE_SPINE.length-1?'<div class="spine-arr">›</div>':''}
-  `).join('');
-}
-
-function renderCEOCases(){
-  const el = document.getElementById('ceo-cases');
-  el.innerHTML = CEO_CASES.map(c=>{
-    const borderCls = c.stateColor==='r'?'blocked':c.stateColor==='a'?'warning':'';
-    const tagHtml = c.tags.map(t=>`<span class="ctag ctag-${t.c}">${t.t}</span>`).join('');
-    const stateColor = c.stateColor==='r'?'var(--red)':c.stateColor==='a'?'var(--amber)':'var(--pu)';
-    return `<div class="case-card ${borderCls}${selectedCDP===c.id?' selected':''}" onclick="openCDP('${c.id}')">
-      <div class="case-ico">${c.icon}</div>
-      <div class="case-info">
-        <div class="case-name">${c.name}</div>
-        <div class="case-sub">${c.sub}</div>
-        <div class="case-tags">${tagHtml}</div>
-      </div>
-      <div class="case-meta">
-        <div style="font-size:10.5px;font-weight:700;color:${stateColor}">${c.state}</div>
-        <div class="case-owner">${c.owner} · ${c.ownerRole}</div>
-        <div style="font-size:10px;margin-top:3px;color:${(c.sla.includes('Overdue')||c.sla.includes('today'))?'var(--red)':'var(--t3)'}">${c.sla}</div>
-      </div>
-      <div class="case-arr">›</div>
-    </div>`;
-  }).join('');
-}
-
-function renderCEOAlerts(){
-  const el = document.getElementById('ceo-alerts');
-  el.innerHTML = CEO_ALERTS.map(a=>`
-    <div class="alert-item ${a.type}${selectedCDP===a.caseId?' selected':''}" onclick="${a.caseId?`openCDP('${a.caseId}')`:``}showToast('Alert reviewed','✓')">
-      <div class="alert-ico" style="color:${a.type==='crit'?'var(--red)':a.type==='warn'?'var(--amber)':'var(--blue)'}">${a.ico}</div>
-      <div style="flex:1">
-        <div class="alert-title">${a.title}</div>
-        <div class="alert-desc">${a.desc}</div>
-        <div class="alert-time">${a.time}</div>
-      </div>
-      <div class="alert-badge"><span class="ctag ctag-${a.type==='crit'?'r':a.type==='warn'?'a':'info'}">${a.type.toUpperCase()}</span></div>
-    </div>
-  `).join('');
-}
-
-function renderCEORisk(){
-  const el = document.getElementById('ceo-risk');
-  el.innerHTML = CEO_RISK.map(r=>`
-    <div class="risk-card${selectedCDP===r.caseId?' selected':''}" onclick="${r.caseId?`openCDP('${r.caseId}')`:``}showToast('${r.name} flagged','!')">
-      <div class="risk-client">${r.name}</div>
-      <div class="risk-issue">${r.issue}</div>
-      <div class="risk-status">
-        <div class="risk-dot ${r.dot==='a'?'a':''}"></div>
-        <div class="risk-status-text ${r.dot==='a'?'a':''}">${r.status}</div>
-      </div>
-    </div>`).join('');
-}
-
-function openCDP(caseId){
-  const c = CEO_CASES.find(x=>x.id===caseId);
-  if(!c) return;
-  selectedCDP = caseId;
-  renderCEOCases(); renderCEOAlerts(); renderCEORisk();
-  document.getElementById('cdp-empty').classList.add('hidden');
-  const el = document.getElementById('cdp-content');
-  el.classList.remove('hidden'); el.style.display='flex';
-  document.getElementById('cdp-type-label').textContent='CASE DETAIL · '+c.ownerRole.toUpperCase();
-  document.getElementById('cdp-title').textContent = c.name;
-  document.getElementById('cdp-subtitle').textContent = c.sub+' · '+c.state;
-  document.getElementById('cdp-fields').innerHTML = c.fields.map(f=>
-    `<div class="cdp-field"><div class="cdp-field-lbl">${f.l}</div><div class="cdp-field-val ${f.vc||''}">${f.v}</div></div>`).join('');
-  document.getElementById('cdp-blockers').innerHTML = c.blockers.length
-    ? c.blockers.map(b=>`<div class="blocker-item">${b}</div>`).join('')
-    : '<div style="font-size:11.5px;color:var(--t3)">No blockers</div>';
-  document.getElementById('cdp-docs').innerHTML = c.docs.map(d=>`<div class="doc-item">${d}</div>`).join('');
-  document.getElementById('cdp-timeline').innerHTML = c.timeline.map(t=>{
-    const dotCls = t.dot==='done'?'done':t.dot==='act'?'act':t.dot==='blocked'?'blocked':'future';
-    const dotIco = t.dot==='done'?'✓':t.dot==='act'?'●':t.dot==='blocked'?'⊗':'○';
-    return `<div class="timeline-item"><div class="tl-dot ${dotCls}">${dotIco}</div><div class="tl-content"><div class="tl-label">${t.label}</div><div class="tl-date">${t.date}</div></div></div>`;
-  }).join('');
-  document.getElementById('cdp-action-btn').textContent = '→ '+c.action;
-}
-
-function closeCDP(){
-  selectedCDP=null;
-  document.getElementById('cdp-empty').classList.remove('hidden');
-  const el=document.getElementById('cdp-content');
-  el.classList.add('hidden'); el.style.display='none';
-  renderCEOCases(); renderCEOAlerts(); renderCEORisk();
-}
-
-/* ══════════════════════════════════════
-   RENDER AREA
-══════════════════════════════════════ */
-function renderArea(){ renderAreaWorkload(); renderAreaFilters(); renderAreaCases(); renderAreaSLA(); }
-
-function renderAreaWorkload(){
-  const el = document.getElementById('area-workload-table');
-  el.innerHTML = AREA_TEAM.map(m=>{
-    const slaTag = m.sla==='ok'
-      ? `<span class="sla-badge sla-ok">On Track</span>`
-      : m.sla==='risk'
-        ? `<span class="sla-badge sla-risk">At Risk</span>`
-        : `<span class="sla-badge sla-breach">Breach</span>`;
-    const barCls = m.pct>=80?'hi':m.pct>=60?'med':'';
-    return `<div class="wt-row" onclick="filterAreaByMember('${m.name}')">
-      <div class="wt-cell name">${m.name}<div style="font-size:10.5px;font-weight:400;color:var(--t3);margin-top:1px">${m.role}</div></div>
-      <div class="wt-cell">
-        <div style="font-size:10.5px;color:var(--t3)">${m.pct}% capacity</div>
-        <div class="wload-bar"><div class="wload-fill ${barCls}" style="width:${m.pct}%"></div></div>
-      </div>
-      <div class="wt-cell">${m.tasks}</div>
-      <div class="wt-cell">${slaTag}</div>
-      <div class="wt-cell">${m.cases}</div>
-      <div class="wt-cell muted" style="text-align:right">View ›</div>
-    </div>`;
-  }).join('');
-}
-
-function filterAreaByMember(name){
-  const cases = AREA_CASES.filter(c=>c.owner===name);
-  if(cases.length) openADP(cases[0].id);
-  showToast(`Showing cases for ${name}`,'◎');
-}
-
-function renderAreaFilters(){
-  const filters = [{id:'all',label:'All Processes'},{id:'onboarding',label:'Onboarding'},{id:'offboarding',label:'Offboarding'},{id:'review',label:'Reviews'}];
-  document.getElementById('area-proc-filters').innerHTML = filters.map(f=>
-    `<div class="proc-ftab${currentAreaFilter===f.id?' act':''}" onclick="setAreaFilter('${f.id}')">${f.label}</div>`).join('');
-}
-
-function setAreaFilter(id){ currentAreaFilter=id; renderAreaFilters(); renderAreaCases(); }
-
-function renderAreaCases(){
-  const cases = currentAreaFilter==='all' ? AREA_CASES : AREA_CASES.filter(c=>c.procFilter===currentAreaFilter);
-  const el = document.getElementById('area-cases');
-  if(!cases.length){ el.innerHTML=`<div style="text-align:center;padding:28px;color:var(--t3);font-size:12.5px">No cases for this filter.</div>`; return; }
-  el.innerHTML = cases.map(c=>{
-    const borderCls = c.dueClass==='ov'?'blocked':'';
-    const stateColor = c.stateColor==='r'?'var(--red)':c.stateColor==='a'?'var(--amber)':c.stateColor==='g'?'var(--ac)':'var(--pu)';
-    return `<div class="acase ${borderCls}${selectedADP===c.id?' sel':''}" onclick="openADP('${c.id}')">
-      <div class="acase-ico">${c.icon}</div>
-      <div class="acase-info">
-        <div class="acase-name">${c.name}</div>
-        <div class="acase-sub">${c.sub}</div>
-        <div class="acase-state" style="color:${stateColor}">● ${c.state}</div>
-      </div>
-      <div class="acase-right">
-        <div class="acase-owner">${c.owner}</div>
-        <div class="acase-due ${c.dueClass}">${c.due}</div>
-      </div>
-      <div class="acase-arr">›</div>
-    </div>`;
-  }).join('');
-}
-
-function renderAreaSLA(){
-  const el = document.getElementById('area-sla');
-  el.innerHTML = AREA_SLA.map(s=>{
-    const statusColor = s.pct>=75?'var(--ac)':s.pct>=55?'var(--amber)':'var(--red)';
-    return `<div class="kpi" style="border-left:2px solid ${statusColor};flex-direction:column;align-items:flex-start;gap:8px">
-      <div style="font-size:11.5px;font-weight:600;color:var(--t2)">${s.proc}</div>
-      <div style="display:flex;align-items:center;gap:10px;width:100%">
-        <div class="kpi-n" style="color:${statusColor};font-size:20px">${s.pct}%</div>
-        <div style="flex:1">
-          <div style="display:flex;gap:5px;font-size:10px;flex-wrap:wrap;font-family:var(--fm)">
-            <span style="color:var(--ac)">✓ ${s.ok} OK</span>
-            ${s.risk?`<span style="color:var(--amber)">! ${s.risk} Risk</span>`:''}
-            ${s.breach?`<span style="color:var(--red)">⊗ ${s.breach} Breach</span>`:''}
-          </div>
-          <div class="wload-bar" style="margin-top:5px"><div class="wload-fill" style="width:${s.pct}%;background:${statusColor}"></div></div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openADP(caseId){
-  const c = AREA_CASES.find(x=>x.id===caseId);
-  if(!c) return;
-  selectedADP = caseId;
-  renderAreaCases();
-  document.getElementById('adp-empty').classList.add('hidden');
-  const el = document.getElementById('adp-content');
-  el.classList.remove('hidden'); el.style.display='flex';
-  document.getElementById('adp-type-label').textContent='CASE DETAIL · HR';
-  document.getElementById('adp-title').textContent = c.name;
-  document.getElementById('adp-subtitle').textContent = c.sub+' · '+c.state;
-  document.getElementById('adp-fields').innerHTML = c.fields.map(f=>
-    `<div class="cdp-field"><div class="cdp-field-lbl">${f.l}</div><div class="cdp-field-val ${f.vc||''}">${f.v}</div></div>`).join('');
-  document.getElementById('adp-tasks').innerHTML = c.tasks.map((t,i)=>
-    `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr)">
-      <div style="width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.07);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--t3);font-family:var(--fm)">${i+1}</div>
-      <div style="font-size:12px;font-weight:500;color:var(--t1)">${t}</div>
-    </div>`).join('');
-  document.getElementById('adp-systems').innerHTML = c.systems.map(s=>`<div class="dp-sys">${s}</div>`).join('');
-  document.getElementById('adp-next').textContent = c.next;
-  document.getElementById('adp-notify').innerHTML = c.notify.map(n=>
-    `<div class="nt-row"><div class="nt-av" style="background:${n.color}">${n.name.charAt(0)}</div>
-    <div><div class="nt-name">${n.name}</div><div class="nt-role">${n.role}</div></div>
-    <button class="nt-btn" onclick="event.stopPropagation();this.textContent='Sent ✓';this.style.color='var(--ac)'">Notify</button></div>`).join('');
-}
-
-function closeADP(){
-  selectedADP=null;
-  document.getElementById('adp-empty').classList.remove('hidden');
-  const el=document.getElementById('adp-content');
-  el.classList.add('hidden'); el.style.display='none';
-  renderAreaCases();
-}
-
-/* ══════════════════════════════════════
-   SIDEBAR MODES
-══════════════════════════════════════ */
-const SIDEBAR_MODES = {
-  exec:{
-    label:'Executive View', tierLabel:'CEO Control Tower', dot:'exec',
-    defaultView:'ceo',
-    stats:[{n:'€247K',l:'Revenue',cls:'green'},{n:'7',l:'Blocked',cls:'red'}],
-    sections:[{
-      label:'Command',
-      items:[
-        { ico:'◈', label:'CEO Overview',    action:`navTo('ceo',this)`,    view:'ceo'   },
-        { ico:'◉', label:'Revenue Spine',   action:`navTo('ceo',this)`,    view:'ceo'   },
-        { ico:'○', label:'Delivery',        action:`showToast('Coming soon','○')` },
-        { ico:'◎', label:'Finance',         action:`showToast('Coming soon','◎')` },
-        { ico:'⊡', label:'Approvals',       action:`showToast('Coming soon','⊡')`, badge:'7' },
-        { ico:'◐', label:'AI Agents',       action:`showToast('Coming soon','◐')`, badge:'6', badgeCls:'v' }
-      ]
-    },{
-      label:'Operations',
-      items:[
-        { ico:'◻', label:'Active Cases', action:`navTo('ceo',this)` },
-        { ico:'⊗', label:'Blockers',     action:`showToast('Coming soon','⊗')`, badge:'7' }
-      ]
-    }]
-  },
-  manager:{
-    label:'Manager View', tierLabel:'Area Management', dot:'manager',
-    defaultView:'area',
-    areaSelector: true,
-    stats:[{n:'14',l:'Cases',cls:''},{n:'3',l:'At Risk',cls:'amber'}],
-    sections:[{
-      label:'HR Area',
-      items:[
-        { ico:'◐', label:'HR Overview',    action:`navTo('area',this)`,   view:'area'  },
-        { ico:'◈', label:'Onboarding',     action:`navTo('area',this)`,   view:'area'  },
-        { ico:'⊗', label:'Offboarding',    action:`navTo('area',this)`,   view:'area'  },
-        { ico:'○', label:'Performance',    action:`showToast('Coming soon','○')` },
-        { ico:'◎', label:'Payroll',        action:`showToast('Coming soon','◎')` }
-      ]
-    },{
-      label:'Tools',
-      items:[
-        { ico:'◻', label:'SLA Dashboard', action:`showToast('Coming soon','◻')` },
-        { ico:'⊡', label:'Team Workload', action:`navTo('area',this)` }
-      ]
-    }]
-  },
-  user:{
-    label:'User View', tierLabel:'My Workspace', dot:'user',
-    defaultView:'mywork',
-    stats:[{n:'12',l:'Tasks',cls:''},{n:'3',l:'Overdue',cls:'red'}],
-    sections:[{
-      label:'My Work',
-      items:[
-        { ico:'◉', label:'Overview',      action:`navTo('mywork',this)`,  view:'mywork' },
-        { ico:'◈', label:'All Tasks',     action:`navTo('mywork',this)` },
-        { ico:'⊗', label:'Needs Attention', action:`navTo('mywork',this)`, badge:'3' },
-        { ico:'○', label:'Completed',     action:`navTo('mywork',this)` }
-      ]
-    },{
-      label:'My Processes',
-      items:[
-        { ico:'◻', label:'Laptop Lifecycle',   action:`openMyProc('laptop')` },
-        { ico:'◈', label:'Equipment Return',   action:`openMyProc('equipment')` },
-        { ico:'◐', label:'Employee Onboarding',action:`openMyProc('onboarding')` }
-      ]
-    }]
-  },
-  process:{
-    label:'Process View', tierLabel:'Process Navigator', dot:'process',
-    defaultView:'nav',
-    sections:[{
-      label:'Browse Processes',
-      items:[
-        { ico:'◻', label:'Laptop Lifecycle',    action:`openGlobalProcess('laptop');navTo('nav',this)` },
-        { ico:'◈', label:'Equipment Return',    action:`openGlobalProcess('equipment');navTo('nav',this)` },
-        { ico:'◐', label:'Employee Onboarding', action:`openGlobalProcess('onboarding');navTo('nav',this)` }
-      ]
-    },{
-      label:'By Domain',
-      items:[
-        { ico:'⚙', label:'Operations', children:[
-          { label:'Laptop Lifecycle',   action:`openGlobalProcess('laptop');navTo('nav')` },
-          { label:'Equipment Return',   action:`openGlobalProcess('equipment');navTo('nav')` }
-        ]},
-        { ico:'◐', label:'HR', children:[
-          { label:'Employee Onboarding', action:`openGlobalProcess('onboarding');navTo('nav')` },
-          { label:'Employee Offboarding',action:`showToast('Coming soon','◐')` }
-        ]}
-      ]
-    }]
-  }
-};
-
-const openCarets = {};
-
-function setSidebarMode(mode, jumpToView){
-  currentSidebarMode = mode;
-  document.querySelectorAll('.ms-btn').forEach(b=>b.classList.remove('ms-act'));
-  const mBtn = document.getElementById('ms-'+mode);
-  if(mBtn) mBtn.classList.add('ms-act');
-  const cfg = SIDEBAR_MODES[mode];
-  document.getElementById('mode-strip-dot').className = 'mode-strip-dot ' + cfg.dot;
-  document.getElementById('mode-strip-lbl').textContent = cfg.label;
-  document.getElementById('sb-tier-label').textContent = cfg.tierLabel;
-  renderSidebarMenu(mode);
-  if(jumpToView !== false) navTo(cfg.defaultView);
-}
-
-function renderSidebarMenu(mode){
-  const cfg = SIDEBAR_MODES[mode];
-  const el = document.getElementById('sb-menu');
-  let html = '';
-
-  if(cfg.stats){
-    html += `<div class="sb-stat-row">`;
-    cfg.stats.forEach(s=>{ html += `<div class="sb-stat"><div class="sb-stat-n ${s.cls||''}">${s.n}</div><div class="sb-stat-l">${s.l}</div></div>`; });
-    html += `</div>`;
-  }
-
-  if(cfg.areaSelector){
-    html += `<div class="sb-area-sel"><div class="area-sel-label">Area</div><div class="area-sel-pills">
-      <div class="area-pill act" onclick="switchArea('HR',this)">HR</div>
-      <div class="area-pill" onclick="switchArea('Ops',this)">Ops</div>
-      <div class="area-pill" onclick="switchArea('Finance',this)">Finance</div>
-      <div class="area-pill" onclick="switchArea('IT',this)">IT</div>
-    </div></div>`;
-  }
-
-  cfg.sections.forEach(sec=>{
-    html += `<div style="padding:12px 0 2px"><div class="sb-lbl">${sec.label}</div>`;
-    sec.items.forEach(item=>{
-      if(item.children){
-        const isOpen = openCarets[item.label];
-        html += `<div class="ni${isOpen?' open':''}" onclick="toggleSbCaret('${item.label.replace(/'/g,"\\'")}',this)">
-          <span class="ni-ico">${item.ico}</span>${item.label}
-          <span class="ni-caret">›</span>
-        </div>
-        <div class="sb-children${isOpen?' open':''}" id="sc-${item.label.replace(/[^a-z]/gi,'_')}">
-          ${item.children.map(ch=>`<div class="sb-child" onclick="${ch.action}">${ch.label}</div>`).join('')}
-        </div>`;
-      } else {
-        const badge = item.badge ? `<span class="ni-badge${item.badgeCls?' '+item.badgeCls:''}">${item.badge}</span>` : '';
-        const isAct = item.view && currentView === item.view;
-        html += `<div class="ni${isAct?' act':''}" onclick="${item.action}">
-          <span class="ni-ico">${item.ico}</span>${item.label}${badge}
-        </div>`;
-      }
+      `;
     });
-    html += `</div>`;
-  });
-
-  if(mode !== 'process'){
-    html += `<div class="sb-div"></div>
-    <div style="padding:2px 0">
-      <div class="ni" onclick="setSidebarMode('process')">
-        <span class="ni-ico">⬡</span>Browse All Processes
-        <span style="margin-left:auto;font-size:10px;color:var(--t3)">›</span>
-      </div>
-    </div>`;
-  }
-
-  el.innerHTML = html;
-}
-
-function toggleSbCaret(label, el){
-  openCarets[label] = !openCarets[label];
-  renderSidebarMenu(currentSidebarMode);
-}
-
-function switchArea(area, el){
-  document.querySelectorAll('.area-pill').forEach(p=>p.classList.remove('act'));
-  el.classList.add('act');
-  showToast(`${area} area view — coming in next sprint`,'⬡');
-}
-
-function setActive(el){
-  if(!el) return;
-  document.querySelectorAll('#sb-menu .ni').forEach(n=>n.classList.remove('act'));
-  el.classList.add('act');
-}
-
-// Close dropdowns on outside click
-document.addEventListener('click', e=>{
-  if(!e.target.closest('.role-sel')) document.getElementById('role-dd').classList.remove('open');
-});
-
-/* ══════════════════════════════════════
-   INIT
-══════════════════════════════════════ */
-setSidebarMode('exec', false);
-setTimeout(()=>{
-  setSidebarMode('user', false);
-  navTo('mywork');
-  renderMyWork();
-}, 0);
-</script>
+  </script>
 </body>
 </html>
