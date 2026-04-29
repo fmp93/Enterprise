@@ -2385,5 +2385,230 @@ setTimeout(()=>{
   renderMyWork();
 }, 0);
 </script>
+
+<!-- TEST 2: FREE PROCESS NAVIGATION PATCH -->
+<style>
+  .navigatorBox {
+    padding: 22px;
+    color: white;
+  }
+  .navigatorBadge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(0,255,198,.10);
+    border: 1px solid rgba(0,255,198,.25);
+    color: #b9fff0;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .navigatorBox h2 {
+    margin: 0 0 8px;
+    font-size: 24px;
+  }
+  .navigatorMuted {
+    color: #9aa4b2;
+    font-size: 13px;
+    line-height: 1.45;
+    margin-bottom: 14px;
+  }
+  .navigatorSection {
+    border-top: 1px solid rgba(255,255,255,.10);
+    padding-top: 13px;
+    margin-top: 13px;
+  }
+  .navigatorSection h4 {
+    margin: 0 0 8px;
+    font-size: 13px;
+  }
+  .navigatorTask {
+    font-size: 13px;
+    color: #e5eaf5;
+    margin: 8px 0;
+    line-height: 1.4;
+  }
+  .navigatorPill {
+    display: inline-block;
+    padding: 6px 9px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.10);
+    margin: 4px 4px 0 0;
+    font-size: 12px;
+  }
+</style>
+
+<script>
+(function () {
+  const ACTIVE_STEP = 1;
+
+  const steps = [
+    {
+      title: "Pre-boarding",
+      owner: "HR",
+      involvement: "HR owns this step. IT is informed. Manager contributes by confirming role/start date.",
+      objective: "Prepare the employee before Day 1: contract, BambooHR profile, manager, start date and welcome email.",
+      systems: ["DocuSign", "BambooHR", "Email"],
+      tasks: [
+        "Confirm signed contract",
+        "Create employee profile in BambooHR",
+        "Assign role, department, manager and start date",
+        "Upload contract and required documents",
+        "Send welcome email",
+        "Trigger IT provisioning request"
+      ],
+      output: "Employee record exists and IT provisioning has been triggered."
+    },
+    {
+      title: "Day 1 Setup",
+      owner: "IT / Operations",
+      involvement: "IT owns this step. HR contributes employee data. Manager is informed. Employee participates by confirming access.",
+      objective: "Ensure access, equipment and role-based permissions are ready before work starts.",
+      systems: ["Microsoft 365 / Google Workspace", "Slack / Teams", "Jira", "Device Inventory"],
+      tasks: [
+        "Create email account",
+        "Create Slack / Teams access",
+        "Grant Jira and role-specific tool access",
+        "Assign laptop or equipment",
+        "Send secure access instructions",
+        "Confirm employee can log in"
+      ],
+      output: "Employee can access all required systems."
+    },
+    {
+      title: "Induction Complete",
+      owner: "HR",
+      involvement: "HR owns this step. Employee participates. Manager is informed. IT supports only if access issues appear.",
+      objective: "Welcome the employee and explain company structure, policies, tools and where to find processes.",
+      systems: ["BambooHR", "Calendar", "Enterprise OS", "Email"],
+      tasks: [
+        "Run HR welcome session",
+        "Explain company structure and expectations",
+        "Review key policies",
+        "Show BambooHR",
+        "Introduce Enterprise OS / Process Browser",
+        "Confirm employee understands next steps"
+      ],
+      output: "Employee understands the company and onboarding path."
+    },
+    {
+      title: "30-Day Check-in",
+      owner: "Manager",
+      involvement: "Manager owns this step. HR monitors. IT supports if blockers exist. Employee participates.",
+      objective: "Validate role clarity, early performance, blockers and integration.",
+      systems: ["Calendar", "Jira", "BambooHR", "Enterprise OS"],
+      tasks: [
+        "Run manager check-in",
+        "Review first assigned tasks",
+        "Confirm expectations",
+        "Document blockers",
+        "Escalate support needs to HR or IT"
+      ],
+      output: "Employee is progressing with clear ownership and no critical blockers."
+    },
+    {
+      title: "Probation Passed",
+      owner: "HR / Manager",
+      involvement: "HR and Manager jointly own closure. CEO has visibility. Employee provides feedback.",
+      objective: "Close onboarding with evidence and confirm employee is active and ready.",
+      systems: ["BambooHR", "Jira", "Calendar", "Enterprise OS"],
+      tasks: [
+        "Validate onboarding checklist completion",
+        "Confirm training completion",
+        "Collect manager readiness approval",
+        "Collect employee feedback",
+        "Close open exceptions",
+        "Mark employee as active / fully onboarded"
+      ],
+      output: "Employee is fully onboarded and evidence is archived."
+    }
+  ];
+
+  function findRightPanel() {
+    const candidates = Array.from(document.querySelectorAll("div, aside, section"))
+      .filter(el => {
+        const r = el.getBoundingClientRect();
+        const text = (el.textContent || "").toLowerCase();
+        return r.left > window.innerWidth * 0.55 &&
+               r.width > 220 &&
+               r.height > 250 &&
+               (text.includes("action guide") || text.includes("next action") || text.includes("checklist") || text.includes("owner"));
+      })
+      .sort((a,b) => b.getBoundingClientRect().height - a.getBoundingClientRect().height);
+
+    return candidates[0];
+  }
+
+  function renderStep(step, index) {
+    const panel = findRightPanel();
+    if (!panel) {
+      alert("Right column not found. We need to identify the Action Guide panel.");
+      return;
+    }
+
+    panel.innerHTML = `
+      <div class="navigatorBox">
+        <div class="navigatorBadge">Navigator Mode</div>
+        <h2>${index + 1}. ${step.title}</h2>
+        <div class="navigatorMuted">
+          <strong>Active step:</strong> ${ACTIVE_STEP}. 
+          <strong>Viewing:</strong> ${index + 1}.<br>
+          <strong>Owner:</strong> ${step.owner}
+        </div>
+
+        <div class="navigatorSection">
+          <h4>Your / Area Involvement</h4>
+          <div class="navigatorMuted">${step.involvement}</div>
+        </div>
+
+        <div class="navigatorSection">
+          <h4>Objective</h4>
+          <div class="navigatorMuted">${step.objective}</div>
+        </div>
+
+        <div class="navigatorSection">
+          <h4>Systems</h4>
+          ${step.systems.map(s => `<span class="navigatorPill">${s}</span>`).join("")}
+        </div>
+
+        <div class="navigatorSection">
+          <h4>Tasks to complete</h4>
+          ${step.tasks.map(t => `<div class="navigatorTask">☐ ${t}</div>`).join("")}
+        </div>
+
+        <div class="navigatorSection">
+          <h4>Expected Output</h4>
+          <div class="navigatorMuted">${step.output}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function bindCircles() {
+    steps.forEach((step, index) => {
+      const nodes = Array.from(document.querySelectorAll("div, span, button, p"))
+        .filter(el => (el.textContent || "").trim().toLowerCase() === step.title.toLowerCase());
+
+      nodes.forEach(node => {
+        node.style.cursor = "pointer";
+        node.title = "Click to navigate this process step";
+
+        node.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          renderStep(step, index);
+        };
+      });
+    });
+  }
+
+  window.addEventListener("load", bindCircles);
+})();
+</script>
+<!-- END TEST 2: FREE PROCESS NAVIGATION PATCH -->
+
 </body>
 </html>
