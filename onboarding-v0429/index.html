@@ -3445,5 +3445,157 @@ setTimeout(()=>{
 </script>
 <!-- END VERSION 04/29 PART 6: ROLE AWARENESS -->
 
+
+<!-- VERSION 04/29 PART 7: NON-BLOCKING PROGRESS -->
+<style>
+  .v0429ProgressWrap {
+    margin: 12px 0 16px;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.045);
+    border: 1px solid rgba(255,255,255,.09);
+  }
+
+  .v0429ProgressBar {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.10);
+    overflow: hidden;
+    margin-top: 8px;
+  }
+
+  .v0429ProgressFill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #8b5cf6, #00ffc6);
+    border-radius: 999px;
+    transition: width .25s ease;
+  }
+
+  .v0429TaskDone {
+    opacity: .55;
+    text-decoration: line-through;
+  }
+
+  .v0429TaskCheckbox {
+    margin-right: 8px;
+    accent-color: #00ffc6;
+  }
+</style>
+
+<script>
+(function () {
+  function taskKey(state, area, task) {
+    return `v0429:${state}:${area}:${task}`;
+  }
+
+  function getDoneMap() {
+    return JSON.parse(localStorage.getItem("v0429DoneTasks") || "{}");
+  }
+
+  function saveDoneMap(map) {
+    localStorage.setItem("v0429DoneTasks", JSON.stringify(map));
+  }
+
+  function enhanceTasksWithCheckboxes() {
+    const stateTitle = document.querySelector(".v0429PanelTitle");
+    if (!stateTitle) return;
+
+    const state = stateTitle.textContent.trim();
+    const doneMap = getDoneMap();
+
+    document.querySelectorAll(".v0429AreaCard").forEach(areaCard => {
+      const areaTop = areaCard.querySelector(".v0429AreaTop");
+      if (!areaTop) return;
+
+      const area = areaTop.children[0]?.childNodes[0]?.textContent?.trim() || "Area";
+
+      areaCard.querySelectorAll(".v0429TaskRow").forEach(row => {
+        if (row.dataset.progressReady === "true") return;
+
+        let task = row.textContent.replace("☐", "").trim();
+        const key = taskKey(state, area, task);
+
+        row.dataset.progressReady = "true";
+        row.dataset.taskKey = key;
+
+        row.innerHTML = `
+          <input class="v0429TaskCheckbox" type="checkbox" ${doneMap[key] ? "checked" : ""}>
+          <span>${task}</span>
+        `;
+
+        if (doneMap[key]) row.classList.add("v0429TaskDone");
+
+        const checkbox = row.querySelector("input");
+        checkbox.addEventListener("click", e => e.stopPropagation());
+
+        checkbox.addEventListener("change", () => {
+          const map = getDoneMap();
+          map[key] = checkbox.checked;
+          saveDoneMap(map);
+
+          row.classList.toggle("v0429TaskDone", checkbox.checked);
+          updateProgress();
+        });
+      });
+    });
+
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const panelTitle = document.querySelector(".v0429PanelTitle");
+    if (!panelTitle) return;
+
+    const rows = Array.from(document.querySelectorAll(".v0429TaskRow"));
+    if (!rows.length) return;
+
+    const total = rows.length;
+    const done = rows.filter(row => row.querySelector("input")?.checked).length;
+    const percent = Math.round((done / total) * 100);
+
+    let progress = document.getElementById("v0429ProgressWrap");
+
+    if (!progress) {
+      progress = document.createElement("div");
+      progress.id = "v0429ProgressWrap";
+      progress.className = "v0429ProgressWrap";
+
+      panelTitle.insertAdjacentElement("afterend", progress);
+    }
+
+    progress.innerHTML = `
+      <div class="v0429PanelMuted" style="margin-bottom:0;">
+        <strong>Execution Progress:</strong> ${done}/${total} tasks completed · ${percent}%
+      </div>
+      <div class="v0429ProgressBar">
+        <div class="v0429ProgressFill" style="width:${percent}%"></div>
+      </div>
+    `;
+  }
+
+  function observePanelChanges() {
+    const observer = new MutationObserver(() => {
+      setTimeout(enhanceTasksWithCheckboxes, 100);
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  window.addEventListener("load", () => {
+    observePanelChanges();
+    setTimeout(enhanceTasksWithCheckboxes, 500);
+  });
+
+  document.addEventListener("click", () => {
+    setTimeout(enhanceTasksWithCheckboxes, 150);
+  });
+})();
+</script>
+<!-- END VERSION 04/29 PART 7: NON-BLOCKING PROGRESS -->
+
 </body>
 </html>
