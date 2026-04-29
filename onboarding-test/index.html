@@ -2562,5 +2562,305 @@ setTimeout(()=>{
 </div>
 <!-- END ONBOARDING SANDBOX MODULE -->
 
+
+<!-- ONBOARDING PROCESS ENGINE PATCH -->
+<style>
+  .osDrawerPanel {
+    position: fixed;
+    top: 92px;
+    right: 0;
+    width: 382px;
+    height: calc(100vh - 92px);
+    z-index: 99998;
+    background: #0d1020;
+    border-left: 1px solid rgba(255,255,255,.10);
+    color: white;
+    padding: 22px;
+    overflow-y: auto;
+    box-shadow: -30px 0 80px rgba(0,0,0,.35);
+  }
+  .osDrawerTitle {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .osDrawerMuted {
+    color: #8f9bad;
+    font-size: 13px;
+    line-height: 1.45;
+    margin-bottom: 18px;
+  }
+  .osStepBlock {
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.035);
+    border-radius: 18px;
+    padding: 14px;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .osStepBlock.active {
+    border-color: rgba(0,255,198,.65);
+    background: rgba(0,255,198,.08);
+  }
+  .osStepBlock.done {
+    border-color: rgba(0,255,198,.30);
+  }
+  .osStepHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-weight: 750;
+  }
+  .osStepStatus {
+    font-size: 11px;
+    color: #8f7cff;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .osTask {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 10px 0;
+    color: #d9e0ee;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .osTask input {
+    margin-top: 2px;
+    accent-color: #00ffc6;
+  }
+  .osPill {
+    display: inline-block;
+    margin: 5px 5px 0 0;
+    padding: 6px 9px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.09);
+    color: #d9e0ee;
+    font-size: 12px;
+  }
+</style>
+
+<script>
+(function () {
+  const processData = {
+    name: "Employee Onboarding",
+    currentStep: 1,
+    steps: [
+      {
+        title: "Pre-boarding",
+        owner: "HR",
+        systems: ["DocuSign", "BambooHR"],
+        tasks: [
+          "Confirm signed contract",
+          "Create employee profile in BambooHR",
+          "Assign department, role, manager and start date",
+          "Upload signed contract and required documents",
+          "Send welcome email with next steps"
+        ]
+      },
+      {
+        title: "Day 1 Setup",
+        owner: "IT / Operations",
+        systems: ["Microsoft 365", "Azure AD", "Slack/Teams", "Jira"],
+        tasks: [
+          "Create Microsoft 365 account",
+          "Set up ITSM access",
+          "Grant Slack/Teams access",
+          "Assign laptop or equipment",
+          "Confirm employee can access required tools"
+        ]
+      },
+      {
+        title: "Induction Complete",
+        owner: "HR",
+        systems: ["BambooHR", "Enterprise OS"],
+        tasks: [
+          "Run company introduction",
+          "Explain internal policies",
+          "Introduce Process Browser / Enterprise OS",
+          "Show employee where to find tasks and support",
+          "Confirm employee understands onboarding path"
+        ]
+      },
+      {
+        title: "30-Day Check-in",
+        owner: "Manager",
+        systems: ["BambooHR", "Calendar", "Jira"],
+        tasks: [
+          "Assign first role-specific tasks",
+          "Schedule Day 3 and Day 7 check-ins",
+          "Assign buddy or mentor if needed",
+          "Review first performance signals",
+          "Document blockers or risks"
+        ]
+      },
+      {
+        title: "Probation Passed",
+        owner: "HR / Manager",
+        systems: ["BambooHR"],
+        tasks: [
+          "Validate training completion",
+          "Manager confirms readiness",
+          "Close onboarding checklist",
+          "Mark employee as Active",
+          "Archive onboarding evidence"
+        ]
+      }
+    ]
+  };
+
+  let selectedStep = Number(localStorage.getItem("onboardingSelectedStep") || processData.currentStep);
+  let completed = JSON.parse(localStorage.getItem("onboardingCompletedTasks") || "{}");
+
+  function save() {
+    localStorage.setItem("onboardingSelectedStep", selectedStep);
+    localStorage.setItem("onboardingCompletedTasks", JSON.stringify(completed));
+  }
+
+  function stepDone(index) {
+    const step = processData.steps[index];
+    return step.tasks.every((_, taskIndex) => completed[`${index}-${taskIndex}`]);
+  }
+
+  function firstIncompleteStep() {
+    for (let i = 0; i < processData.steps.length; i++) {
+      if (!stepDone(i)) return i + 1;
+    }
+    return processData.steps.length;
+  }
+
+  function renderDrawer() {
+    let drawer = document.getElementById("osDrawerPanel");
+    if (!drawer) {
+      drawer = document.createElement("div");
+      drawer.id = "osDrawerPanel";
+      drawer.className = "osDrawerPanel";
+      document.body.appendChild(drawer);
+    }
+
+    const activeIndex = selectedStep - 1;
+    const activeStep = processData.steps[activeIndex];
+
+    drawer.innerHTML = `
+      <div class="osDrawerTitle">${processData.name}</div>
+      <div class="osDrawerMuted">
+        Full process scope. You can navigate every future state, but the active step remains visually clear.
+      </div>
+
+      ${processData.steps.map((step, index) => {
+        const done = stepDone(index);
+        const active = index === activeIndex;
+        return `
+          <div class="osStepBlock ${active ? "active" : ""} ${done ? "done" : ""}" data-os-step="${index + 1}">
+            <div class="osStepHeader">
+              <span>${index + 1}. ${step.title}</span>
+              <span class="osStepStatus">${done ? "Completed" : active ? "Current View" : "Future State"}</span>
+            </div>
+            <div class="osDrawerMuted">Owner: ${step.owner}</div>
+          </div>
+        `;
+      }).join("")}
+
+      <hr style="border-color:rgba(255,255,255,.08); margin:18px 0;">
+
+      <div class="osDrawerTitle">${selectedStep}. ${activeStep.title}</div>
+      <div class="osDrawerMuted">Owner: ${activeStep.owner}</div>
+      <div>
+        ${activeStep.systems.map(s => `<span class="osPill">${s}</span>`).join("")}
+      </div>
+
+      <div style="margin-top:16px;">
+        ${activeStep.tasks.map((task, taskIndex) => {
+          const key = `${activeIndex}-${taskIndex}`;
+          return `
+            <label class="osTask">
+              <input type="checkbox" data-task-key="${key}" ${completed[key] ? "checked" : ""}>
+              <span>${task}</span>
+            </label>
+          `;
+        }).join("")}
+      </div>
+    `;
+
+    drawer.querySelectorAll("[data-os-step]").forEach(el => {
+      el.onclick = () => {
+        selectedStep = Number(el.dataset.osStep);
+        save();
+        renderDrawer();
+        highlightFlow();
+      };
+    });
+
+    drawer.querySelectorAll("[data-task-key]").forEach(box => {
+      box.onchange = () => {
+        completed[box.dataset.taskKey] = box.checked;
+        const currentIndex = selectedStep - 1;
+
+        if (stepDone(currentIndex) && selectedStep < processData.steps.length) {
+          selectedStep++;
+        }
+
+        save();
+        renderDrawer();
+        highlightFlow();
+      };
+    });
+  }
+
+  function highlightFlow() {
+    const textMap = processData.steps.map(s => s.title.toLowerCase());
+
+    document.querySelectorAll("body *").forEach(el => {
+      const txt = (el.textContent || "").trim().toLowerCase();
+
+      if (textMap.includes(txt)) {
+        el.style.cursor = "pointer";
+        el.onclick = () => {
+          selectedStep = textMap.indexOf(txt) + 1;
+          save();
+          renderDrawer();
+          highlightFlow();
+        };
+
+        if (txt === processData.steps[selectedStep - 1].title.toLowerCase()) {
+          el.style.opacity = "1";
+          el.style.filter = "none";
+        } else {
+          el.style.opacity = ".75";
+          el.style.filter = "none";
+        }
+      }
+    });
+  }
+
+  function bindButtons() {
+    document.querySelectorAll("button, a, div").forEach(el => {
+      const txt = (el.textContent || "").toLowerCase();
+      if (
+        txt.includes("view full process") ||
+        txt.includes("open onboarding process") ||
+        txt.includes("full process")
+      ) {
+        el.onclick = (e) => {
+          e.preventDefault();
+          renderDrawer();
+          highlightFlow();
+        };
+      }
+    });
+  }
+
+  window.addEventListener("load", () => {
+    selectedStep = firstIncompleteStep();
+    save();
+    bindButtons();
+    highlightFlow();
+  });
+})();
+</script>
+<!-- END ONBOARDING PROCESS ENGINE PATCH -->
+
 </body>
 </html>
