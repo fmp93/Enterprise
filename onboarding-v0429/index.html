@@ -3713,5 +3713,92 @@ setTimeout(()=>{
 </script>
 <!-- END VERSION 04/29 PART 8: STATE PROGRESS SUMMARY -->
 
+
+<!-- VERSION 04/29 PART 9: DATA MODEL PANEL -->
+<style>
+  .v0429DataModelButton {
+    position: fixed;
+    left: 270px;
+    bottom: 58px;
+    z-index: 9999;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(0,255,198,.12);
+    border: 1px solid rgba(0,255,198,.32);
+    color: #b9fff0;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .v0429DataModelPanel {
+    position: fixed;
+    left: 260px;
+    bottom: 100px;
+    width: 430px;
+    max-height: 520px;
+    overflow: auto;
+    z-index: 9999;
+    display: none;
+    padding: 18px;
+    border-radius: 20px;
+    background: rgba(13,16,32,.98);
+    border: 1px solid rgba(255,255,255,.12);
+    color: white;
+    box-shadow: 0 30px 90px rgba(0,0,0,.55);
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .v0429DataModelPanel.open {
+    display: block;
+  }
+
+  .v0429DataModelPanel h3 {
+    margin: 0 0 10px;
+  }
+
+  .v0429DataModelPanel pre {
+    white-space: pre-wrap;
+    color: #dbe3f3;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+</style>
+
+<button class="v0429DataModelButton" id="v0429DataModelButton">
+  View Data Model
+</button>
+
+<div class="v0429DataModelPanel" id="v0429DataModelPanel">
+  <h3>Version 04/29 Data Model</h3>
+  <pre id="v0429DataModelPre">Loading...</pre>
+</div>
+
+<script>
+(function () {
+  async function loadDataModel() {
+    const panel = document.getElementById("v0429DataModelPanel");
+    const pre = document.getElementById("v0429DataModelPre");
+
+    try {
+      const res = await fetch("./process-data.json");
+      const data = await res.json();
+      pre.textContent = JSON.stringify(data, null, 2);
+    } catch (e) {
+      pre.textContent = "Open through local server to load JSON:\n\ncd ~/Enterprise\npython3 -m http.server 8080\n\nThen open:\nhttp://localhost:8080/onboarding-v0429/";
+    }
+
+    panel.classList.toggle("open");
+  }
+
+  window.addEventListener("load", () => {
+    const btn = document.getElementById("v0429DataModelButton");
+    if (btn) btn.onclick = loadDataModel;
+  });
+})();
+</script>
+<!-- END VERSION 04/29 PART 9: DATA MODEL PANEL -->
+
 </body>
 </html>

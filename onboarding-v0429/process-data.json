@@ -1,0 +1,56 @@
+{
+  "version": "04/29",
+  "taxonomy": {
+    "view": "User",
+    "domain": "HR",
+    "process_group": "Employee Lifecycle",
+    "process": "Employee Onboarding"
+  },
+  "process": {
+    "id": "hr_employee_onboarding",
+    "name": "Employee Onboarding",
+    "previous_process": "Recruiting & Hiring",
+    "next_process": "Employee Management",
+    "goal": "Convert a signed candidate into an active, trained, provisioned employee with clear ownership and no Day 1 blockers."
+  },
+  "states": [
+    {
+      "name": "Pre-boarding",
+      "owner": "HR",
+      "areas": ["HR", "Manager", "IT / Operations"]
+    },
+    {
+      "name": "Day 1 Setup",
+      "owner": "IT / Operations",
+      "areas": ["IT / Operations", "HR", "Manager", "Employee"]
+    },
+    {
+      "name": "Induction Complete",
+      "owner": "HR",
+      "areas": ["HR", "Employee", "IT / Operations"]
+    },
+    {
+      "name": "30-Day Check-in",
+      "owner": "Manager",
+      "areas": ["Manager", "HR", "Employee"]
+    },
+    {
+      "name": "Probation Passed",
+      "owner": "HR / Manager",
+      "areas": ["HR", "Manager", "Employee", "CEO / Leadership"]
+    }
+  ],
+  "data_model": {
+    "layers": [
+      "Taxonomy",
+      "Process",
+      "State / Circle",
+      "Area Ownership",
+      "Task",
+      "Action Guide",
+      "Evidence",
+      "Progress"
+    ],
+    "rule": "Navigation is always open. Execution progress never blocks browsing."
+  }
+}
