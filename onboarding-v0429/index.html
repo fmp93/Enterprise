@@ -2705,6 +2705,7 @@ setTimeout(()=>{
   }
 
   function renderFullProcess() {
+    window.renderFullProcess0429 = renderFullProcess;
     const panel = findRightPanel();
     if (!panel) return;
 
@@ -2752,6 +2753,335 @@ setTimeout(()=>{
 })();
 </script>
 <!-- END VERSION 04/29 PART 3: FULL PROCESS RIGHT PANEL -->
+
+
+<!-- VERSION 04/29 PART 4: STATE AREA TASKS -->
+<style>
+  .v0429StateCard {
+    cursor: pointer;
+    transition: .18s ease;
+  }
+
+  .v0429StateCard:hover {
+    background: rgba(124,58,237,.10);
+    border-color: rgba(124,58,237,.35);
+  }
+
+  .v0429AreaCard {
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.035);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .v0429AreaTop {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-weight: 850;
+  }
+
+  .v0429AreaRole {
+    color: #c4b5fd;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .v0429TaskRow {
+    padding: 10px 0;
+    border-top: 1px solid rgba(255,255,255,.07);
+    color: #e5eaf5;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .v0429BackButton {
+    width: 100%;
+    margin-bottom: 14px;
+    padding: 11px 13px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: white;
+    font-weight: 850;
+    cursor: pointer;
+  }
+
+  .v0429BackButton:hover {
+    background: rgba(255,255,255,.10);
+  }
+</style>
+
+<script>
+(function () {
+  const stateDetails0429 = {
+    "Pre-boarding": {
+      objective: "Prepare the employee record and required information before Day 1.",
+      areas: [
+        {
+          area: "HR",
+          role: "Responsible",
+          tasks: [
+            "Confirm signed contract",
+            "Create employee profile in BambooHR",
+            "Assign department, role, manager and start date",
+            "Upload signed contract and required documents",
+            "Send welcome email"
+          ]
+        },
+        {
+          area: "Manager",
+          role: "Contributor",
+          tasks: [
+            "Confirm role expectations",
+            "Confirm start date",
+            "Confirm initial team assignment"
+          ]
+        },
+        {
+          area: "IT / Operations",
+          role: "Informed",
+          tasks: [
+            "Receive provisioning request",
+            "Review required systems based on role"
+          ]
+        }
+      ]
+    },
+
+    "Day 1 Setup": {
+      objective: "Ensure the employee has accounts, access and equipment ready.",
+      areas: [
+        {
+          area: "IT / Operations",
+          role: "Responsible",
+          tasks: [
+            "Create company email account",
+            "Create Slack / Teams access",
+            "Grant Jira and required tool access",
+            "Apply role-based permissions",
+            "Assign laptop or equipment",
+            "Confirm login works before Day 1"
+          ]
+        },
+        {
+          area: "HR",
+          role: "Contributor",
+          tasks: [
+            "Confirm employee profile is complete",
+            "Confirm start date and manager",
+            "Confirm role data is accurate for provisioning"
+          ]
+        },
+        {
+          area: "Manager",
+          role: "Contributor",
+          tasks: [
+            "Confirm tools needed for the role",
+            "Confirm first-week access requirements"
+          ]
+        },
+        {
+          area: "Employee",
+          role: "Participant",
+          tasks: [
+            "Receive access instructions",
+            "Confirm email login",
+            "Confirm communication tool access"
+          ]
+        }
+      ]
+    },
+
+    "Induction Complete": {
+      objective: "Welcome the employee and explain company structure, tools, policies and support paths.",
+      areas: [
+        {
+          area: "HR",
+          role: "Responsible",
+          tasks: [
+            "Run welcome session",
+            "Explain company structure",
+            "Review key policies",
+            "Show BambooHR",
+            "Introduce Enterprise OS / Process Browser",
+            "Confirm employee understands next steps"
+          ]
+        },
+        {
+          area: "Employee",
+          role: "Participant",
+          tasks: [
+            "Attend induction session",
+            "Review assigned policies",
+            "Confirm understanding of process browser"
+          ]
+        },
+        {
+          area: "IT / Operations",
+          role: "Support",
+          tasks: [
+            "Resolve access issues if discovered during induction"
+          ]
+        }
+      ]
+    },
+
+    "30-Day Check-in": {
+      objective: "Validate role clarity, early performance, blockers and integration.",
+      areas: [
+        {
+          area: "Manager",
+          role: "Responsible",
+          tasks: [
+            "Run 30-day check-in",
+            "Review first assigned tasks",
+            "Confirm expectations",
+            "Document blockers",
+            "Escalate HR or IT support if needed"
+          ]
+        },
+        {
+          area: "HR",
+          role: "Informed / Support",
+          tasks: [
+            "Review check-in result",
+            "Support employee if there are people or process issues"
+          ]
+        },
+        {
+          area: "Employee",
+          role: "Participant",
+          tasks: [
+            "Share feedback",
+            "Report blockers",
+            "Confirm understanding of role expectations"
+          ]
+        }
+      ]
+    },
+
+    "Probation Passed": {
+      objective: "Close onboarding and confirm the employee is active, trained and ready.",
+      areas: [
+        {
+          area: "HR",
+          role: "Responsible",
+          tasks: [
+            "Validate onboarding checklist completion",
+            "Confirm training completion",
+            "Collect employee feedback",
+            "Close open exceptions",
+            "Update BambooHR status"
+          ]
+        },
+        {
+          area: "Manager",
+          role: "Responsible",
+          tasks: [
+            "Confirm employee readiness",
+            "Approve probation / onboarding completion",
+            "Confirm no critical blockers remain"
+          ]
+        },
+        {
+          area: "Employee",
+          role: "Participant",
+          tasks: [
+            "Submit final onboarding feedback",
+            "Confirm access and role clarity"
+          ]
+        },
+        {
+          area: "CEO / Leadership",
+          role: "Visibility",
+          tasks: [
+            "Monitor onboarding completion metrics and bottlenecks"
+          ]
+        }
+      ]
+    }
+  };
+
+  function findRightPanel0429() {
+    const candidates = Array.from(document.querySelectorAll("div, aside, section"))
+      .filter(el => {
+        const r = el.getBoundingClientRect();
+        return r.left > window.innerWidth * 0.60 &&
+               r.width > 260 &&
+               r.height > 400;
+      })
+      .sort((a,b) => b.getBoundingClientRect().height - a.getBoundingClientRect().height);
+
+    return candidates[0];
+  }
+
+  function renderStateDetails0429(stateName) {
+    const panel = findRightPanel0429();
+    const detail = stateDetails0429[stateName];
+    if (!panel || !detail) return;
+
+    panel.innerHTML = `
+      <div class="v0429Panel">
+        <button class="v0429BackButton" id="v0429BackToFullProcess">← Back to Full Process</button>
+
+        <div class="v0429PanelBadge">State Detail</div>
+        <div class="v0429PanelTitle">${stateName}</div>
+        <div class="v0429PanelMuted">${detail.objective}</div>
+
+        ${detail.areas.map(area => `
+          <div class="v0429AreaCard">
+            <div class="v0429AreaTop">
+              <span>${area.area}</span>
+              <span class="v0429AreaRole">${area.role}</span>
+            </div>
+            ${area.tasks.map(task => `
+              <div class="v0429TaskRow">☐ ${task}</div>
+            `).join("")}
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+    const back = panel.querySelector("#v0429BackToFullProcess");
+    if (back && window.renderFullProcess0429) {
+      back.onclick = window.renderFullProcess0429;
+    }
+  }
+
+  function makeStateCardsClickable0429() {
+    const interval = setInterval(() => {
+      const cards = Array.from(document.querySelectorAll(".v0429StateCard"));
+      if (!cards.length) return;
+
+      cards.forEach(card => {
+        if (card.dataset.v0429Clickable === "true") return;
+
+        const label = Object.keys(stateDetails0429).find(name =>
+          (card.textContent || "").includes(name)
+        );
+
+        if (label) {
+          card.dataset.v0429Clickable = "true";
+          card.onclick = () => renderStateDetails0429(label);
+        }
+      });
+    }, 300);
+
+    setTimeout(() => clearInterval(interval), 10000);
+  }
+
+  window.addEventListener("load", () => {
+    makeStateCardsClickable0429();
+  });
+
+  window.renderStateDetails0429 = renderStateDetails0429;
+})();
+</script>
+<!-- END VERSION 04/29 PART 4: STATE AREA TASKS -->
 
 </body>
 </html>
