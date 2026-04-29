@@ -2583,5 +2583,175 @@ setTimeout(()=>{
 </script>
 <!-- END VERSION 04/29 PART 2: PROCESS MAP -->
 
+
+<!-- VERSION 04/29 PART 3: FULL PROCESS RIGHT PANEL -->
+<style>
+  .v0429Panel {
+    padding: 24px;
+    color: white;
+  }
+
+  .v0429PanelBadge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(124,58,237,.16);
+    color: #c4b5fd;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .v0429PanelTitle {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+
+  .v0429PanelMuted {
+    color: #9aa4b2;
+    font-size: 13px;
+    line-height: 1.45;
+    margin-bottom: 14px;
+  }
+
+  .v0429StateCard {
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.035);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .v0429StateTop {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-weight: 850;
+  }
+
+  .v0429StateType {
+    color: #8b5cf6;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .v0429MiniPill {
+    display: inline-block;
+    margin: 7px 5px 0 0;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.09);
+    color: #dbe3f3;
+    font-size: 11px;
+  }
+</style>
+
+<script>
+(function () {
+  const v0429Process = {
+    name: "Employee Onboarding",
+    path: "User View > HR > Employee Lifecycle > Employee Onboarding",
+    goal: "Convert a signed candidate into an active, trained, provisioned employee with clear ownership and no Day 1 blockers.",
+    states: [
+      {
+        label: "Pre-boarding",
+        type: "Previous / Intake",
+        owner: "HR",
+        areas: ["HR", "Manager", "IT informed"]
+      },
+      {
+        label: "Day 1 Setup",
+        type: "Current",
+        owner: "IT / Operations",
+        areas: ["IT", "HR", "Manager", "Employee"]
+      },
+      {
+        label: "Induction Complete",
+        type: "Future",
+        owner: "HR",
+        areas: ["HR", "Employee", "Manager informed"]
+      },
+      {
+        label: "30-Day Check-in",
+        type: "Future",
+        owner: "Manager",
+        areas: ["Manager", "HR", "Employee"]
+      },
+      {
+        label: "Probation Passed",
+        type: "Exit / Next Process",
+        owner: "HR / Manager",
+        areas: ["HR", "Manager", "Employee", "CEO visibility"]
+      }
+    ]
+  };
+
+  function findRightPanel() {
+    const candidates = Array.from(document.querySelectorAll("div, aside, section"))
+      .filter(el => {
+        const r = el.getBoundingClientRect();
+        return r.left > window.innerWidth * 0.60 &&
+               r.width > 260 &&
+               r.height > 400;
+      })
+      .sort((a,b) => b.getBoundingClientRect().height - a.getBoundingClientRect().height);
+
+    return candidates[0];
+  }
+
+  function renderFullProcess() {
+    const panel = findRightPanel();
+    if (!panel) return;
+
+    panel.innerHTML = `
+      <div class="v0429Panel">
+        <div class="v0429PanelBadge">Full Process Scope</div>
+        <div class="v0429PanelTitle">${v0429Process.name}</div>
+        <div class="v0429PanelMuted">${v0429Process.path}</div>
+        <div class="v0429PanelMuted">${v0429Process.goal}</div>
+
+        ${v0429Process.states.map((s, i) => `
+          <div class="v0429StateCard">
+            <div class="v0429StateTop">
+              <span>${i + 1}. ${s.label}</span>
+              <span class="v0429StateType">${s.type}</span>
+            </div>
+            <div class="v0429PanelMuted" style="margin-top:6px;margin-bottom:4px;">
+              Owner: ${s.owner}
+            </div>
+            <div>
+              ${s.areas.map(a => `<span class="v0429MiniPill">${a}</span>`).join("")}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function bindFullProcessButton() {
+    Array.from(document.querySelectorAll("button, a, div")).forEach(el => {
+      const txt = (el.textContent || "").trim().toLowerCase();
+      if (txt === "view full process") {
+        el.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          renderFullProcess();
+        };
+      }
+    });
+  }
+
+  window.addEventListener("load", () => {
+    setTimeout(bindFullProcessButton, 400);
+  });
+})();
+</script>
+<!-- END VERSION 04/29 PART 3: FULL PROCESS RIGHT PANEL -->
+
 </body>
 </html>
