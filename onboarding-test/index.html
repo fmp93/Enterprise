@@ -2386,79 +2386,242 @@ setTimeout(()=>{
 }, 0);
 </script>
 
-<!-- NAVIGATION UNLOCK PATCH -->
+
+
+
+<!-- REAL ONBOARDING NAVIGATOR PATCH -->
+<style>
+  .navigatorGuide {
+    padding: 24px;
+    color: white;
+  }
+  .navigatorLabel {
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #8f7cff;
+    margin-bottom: 8px;
+    font-weight: 800;
+  }
+  .navigatorTitle {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+  .navigatorMuted {
+    color: #9aa4b2;
+    font-size: 13px;
+    line-height: 1.45;
+    margin-bottom: 14px;
+  }
+  .navigatorSection {
+    border-top: 1px solid rgba(255,255,255,.10);
+    padding-top: 14px;
+    margin-top: 14px;
+  }
+  .navigatorSection h4 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: #dbe3f3;
+  }
+  .navigatorPill {
+    display: inline-block;
+    padding: 6px 9px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.10);
+    margin: 4px 4px 0 0;
+    font-size: 12px;
+    color: #dbe3f3;
+  }
+  .navigatorTask {
+    margin: 8px 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #e5eaf5;
+  }
+</style>
+
 <script>
 (function () {
+  const onboardingSteps = [
+    {
+      title: "Pre-boarding",
+      owner: "HR",
+      involvement: { HR: "Responsible", IT: "Informed", Manager: "Contributor", CEO: "Visibility", Employee: "Participant" },
+      objective: "Create the employee record, confirm documents, and prepare the employee before Day 1.",
+      systems: ["DocuSign", "BambooHR", "Email"],
+      tasks: [
+        "Confirm contract is fully signed",
+        "Create employee profile in BambooHR",
+        "Assign department, role, manager and start date",
+        "Upload signed contract and required documents",
+        "Send welcome email",
+        "Trigger IT provisioning request"
+      ],
+      output: "Employee exists in BambooHR and provisioning is triggered."
+    },
+    {
+      title: "Day 1 Setup",
+      owner: "IT / Operations",
+      involvement: { HR: "Contributor", IT: "Responsible", Manager: "Informed", CEO: "Visibility", Employee: "Participant" },
+      objective: "Ensure accounts, access and equipment are ready before the employee starts.",
+      systems: ["Microsoft 365", "Azure AD", "Slack / Teams", "Jira", "Device Inventory"],
+      tasks: [
+        "Create company email account",
+        "Create Slack / Teams access",
+        "Grant Jira and role-based systems access",
+        "Assign laptop or equipment",
+        "Send secure access instructions",
+        "Confirm login works before Day 1"
+      ],
+      output: "Employee has required access and equipment ready."
+    },
+    {
+      title: "Induction Complete",
+      owner: "HR",
+      involvement: { HR: "Responsible", IT: "Support if access issues", Manager: "Informed", CEO: "Visibility", Employee: "Participant" },
+      objective: "Welcome the employee and explain company tools, policies and where to find support.",
+      systems: ["BambooHR", "Calendar", "Enterprise OS", "Email"],
+      tasks: [
+        "Run HR welcome session",
+        "Explain company structure and expectations",
+        "Review key policies",
+        "Show how to use BambooHR",
+        "Introduce Enterprise OS / Process Browser",
+        "Confirm employee understands next steps"
+      ],
+      output: "Employee understands the company, tools and onboarding path."
+    },
+    {
+      title: "30-Day Check-in",
+      owner: "Manager",
+      involvement: { HR: "Informed / support", IT: "Support if blockers", Manager: "Responsible", CEO: "Visibility", Employee: "Participant" },
+      objective: "Confirm role clarity, performance signals, blockers and early integration.",
+      systems: ["BambooHR", "Calendar", "Jira", "Enterprise OS"],
+      tasks: [
+        "Run manager check-in",
+        "Review first assigned tasks",
+        "Document blockers",
+        "Confirm role expectations",
+        "Update HR if support is needed"
+      ],
+      output: "Employee is progressing with clear role ownership and no critical blockers."
+    },
+    {
+      title: "Probation Passed",
+      owner: "HR / Manager",
+      involvement: { HR: "Responsible", IT: "Informed", Manager: "Responsible", CEO: "Visibility", Employee: "Participant" },
+      objective: "Close onboarding and confirm the employee is active and ready to operate independently.",
+      systems: ["BambooHR", "Jira", "Calendar", "Enterprise OS"],
+      tasks: [
+        "Validate checklist completion",
+        "Confirm training completion",
+        "Collect manager readiness approval",
+        "Collect employee feedback",
+        "Close exceptions",
+        "Mark employee as active / fully onboarded"
+      ],
+      output: "Employee is fully onboarded with evidence archived."
+    }
+  ];
 
-  let activeStep = 1;   // real progress
-  let selectedStep = 1; // what user is viewing
+  let activeStep = 1;
+  let selectedStep = 1;
 
-  function getCircles() {
-    return Array.from(document.querySelectorAll("div"))
-      .filter(el => el.textContent && el.textContent.match(/Pre|Day|Induction|Check|Probation/i));
+  function getRole() {
+    const txt = document.body.innerText;
+    if (txt.includes("HR")) return "HR";
+    if (txt.includes("IT")) return "IT";
+    if (txt.includes("CEO")) return "CEO";
+    if (txt.includes("MGR")) return "Manager";
+    return "HR";
   }
 
-  function updateUI() {
-    const circles = getCircles();
-
-    circles.forEach((el, index) => {
-      const stepIndex = index + 1;
-
-      el.style.cursor = "pointer";
-      el.style.opacity = "1";
-
-      if (stepIndex === activeStep) {
-        el.style.border = "2px solid #00ffc6";
-      } else if (stepIndex < activeStep) {
-        el.style.border = "2px solid rgba(0,255,198,.4)";
-      } else {
-        el.style.border = "1px solid rgba(255,255,255,.15)";
-      }
-
-      if (stepIndex === selectedStep) {
-        el.style.boxShadow = "0 0 0 2px rgba(140,120,255,.6)";
-      } else {
-        el.style.boxShadow = "none";
-      }
-
-      el.onclick = () => {
-        selectedStep = stepIndex;
-        renderStepGuide(stepIndex);
-        updateUI();
-      };
-    });
+  function getRightPanel() {
+    const candidates = Array.from(document.querySelectorAll("div, aside, section"))
+      .filter(el => {
+        const r = el.getBoundingClientRect();
+        return r.left > window.innerWidth * 0.62 && r.width > 220 && r.height > 400;
+      })
+      .sort((a,b) => b.getBoundingClientRect().height - a.getBoundingClientRect().height);
+    return candidates[0] || document.body;
   }
 
-  function renderStepGuide(stepIndex) {
-    const panel = document.querySelector("[class*='Action']") || document.body;
+  function renderGuide(index) {
+    selectedStep = index;
+    const step = onboardingSteps[index - 1];
+    const role = getRole();
+    const panel = getRightPanel();
 
     panel.innerHTML = `
-      <div style="padding:20px;">
-        <h2>Step ${stepIndex}</h2>
-        <p>Viewing step (navigation mode)</p>
-
-        <div style="margin-top:10px; font-size:13px; color:#9aa4b2;">
-          Active Step: ${activeStep} <br/>
-          Selected Step: ${selectedStep}
+      <div class="navigatorGuide">
+        <div class="navigatorLabel">Navigator Mode · ${role} View</div>
+        <div class="navigatorTitle">${index}. ${step.title}</div>
+        <div class="navigatorMuted">
+          <strong>Active step:</strong> ${activeStep} · <strong>Selected step:</strong> ${selectedStep}<br>
+          <strong>Owner:</strong> ${step.owner}<br>
+          <strong>Your involvement:</strong> ${step.involvement[role] || "Visibility"}
         </div>
 
-        <hr style="margin:15px 0; border-color:rgba(255,255,255,.1)">
+        <div class="navigatorSection">
+          <h4>Objective</h4>
+          <div class="navigatorMuted">${step.objective}</div>
+        </div>
 
-        <p>This is where tasks, systems, inputs, outputs, involvement, etc will render.</p>
+        <div class="navigatorSection">
+          <h4>Systems</h4>
+          ${step.systems.map(s => `<span class="navigatorPill">${s}</span>`).join("")}
+        </div>
+
+        <div class="navigatorSection">
+          <h4>Tasks to complete</h4>
+          ${step.tasks.map(t => `<div class="navigatorTask">☐ ${t}</div>`).join("")}
+        </div>
+
+        <div class="navigatorSection">
+          <h4>Expected output</h4>
+          <div class="navigatorMuted">${step.output}</div>
+        </div>
       </div>
     `;
   }
 
-  function init() {
-    selectedStep = activeStep;
-    updateUI();
+  function bindCircles() {
+    onboardingSteps.forEach((step, idx) => {
+      const all = Array.from(document.querySelectorAll("div, span, p, button"));
+      all.forEach(el => {
+        const clean = (el.textContent || "").trim().toLowerCase();
+        if (clean === step.title.toLowerCase()) {
+          el.style.cursor = "pointer";
+          el.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            renderGuide(idx + 1);
+          };
+        }
+      });
+    });
+
+    Array.from(document.querySelectorAll("button, a, div")).forEach(el => {
+      const txt = (el.textContent || "").toLowerCase();
+      if (txt.includes("view full process")) {
+        el.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          renderGuide(selectedStep);
+        };
+      }
+    });
   }
 
-  window.addEventListener("load", init);
-
+  window.addEventListener("load", () => {
+    bindCircles();
+    renderGuide(activeStep);
+  });
 })();
 </script>
-<!-- END NAVIGATION UNLOCK PATCH -->
+<!-- END REAL ONBOARDING NAVIGATOR PATCH -->
 
 </body>
 </html>
