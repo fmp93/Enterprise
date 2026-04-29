@@ -1,0 +1,139 @@
+{
+  "process": {
+    "id": "hr_onboarding_v1",
+    "name": "Employee Onboarding",
+    "domain": "HR",
+    "trigger": "Contract Signed",
+    "goal": "Employee becomes fully operational, trained, and active"
+  },
+  "state_machine": [
+    {
+      "state": "Contract Signed",
+      "trigger": "DocuSign Completed",
+      "next_state": "Pre-Onboarding",
+      "action": "Create employee record in BambooHR",
+      "owner": "HR"
+    },
+    {
+      "state": "Pre-Onboarding",
+      "trigger": "Employee Created",
+      "next_state": "Provisioning",
+      "action": "Send welcome email and collect personal info",
+      "owner": "HR"
+    },
+    {
+      "state": "Provisioning",
+      "trigger": "Info Received",
+      "next_state": "Ready Day 1",
+      "action": "Create accounts and assign tools",
+      "owner": "IT"
+    },
+    {
+      "state": "Ready Day 1",
+      "trigger": "Start Date",
+      "next_state": "Day 1 Active",
+      "action": "Execute onboarding session",
+      "owner": "HR"
+    },
+    {
+      "state": "Day 1 Active",
+      "trigger": "Session Completed",
+      "next_state": "Training",
+      "action": "Assign training modules",
+      "owner": "HR"
+    },
+    {
+      "state": "Training",
+      "trigger": "Training Completed",
+      "next_state": "Active Employee",
+      "action": "Manager confirms readiness",
+      "owner": "Manager"
+    }
+  ],
+  "subprocesses": [
+    {
+      "name": "Pre-Onboarding",
+      "tasks": [
+        "Create employee in BambooHR",
+        "Upload signed contract",
+        "Assign manager",
+        "Send welcome email"
+      ]
+    },
+    {
+      "name": "Provisioning",
+      "tasks": [
+        "Create email account",
+        "Create Slack account",
+        "Grant system access",
+        "Assign laptop"
+      ]
+    },
+    {
+      "name": "Day 1",
+      "tasks": [
+        "HR onboarding session",
+        "Company overview",
+        "Tools walkthrough"
+      ]
+    },
+    {
+      "name": "Training",
+      "tasks": [
+        "Assign training modules",
+        "Assign mentor",
+        "Schedule check-ins"
+      ]
+    },
+    {
+      "name": "Activation",
+      "tasks": [
+        "Manager approval",
+        "Close onboarding",
+        "Mark employee active"
+      ]
+    }
+  ],
+  "checklists": {
+    "HR": [
+      "Employee created in BambooHR",
+      "Contract uploaded",
+      "Welcome email sent",
+      "Training assigned",
+      "Onboarding session completed"
+    ],
+    "IT": [
+      "Email created",
+      "Slack access granted",
+      "Systems access configured",
+      "Laptop assigned"
+    ],
+    "Manager": [
+      "Role explained",
+      "Tasks assigned",
+      "Check-ins scheduled",
+      "Readiness confirmed"
+    ],
+    "Employee": [
+      "Contract signed",
+      "Personal info submitted",
+      "Tools accessed",
+      "Training completed",
+      "Manager met"
+    ]
+  },
+  "systems": [
+    "BambooHR",
+    "DocuSign",
+    "Slack",
+    "Google Workspace",
+    "Jira"
+  ],
+  "risks": [
+    "No access on Day 1",
+    "Laptop not delivered",
+    "No manager assigned",
+    "Training missing",
+    "Wrong permissions"
+  ]
+}
