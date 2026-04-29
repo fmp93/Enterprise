@@ -3276,5 +3276,174 @@ setTimeout(()=>{
 </script>
 <!-- END VERSION 04/29 PART 5: TASK ACTION GUIDE -->
 
+
+<!-- VERSION 04/29 PART 6: ROLE AWARENESS -->
+<style>
+  .v0429RoleBar {
+    margin: 12px 0 16px;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(124,58,237,.12);
+    border: 1px solid rgba(124,58,237,.28);
+  }
+
+  .v0429RoleLabel {
+    color: #c4b5fd;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .v0429RoleText {
+    color: white;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .v0429AreaCard.v0429MyArea {
+    border-color: rgba(0,255,198,.45);
+    background: rgba(0,255,198,.08);
+    box-shadow: 0 0 0 1px rgba(0,255,198,.12);
+  }
+
+  .v0429YouBadge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: rgba(0,255,198,.16);
+    color: #b9fff0;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+</style>
+
+<script>
+(function () {
+  function getCurrentRole0429() {
+    const selected = Array.from(document.querySelectorAll("button, div, span, a"))
+      .find(el => {
+        const txt = (el.textContent || "").trim().toLowerCase();
+        const cls = (el.className || "").toString().toLowerCase();
+        return (
+          ["hr", "it", "manager", "employee", "ceo"].includes(txt) &&
+          (
+            cls.includes("active") ||
+            cls.includes("selected") ||
+            getComputedStyle(el).backgroundColor !== "rgba(0, 0, 0, 0)"
+          )
+        );
+      });
+
+    if (selected) {
+      const txt = selected.textContent.trim();
+      if (txt.toLowerCase() === "manager") return "Manager";
+      if (txt.toLowerCase() === "employee") return "Employee";
+      if (txt.toLowerCase() === "ceo") return "CEO";
+      if (txt.toLowerCase() === "it") return "IT";
+      if (txt.toLowerCase() === "hr") return "HR";
+    }
+
+    const body = document.body.innerText;
+    if (body.includes("View as HR")) return "HR";
+    return localStorage.getItem("v0429Role") || "HR";
+  }
+
+  function roleMatchesArea(role, area) {
+    const r = role.toLowerCase();
+    const a = area.toLowerCase();
+
+    if (r === "hr" && a.includes("hr")) return true;
+    if (r === "it" && (a.includes("it") || a.includes("operations"))) return true;
+    if (r === "manager" && a.includes("manager")) return true;
+    if (r === "employee" && a.includes("employee")) return true;
+    if (r === "ceo" && (a.includes("ceo") || a.includes("leadership"))) return true;
+
+    return false;
+  }
+
+  function applyRoleAwareness0429() {
+    const role = getCurrentRole0429();
+    localStorage.setItem("v0429Role", role);
+
+    const panelTitle = document.querySelector(".v0429PanelTitle");
+    if (!panelTitle) return;
+
+    const areaCards = Array.from(document.querySelectorAll(".v0429AreaCard"));
+    if (!areaCards.length) return;
+
+    let matchedRole = "Visibility";
+    let matchedArea = "No direct area ownership";
+
+    areaCards.forEach(card => {
+      card.classList.remove("v0429MyArea");
+
+      const top = card.querySelector(".v0429AreaTop");
+      if (!top) return;
+
+      const areaName = top.children[0]?.textContent?.trim() || "";
+      const roleName = top.children[1]?.textContent?.trim() || "Visibility";
+
+      const oldBadge = top.querySelector(".v0429YouBadge");
+      if (oldBadge) oldBadge.remove();
+
+      if (roleMatchesArea(role, areaName)) {
+        card.classList.add("v0429MyArea");
+        matchedRole = roleName;
+        matchedArea = areaName;
+
+        const badge = document.createElement("span");
+        badge.className = "v0429YouBadge";
+        badge.textContent = "You";
+        top.children[0].appendChild(badge);
+      }
+    });
+
+    let roleBar = document.getElementById("v0429RoleBar");
+    if (!roleBar) {
+      roleBar = document.createElement("div");
+      roleBar.id = "v0429RoleBar";
+      roleBar.className = "v0429RoleBar";
+      panelTitle.insertAdjacentElement("afterend", roleBar);
+    }
+
+    roleBar.innerHTML = `
+      <div class="v0429RoleLabel">Role Awareness</div>
+      <div class="v0429RoleText">
+        Viewing as: <strong>${role}</strong><br>
+        Your involvement here: <strong>${matchedRole}</strong><br>
+        Area matched: <strong>${matchedArea}</strong>
+      </div>
+    `;
+  }
+
+  function bindRoleTabs0429() {
+    Array.from(document.querySelectorAll("button, div, span, a")).forEach(el => {
+      const txt = (el.textContent || "").trim().toLowerCase();
+      if (["hr", "it", "manager", "employee", "ceo"].includes(txt)) {
+        el.addEventListener("click", () => {
+          const role = txt === "it" ? "IT" : txt.charAt(0).toUpperCase() + txt.slice(1);
+          localStorage.setItem("v0429Role", role);
+          setTimeout(applyRoleAwareness0429, 150);
+        });
+      }
+    });
+  }
+
+  window.addEventListener("load", () => {
+    bindRoleTabs0429();
+    setInterval(applyRoleAwareness0429, 700);
+  });
+
+  document.addEventListener("click", () => {
+    setTimeout(applyRoleAwareness0429, 150);
+  });
+})();
+</script>
+<!-- END VERSION 04/29 PART 6: ROLE AWARENESS -->
+
 </body>
 </html>
