@@ -3597,5 +3597,121 @@ setTimeout(()=>{
 </script>
 <!-- END VERSION 04/29 PART 7: NON-BLOCKING PROGRESS -->
 
+
+<!-- VERSION 04/29 PART 8: STATE PROGRESS SUMMARY -->
+<style>
+  .v0429StateProgress {
+    margin-top: 8px;
+    height: 7px;
+    background: rgba(255,255,255,.10);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .v0429StateProgressFill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #8b5cf6, #00ffc6);
+    border-radius: 999px;
+  }
+
+  .v0429StatePercent {
+    margin-top: 6px;
+    color: #9aa4b2;
+    font-size: 12px;
+  }
+
+  .v0429StateComplete {
+    border-color: rgba(0,255,198,.35) !important;
+    background: rgba(0,255,198,.07) !important;
+  }
+</style>
+
+<script>
+(function () {
+  const stateTaskCounts0429 = {
+    "Pre-boarding": 10,
+    "Day 1 Setup": 14,
+    "Induction Complete": 10,
+    "30-Day Check-in": 10,
+    "Probation Passed": 11
+  };
+
+  function getDoneMap0429() {
+    return JSON.parse(localStorage.getItem("v0429DoneTasks") || "{}");
+  }
+
+  function getStateProgress0429(stateName) {
+    const doneMap = getDoneMap0429();
+    const keys = Object.keys(doneMap).filter(k => k.includes(`v0429:${stateName}:`) && doneMap[k]);
+    const total = stateTaskCounts0429[stateName] || 1;
+    const done = Math.min(keys.length, total);
+    const percent = Math.round((done / total) * 100);
+    return { done, total, percent };
+  }
+
+  function enhanceFullProcessProgress0429() {
+    const cards = Array.from(document.querySelectorAll(".v0429StateCard"));
+    if (!cards.length) return;
+
+    cards.forEach(card => {
+      const stateName = Object.keys(stateTaskCounts0429).find(name =>
+        (card.textContent || "").includes(name)
+      );
+
+      if (!stateName) return;
+
+      const progress = getStateProgress0429(stateName);
+      const old = card.querySelector(".v0429StateProgressWrap");
+      if (old) old.remove();
+
+      if (progress.percent === 100) {
+        card.classList.add("v0429StateComplete");
+      } else {
+        card.classList.remove("v0429StateComplete");
+      }
+
+      const wrap = document.createElement("div");
+      wrap.className = "v0429StateProgressWrap";
+      wrap.innerHTML = `
+        <div class="v0429StateProgress">
+          <div class="v0429StateProgressFill" style="width:${progress.percent}%"></div>
+        </div>
+        <div class="v0429StatePercent">${progress.done}/${progress.total} tasks completed · ${progress.percent}%</div>
+      `;
+
+      card.appendChild(wrap);
+    });
+  }
+
+  function patchRenderFullProcess0429() {
+    const oldRender = window.renderFullProcess0429;
+    if (!oldRender || oldRender._progressPatched) return;
+
+    window.renderFullProcess0429 = function () {
+      oldRender();
+      setTimeout(enhanceFullProcessProgress0429, 100);
+    };
+
+    window.renderFullProcess0429._progressPatched = true;
+  }
+
+  window.addEventListener("load", () => {
+    setInterval(() => {
+      patchRenderFullProcess0429();
+      enhanceFullProcessProgress0429();
+    }, 700);
+  });
+
+  document.addEventListener("click", () => {
+    setTimeout(() => {
+      patchRenderFullProcess0429();
+      enhanceFullProcessProgress0429();
+    }, 200);
+  });
+})();
+</script>
+<!-- END VERSION 04/29 PART 8: STATE PROGRESS SUMMARY -->
+
 </body>
 </html>
