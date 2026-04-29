@@ -2563,22 +2563,31 @@ setTimeout(()=>{
 <!-- END ONBOARDING SANDBOX MODULE -->
 
 
-
 <!-- ONBOARDING PROCESS ENGINE PATCH -->
 <style>
-  .osActionGuideContent {
-    padding: 28px;
+  .osDrawerPanel {
+    position: fixed;
+    top: 92px;
+    right: 0;
+    width: 382px;
+    height: calc(100vh - 92px);
+    z-index: 99998;
+    background: #0d1020;
+    border-left: 1px solid rgba(255,255,255,.10);
     color: white;
+    padding: 22px;
+    overflow-y: auto;
+    box-shadow: -30px 0 80px rgba(0,0,0,.35);
   }
-  .osGuideTitle {
-    font-size: 24px;
-    font-weight: 850;
+  .osDrawerTitle {
+    font-size: 20px;
+    font-weight: 800;
     margin-bottom: 8px;
   }
-  .osGuideMuted {
-    color: #9aa4b2;
-    font-size: 14px;
-    line-height: 1.5;
+  .osDrawerMuted {
+    color: #8f9bad;
+    font-size: 13px;
+    line-height: 1.45;
     margin-bottom: 18px;
   }
   .osStepBlock {
@@ -2722,150 +2731,136 @@ setTimeout(()=>{
     return processData.steps.length;
   }
 
-  function getRightColumn() {
-    const candidates = Array.from(document.querySelectorAll("aside, section, div"))
-      .filter(el => {
-        const rect = el.getBoundingClientRect();
-        return rect.width > 250 && rect.height > 400 && rect.left > window.innerWidth * 0.55;
-      })
-      .sort((a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width);
+  function renderDrawer() {
+    let drawer = document.getElementById("osDrawerPanel");
+    if (!drawer) {
+      drawer = document.createElement("div");
+      drawer.id = "osDrawerPanel";
+      drawer.className = "osDrawerPanel";
+      document.body.appendChild(drawer);
+    }
 
-    return candidates[0] || document.body;
-  }
+    const activeIndex = selectedStep - 1;
+    const activeStep = processData.steps[activeIndex];
 
-  function renderProcessScope() {
-    selectedStep = Number(localStorage.getItem("onboardingSelectedStep") || selectedStep);
-    const col = getRightColumn();
-    col.innerHTML = `
-      <div class="osActionGuideContent">
-        <div class="osGuideTitle">${processData.name}</div>
-        <div class="osGuideMuted">
-          Full process scope. Click any state to inspect future steps. Completing all tasks advances the process.
-        </div>
+    drawer.innerHTML = `
+      <div class="osDrawerTitle">${processData.name}</div>
+      <div class="osDrawerMuted">
+        Full process scope. You can navigate every future state, but the active step remains visually clear.
+      </div>
 
-        ${processData.steps.map((step, index) => {
-          const done = stepDone(index);
-          const active = index === selectedStep - 1;
-          return `
-            <div class="osStepBlock ${active ? "active" : ""} ${done ? "done" : ""}" data-os-step="${index + 1}">
-              <div class="osStepHeader">
-                <span>${index + 1}. ${step.title}</span>
-                <span class="osStepStatus">${done ? "Completed" : active ? "Current View" : "Future State"}</span>
-              </div>
-              <div class="osGuideMuted">Owner: ${step.owner}</div>
+      ${processData.steps.map((step, index) => {
+        const done = stepDone(index);
+        const active = index === activeIndex;
+        return `
+          <div class="osStepBlock ${active ? "active" : ""} ${done ? "done" : ""}" data-os-step="${index + 1}">
+            <div class="osStepHeader">
+              <span>${index + 1}. ${step.title}</span>
+              <span class="osStepStatus">${done ? "Completed" : active ? "Current View" : "Future State"}</span>
             </div>
+            <div class="osDrawerMuted">Owner: ${step.owner}</div>
+          </div>
+        `;
+      }).join("")}
+
+      <hr style="border-color:rgba(255,255,255,.08); margin:18px 0;">
+
+      <div class="osDrawerTitle">${selectedStep}. ${activeStep.title}</div>
+      <div class="osDrawerMuted">Owner: ${activeStep.owner}</div>
+      <div>
+        ${activeStep.systems.map(s => `<span class="osPill">${s}</span>`).join("")}
+      </div>
+
+      <div style="margin-top:16px;">
+        ${activeStep.tasks.map((task, taskIndex) => {
+          const key = `${activeIndex}-${taskIndex}`;
+          return `
+            <label class="osTask">
+              <input type="checkbox" data-task-key="${key}" ${completed[key] ? "checked" : ""}>
+              <span>${task}</span>
+            </label>
           `;
         }).join("")}
       </div>
     `;
 
-    col.querySelectorAll("[data-os-step]").forEach(el => {
+    drawer.querySelectorAll("[data-os-step]").forEach(el => {
       el.onclick = () => {
         selectedStep = Number(el.dataset.osStep);
         save();
-        renderStepGuide();
+        renderDrawer();
+        highlightFlow();
       };
     });
-  }
 
-  function renderStepGuide() {
-    const col = getRightColumn();
-    const index = selectedStep - 1;
-    const step = processData.steps[index];
-
-    col.innerHTML = `
-      <div class="osActionGuideContent">
-        <div class="osGuideMuted">Action Guide · Employee Onboarding</div>
-        <div class="osGuideTitle">${selectedStep}. ${step.title}</div>
-        <div class="osGuideMuted">Owner: ${step.owner}</div>
-
-        <div style="margin-bottom:18px;">
-          ${step.systems.map(s => `<span class="osPill">${s}</span>`).join("")}
-        </div>
-
-        <div>
-          ${step.tasks.map((task, taskIndex) => {
-            const key = `${index}-${taskIndex}`;
-            return `
-              <label class="osTask">
-                <input type="checkbox" data-task-key="${key}" ${completed[key] ? "checked" : ""}>
-                <span>${task}</span>
-              </label>
-            `;
-          }).join("")}
-        </div>
-
-        <button id="osBackToScope" style="
-          margin-top:18px;
-          width:100%;
-          border:1px solid rgba(255,255,255,.15);
-          background:rgba(255,255,255,.06);
-          color:white;
-          padding:12px;
-          border-radius:14px;
-          font-weight:800;
-          cursor:pointer;
-        ">View Full Process Scope</button>
-      </div>
-    `;
-
-    col.querySelector("#osBackToScope").onclick = renderProcessScope;
-
-    col.querySelectorAll("[data-task-key]").forEach(box => {
+    drawer.querySelectorAll("[data-task-key]").forEach(box => {
       box.onchange = () => {
         completed[box.dataset.taskKey] = box.checked;
-
         const currentIndex = selectedStep - 1;
+
         if (stepDone(currentIndex) && selectedStep < processData.steps.length) {
           selectedStep++;
         }
 
         save();
-        renderStepGuide();
+        renderDrawer();
+        highlightFlow();
       };
+    });
+  }
+
+  function highlightFlow() {
+    const textMap = processData.steps.map(s => s.title.toLowerCase());
+
+    document.querySelectorAll("body *").forEach(el => {
+      const txt = (el.textContent || "").trim().toLowerCase();
+
+      if (textMap.includes(txt)) {
+        el.style.cursor = "pointer";
+        el.onclick = () => {
+          selectedStep = textMap.indexOf(txt) + 1;
+          save();
+          renderDrawer();
+          highlightFlow();
+        };
+
+        if (txt === processData.steps[selectedStep - 1].title.toLowerCase()) {
+          el.style.opacity = "1";
+          el.style.filter = "none";
+        } else {
+          el.style.opacity = ".75";
+          el.style.filter = "none";
+        }
+      }
     });
   }
 
   function bindButtons() {
     document.querySelectorAll("button, a, div").forEach(el => {
       const txt = (el.textContent || "").toLowerCase();
-
-      if (txt.includes("view full process") || txt.includes("open onboarding process") || txt.includes("full process")) {
+      if (
+        txt.includes("view full process") ||
+        txt.includes("open onboarding process") ||
+        txt.includes("full process")
+      ) {
         el.onclick = (e) => {
           e.preventDefault();
-          e.stopPropagation();
-          renderProcessScope();
+          renderDrawer();
+          highlightFlow();
         };
       }
-
-      processData.steps.forEach((step, index) => {
-        if (txt.trim() === step.title.toLowerCase()) {
-          el.style.cursor = "pointer";
-          el.onclick = () => {
-            selectedStep = index + 1;
-            save();
-            renderStepGuide();
-          };
-        }
-      });
     });
   }
 
   window.addEventListener("load", () => {
     selectedStep = firstIncompleteStep();
     save();
-
-    const oldFloating = Array.from(document.querySelectorAll("button, div, a"))
-      .find(el => (el.textContent || "").trim().toLowerCase() === "open onboarding process");
-
-    if (oldFloating) oldFloating.style.display = "none";
-
     bindButtons();
+    highlightFlow();
   });
 })();
 </script>
 <!-- END ONBOARDING PROCESS ENGINE PATCH -->
-
 
 </body>
 </html>
