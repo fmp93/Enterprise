@@ -187,6 +187,179 @@
 
 
 
+
+    .flow-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 18px;
+    }
+
+    .flow-sidebar {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .flow-item {
+      border: 1px solid #d0d5dd;
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .flow-item strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .flow-item span {
+      color: #667085;
+      font-size: 12px;
+    }
+
+    .flow-item.active-flow {
+      background: #101828;
+      color: white;
+      border-color: #101828;
+    }
+
+    .flow-item.active-flow span {
+      color: #d0d5dd;
+    }
+
+    .flow-main {
+      border: 1px solid #eaecf0;
+      border-radius: 24px;
+      padding: 22px;
+      background: #fcfcfd;
+    }
+
+    .breadcrumb {
+      color: #667085;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .flow-title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .flow-title-row h3 {
+      margin: 0 0 6px;
+      font-size: 24px;
+    }
+
+    .flow-title-row p {
+      margin: 0;
+      color: #667085;
+      font-size: 13px;
+    }
+
+    .flow-title-row button {
+      border: 0;
+      background: #101828;
+      color: white;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-family: inherit;
+    }
+
+    .flow-deep-chain {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+    }
+
+    .deep-node {
+      min-height: 74px;
+      border: 1px solid #d0d5dd;
+      background: white;
+      border-radius: 18px;
+      padding: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-family: inherit;
+    }
+
+    .deep-node.done {
+      background: #ecfdf3;
+      border-color: #abefc6;
+      color: #027a48;
+    }
+
+    .deep-node.active {
+      background: #eff8ff;
+      border-color: #b2ddff;
+      color: #175cd3;
+    }
+
+    .deep-node.risk {
+      background: #fffaeb;
+      border-color: #fedf89;
+      color: #b54708;
+    }
+
+    .state-table {
+      display: grid;
+      gap: 8px;
+    }
+
+    .state-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.3fr 1.4fr 0.8fr;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid #eaecf0;
+      border-radius: 14px;
+      background: white;
+      font-size: 13px;
+      align-items: center;
+    }
+
+    .state-row.header {
+      background: #f2f4f7;
+      color: #475467;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .ok {
+      color: #027a48;
+      font-weight: 800;
+    }
+
+    .active-state {
+      color: #175cd3;
+      font-weight: 800;
+    }
+
+    .wait {
+      color: #b54708;
+      font-weight: 800;
+    }
+
+    @media (max-width: 900px) {
+      .flow-layout,
+      .flow-deep-chain,
+      .state-row {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-title-row {
+        flex-direction: column;
+      }
+    }
+
     .task-list {
       display: grid;
       gap: 12px;
@@ -862,26 +1035,137 @@
         <div class="panel-header">
           <div>
             <h2>Flow Navigator</h2>
-            <p>This is the core process navigator. Here we will model taxonomy from domain to process, subprocess, task, owner, state and completion.</p>
+            <p>The deep process navigator. This is where taxonomy, ownership, subprocesses, states, tasks and completion logic live.</p>
           </div>
+          <div class="status-pill">Flow · Process logic</div>
         </div>
 
-        <div class="flow-placeholder">
-          <strong>Example taxonomy path</strong>
+        <div class="flow-layout">
+          <aside class="flow-sidebar">
+            <button class="flow-item active-flow" onclick="loadFlow('HR', 'Onboarding', 'New Employee Onboarding', 'HR → Onboarding → Pre-boarding → Account Setup → App Access → Completed')">
+              <strong>HR</strong>
+              <span>Onboarding</span>
+            </button>
 
-          <div class="flow-chain">
-            <div class="node">Enterprise</div>
-            <div class="arrow">→</div>
-            <div class="node">HR</div>
-            <div class="arrow">→</div>
-            <div class="node">Onboarding</div>
-            <div class="arrow">→</div>
-            <div class="node">Pre-boarding</div>
-            <div class="arrow">→</div>
-            <div class="node">Create accounts</div>
-            <div class="arrow">→</div>
-            <div class="node">Done</div>
-          </div>
+            <button class="flow-item" onclick="loadFlow('Finance', 'Billing', 'Invoice Creation & Validation', 'Finance → Billing → Invoice Creation → Validation → Sending → AR Tracking')">
+              <strong>Finance</strong>
+              <span>Billing</span>
+            </button>
+
+            <button class="flow-item" onclick="loadFlow('IT Operations', 'Applications & Software', 'Controlled Software Request', 'IT → Applications & Software → Request → Approval → Intune Deployment → Completed')">
+              <strong>IT Operations</strong>
+              <span>Applications & Software</span>
+            </button>
+
+            <button class="flow-item" onclick="loadFlow('Delivery', 'Project Setup', 'SOW-to-Delivery Handoff', 'Delivery → Handoff → Readiness Check → Kickoff → Execution')">
+              <strong>Delivery</strong>
+              <span>Project Setup</span>
+            </button>
+          </aside>
+
+          <section class="flow-main">
+            <div class="breadcrumb" id="flowBreadcrumb">Enterprise OS / HR / Onboarding</div>
+
+            <div class="flow-title-row">
+              <div>
+                <h3 id="flowTitle">New Employee Onboarding</h3>
+                <p id="flowPath">HR → Onboarding → Pre-boarding → Account Setup → App Access → Completed</p>
+              </div>
+              <button onclick="openDetail('Flow Object', 'This process is modeled as an object moving through states. Each state has owners, conditions, actions and tasks.')">Object logic</button>
+            </div>
+
+            <div class="flow-deep-chain">
+              <button class="deep-node done" onclick="openDetail('Previous Process', 'Recruiting & Hiring completed. This triggers onboarding.')">Previous Process</button>
+              <button class="deep-node done" onclick="openDetail('Domain', 'Domain: HR. Responsible for employee lifecycle processes.')">Domain</button>
+              <button class="deep-node active" onclick="openDetail('Main Process', 'Main process: Onboarding. Starts when candidate is accepted or employee record is created.')">Main Process</button>
+              <button class="deep-node" onclick="openDetail('Subprocess', 'Pre-boarding includes documentation, employee data validation and start-date readiness.')">Subprocess</button>
+              <button class="deep-node risk" onclick="openDetail('Task', 'Create accounts. Owner: IT. Condition: employee data and start date confirmed.')">Task</button>
+              <button class="deep-node" onclick="openDetail('Next Process', 'Employee Management starts after onboarding is completed.')">Next Process</button>
+            </div>
+
+            <div class="section-title">State Machine</div>
+
+            <div class="state-table">
+              <div class="state-row header">
+                <span>State</span>
+                <span>Owner</span>
+                <span>Trigger</span>
+                <span>Action</span>
+                <span>Status</span>
+              </div>
+
+              <div class="state-row">
+                <span>Requested</span>
+                <span>HR</span>
+                <span>Candidate accepted</span>
+                <span>Create onboarding case</span>
+                <span class="ok">Done</span>
+              </div>
+
+              <div class="state-row">
+                <span>Validated</span>
+                <span>HR</span>
+                <span>Data complete</span>
+                <span>Confirm employee profile</span>
+                <span class="ok">Done</span>
+              </div>
+
+              <div class="state-row">
+                <span>Account Setup</span>
+                <span>IT</span>
+                <span>HR validation complete</span>
+                <span>Create user/account</span>
+                <span class="active-state">In progress</span>
+              </div>
+
+              <div class="state-row">
+                <span>App Access</span>
+                <span>IT + Manager</span>
+                <span>Account created</span>
+                <span>Assign required apps</span>
+                <span class="wait">Waiting</span>
+              </div>
+
+              <div class="state-row">
+                <span>Completed</span>
+                <span>System</span>
+                <span>All tasks checked</span>
+                <span>Move to Employee Management</span>
+                <span class="wait">Waiting</span>
+              </div>
+            </div>
+
+            <div class="section-title">Tasks to Complete Current State</div>
+
+            <div class="task-list">
+              <div class="task-row">
+                <div>
+                  <span class="tag">Current State · Account Setup</span>
+                  <strong>Create Microsoft 365 account</strong>
+                  <p>Owner: IT Admin · Required before app access.</p>
+                </div>
+                <button onclick="markDone(this)">Mark done</button>
+              </div>
+
+              <div class="task-row">
+                <div>
+                  <span class="tag">Current State · Account Setup</span>
+                  <strong>Assign security group</strong>
+                  <p>Owner: IT Admin · Based on role and department.</p>
+                </div>
+                <button onclick="markDone(this)">Mark done</button>
+              </div>
+
+              <div class="task-row">
+                <div>
+                  <span class="tag">Next State · App Access</span>
+                  <strong>Validate required applications</strong>
+                  <p>Owner: Manager · Required for software provisioning.</p>
+                </div>
+                <button onclick="markDone(this)">Mark done</button>
+              </div>
+            </div>
+          </section>
         </div>
       </section>
     </main>
@@ -904,6 +1188,19 @@
     });
 
 
+
+
+    function loadFlow(domain, process, title, pathText) {
+      document.getElementById('flowBreadcrumb').textContent = 'Enterprise OS / ' + domain + ' / ' + process;
+      document.getElementById('flowTitle').textContent = title;
+      document.getElementById('flowPath').textContent = pathText;
+
+      document.querySelectorAll('.flow-item').forEach(item => {
+        item.classList.remove('active-flow');
+      });
+
+      event.currentTarget.classList.add('active-flow');
+    }
 
     function markDone(button) {
       const row = button.closest('.task-row');
