@@ -188,6 +188,80 @@
 
 
 
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .ghost-link {
+      text-decoration: none;
+      color: #344054;
+      background: white;
+      border: 1px solid #d0d5dd;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .view-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .view-actions button {
+      border: 1px solid #d0d5dd;
+      background: white;
+      color: #101828;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-family: inherit;
+    }
+
+    .card,
+    .tab,
+    .domain-card,
+    .flow-item,
+    .case-table button,
+    .risk-list button,
+    .task-row,
+    .deep-node,
+    .spine-node {
+      transition: 0.18s ease;
+    }
+
+    .case-table button:hover,
+    .risk-list button:hover,
+    .flow-item:hover,
+    .deep-node:hover,
+    .spine-node:hover,
+    .task-row:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(16, 24, 40, 0.07);
+    }
+
+    .completion-banner {
+      margin-top: 20px;
+      border: 1px solid #abefc6;
+      background: #ecfdf3;
+      color: #027a48;
+      padding: 16px;
+      border-radius: 18px;
+      font-weight: 700;
+      display: none;
+    }
+
+    .completion-banner.active {
+      display: block;
+    }
+
     .flow-layout {
       display: grid;
       grid-template-columns: 260px 1fr;
@@ -744,7 +818,11 @@
         <h1>Navigator Flow</h1>
         <p>Enterprise OS sandbox for role dashboards and deep process navigation.</p>
       </div>
-      <div class="status-pill">Sandbox active</div>
+      <div class="top-actions">
+        <a href="/Enterprise/" class="ghost-link">Landing</a>
+        <a href="/Enterprise/demo/" class="ghost-link">Main Demo</a>
+        <div class="status-pill">Sandbox active</div>
+      </div>
     </header>
 
     <nav class="tabs">
@@ -776,7 +854,10 @@
             <h2>CEO Dashboard</h2>
             <p>Executive command view for company health, revenue movement, operational risks, pending decisions and cross-domain bottlenecks.</p>
           </div>
-          <div class="status-pill">CEO View · Live sample</div>
+          <div class="view-actions">
+            <button onclick="switchView('domain')">Open Domains</button>
+            <button onclick="switchView('flow')">Open Flow</button>
+          </div>
         </div>
 
         <div class="grid">
@@ -862,7 +943,10 @@
             <h2>Domain Dashboard</h2>
             <p>Area-level command view. Each domain shows active processes, owners, live cases, risk level and what needs attention.</p>
           </div>
-          <div class="status-pill">Domain View · Live sample</div>
+          <div class="view-actions">
+            <button onclick="switchView('user')">Open User Work</button>
+            <button onclick="switchView('flow')">Open Flow</button>
+          </div>
         </div>
 
         <div class="domain-grid">
@@ -947,7 +1031,10 @@
             <h2>User Dashboard</h2>
             <p>Personal execution view. The user only sees what needs action: tasks, approvals, running cases and next steps.</p>
           </div>
-          <div class="status-pill">User View · Live sample</div>
+          <div class="view-actions">
+            <button onclick="switchView('ceo')">CEO Summary</button>
+            <button onclick="switchView('flow')">Open Flow</button>
+          </div>
         </div>
 
         <div class="grid">
@@ -1018,7 +1105,7 @@
               <h3>New Employee Onboarding</h3>
               <p class="muted">The user sees only the active path, not the full technical state machine.</p>
             </div>
-            <button onclick="openDetail('View in Flow', 'This would open the full taxonomy path inside Flow: HR → Onboarding → Pre-boarding → Account Creation → App Access → Completed.')">Open in Flow</button>
+            <button onclick="switchView('flow')">Open in Flow</button>
           </div>
 
           <div class="progress-chain">
@@ -1037,7 +1124,10 @@
             <h2>Flow Navigator</h2>
             <p>The deep process navigator. This is where taxonomy, ownership, subprocesses, states, tasks and completion logic live.</p>
           </div>
-          <div class="status-pill">Flow · Process logic</div>
+          <div class="view-actions">
+            <button onclick="switchView('ceo')">CEO View</button>
+            <button onclick="switchView('domain')">Domain View</button>
+          </div>
         </div>
 
         <div class="flow-layout">
@@ -1165,6 +1255,10 @@
                 <button onclick="markDone(this)">Mark done</button>
               </div>
             </div>
+
+            <div class="completion-banner" id="completionBanner">
+              Current state completed. Next state can now move forward.
+            </div>
           </section>
         </div>
       </section>
@@ -1190,6 +1284,34 @@
 
 
 
+
+    function switchView(view) {
+      const targetTab = document.querySelector(`.tab[data-view="${view}"]`);
+      if (!targetTab) return;
+
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+
+      targetTab.classList.add('active');
+      document.getElementById(view).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateCompletionBanner() {
+      const banner = document.getElementById('completionBanner');
+      if (!banner) return;
+
+      const flowPanel = document.getElementById('flow');
+      const flowTasks = flowPanel.querySelectorAll('.task-row');
+      const completed = flowPanel.querySelectorAll('.task-row.completed');
+
+      if (flowTasks.length && flowTasks.length === completed.length) {
+        banner.classList.add('active');
+      } else {
+        banner.classList.remove('active');
+      }
+    }
+
     function loadFlow(domain, process, title, pathText) {
       document.getElementById('flowBreadcrumb').textContent = 'Enterprise OS / ' + domain + ' / ' + process;
       document.getElementById('flowTitle').textContent = title;
@@ -1206,6 +1328,7 @@
       const row = button.closest('.task-row');
       row.classList.toggle('completed');
       button.textContent = row.classList.contains('completed') ? 'Completed' : 'Mark done';
+      updateCompletionBanner();
     }
 
     function selectDomain(title, metric, description, owner, risk) {
