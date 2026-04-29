@@ -1,0 +1,59 @@
+{
+  "version": "04/29",
+  "taxonomy": {
+    "view": "User",
+    "domain": "HR",
+    "process_group": "Employee Lifecycle",
+    "process": "Employee Onboarding"
+  },
+  "process": {
+    "id": "hr_employee_onboarding",
+    "name": "Employee Onboarding",
+    "goal": "Convert a signed candidate into an active, trained, provisioned employee with clear ownership and no Day 1 blockers.",
+    "previous_process": "Recruiting & Hiring",
+    "next_process": "Employee Management"
+  },
+  "states": [
+    {
+      "id": "pre_boarding",
+      "label": "Pre-boarding",
+      "type": "previous / intake",
+      "owner": "HR"
+    },
+    {
+      "id": "day_1_setup",
+      "label": "Day 1 Setup",
+      "type": "current",
+      "owner": "IT / Operations"
+    },
+    {
+      "id": "induction",
+      "label": "Induction Complete",
+      "type": "future",
+      "owner": "HR"
+    },
+    {
+      "id": "check_in_30",
+      "label": "30-Day Check-in",
+      "type": "future",
+      "owner": "Manager"
+    },
+    {
+      "id": "probation_passed",
+      "label": "Probation Passed",
+      "type": "future / exit",
+      "owner": "HR / Manager"
+    }
+  ],
+  "model": {
+    "rule": "Process circles are navigation states. Each state opens area ownership. Each area owns tasks. Each task opens the Action Guide.",
+    "layers": [
+      "Taxonomy",
+      "Process",
+      "State / Circle",
+      "Area Ownership",
+      "Task",
+      "Checklist / Action Guide"
+    ]
+  }
+}
