@@ -1558,7 +1558,7 @@ function clickFlowState(idx, procKey){
   const s = PROCESSES[procKey].states[idx];
   if(s.status==='done') showToast(`${s.name} — completed`,'✓');
   else if(s.status==='active') showToast(`${s.name} — current stage`,'●');
-  else showToast(`${s.name} — not yet reached`,'○');
+  else showToast(`${s.name} — `,'○');
 }
 
 /* ══════════════════════════════════════
@@ -2385,5 +2385,80 @@ setTimeout(()=>{
   renderMyWork();
 }, 0);
 </script>
+
+<!-- NAVIGATION UNLOCK PATCH -->
+<script>
+(function () {
+
+  let activeStep = 1;   // real progress
+  let selectedStep = 1; // what user is viewing
+
+  function getCircles() {
+    return Array.from(document.querySelectorAll("div"))
+      .filter(el => el.textContent && el.textContent.match(/Pre|Day|Induction|Check|Probation/i));
+  }
+
+  function updateUI() {
+    const circles = getCircles();
+
+    circles.forEach((el, index) => {
+      const stepIndex = index + 1;
+
+      el.style.cursor = "pointer";
+      el.style.opacity = "1";
+
+      if (stepIndex === activeStep) {
+        el.style.border = "2px solid #00ffc6";
+      } else if (stepIndex < activeStep) {
+        el.style.border = "2px solid rgba(0,255,198,.4)";
+      } else {
+        el.style.border = "1px solid rgba(255,255,255,.15)";
+      }
+
+      if (stepIndex === selectedStep) {
+        el.style.boxShadow = "0 0 0 2px rgba(140,120,255,.6)";
+      } else {
+        el.style.boxShadow = "none";
+      }
+
+      el.onclick = () => {
+        selectedStep = stepIndex;
+        renderStepGuide(stepIndex);
+        updateUI();
+      };
+    });
+  }
+
+  function renderStepGuide(stepIndex) {
+    const panel = document.querySelector("[class*='Action']") || document.body;
+
+    panel.innerHTML = `
+      <div style="padding:20px;">
+        <h2>Step ${stepIndex}</h2>
+        <p>Viewing step (navigation mode)</p>
+
+        <div style="margin-top:10px; font-size:13px; color:#9aa4b2;">
+          Active Step: ${activeStep} <br/>
+          Selected Step: ${selectedStep}
+        </div>
+
+        <hr style="margin:15px 0; border-color:rgba(255,255,255,.1)">
+
+        <p>This is where tasks, systems, inputs, outputs, involvement, etc will render.</p>
+      </div>
+    `;
+  }
+
+  function init() {
+    selectedStep = activeStep;
+    updateUI();
+  }
+
+  window.addEventListener("load", init);
+
+})();
+</script>
+<!-- END NAVIGATION UNLOCK PATCH -->
+
 </body>
 </html>
