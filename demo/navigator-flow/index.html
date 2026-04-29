@@ -186,6 +186,126 @@
 
 
 
+
+    .task-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .task-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid #eaecf0;
+      background: #fcfcfd;
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .task-row strong {
+      display: block;
+      margin: 6px 0;
+      font-size: 15px;
+    }
+
+    .task-row p {
+      margin: 0;
+      color: #667085;
+      font-size: 13px;
+    }
+
+    .tag {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #f2f4f7;
+      color: #475467;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .task-row button,
+    .running-case button {
+      border: 0;
+      background: #101828;
+      color: white;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .task-row.completed {
+      opacity: 0.55;
+      background: #f9fafb;
+    }
+
+    .task-row.completed strong {
+      text-decoration: line-through;
+    }
+
+    .running-case {
+      border: 1px solid #eaecf0;
+      background: #fcfcfd;
+      border-radius: 22px;
+      padding: 20px;
+    }
+
+    .case-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .case-header h3 {
+      margin: 0 0 6px;
+    }
+
+    .progress-chain {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .progress-step {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid #d0d5dd;
+      background: white;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .progress-step.done {
+      background: #ecfdf3;
+      border-color: #abefc6;
+      color: #027a48;
+    }
+
+    .progress-step.active {
+      background: #eff8ff;
+      border-color: #b2ddff;
+      color: #175cd3;
+    }
+
+    @media (max-width: 900px) {
+      .task-row,
+      .case-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .progress-chain {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .domain-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -652,27 +772,88 @@
         <div class="panel-header">
           <div>
             <h2>User Dashboard</h2>
-            <p>Simple operational workspace for every employee: what I need to do, what I am waiting for and what is running live.</p>
+            <p>Personal execution view. The user only sees what needs action: tasks, approvals, running cases and next steps.</p>
           </div>
+          <div class="status-pill">User View · Live sample</div>
         </div>
 
         <div class="grid">
-          <div class="card">
+          <button class="card clickable" onclick="openDetail('My Tasks', 'Tasks assigned to this user across HR, IT, Finance, Sales and Delivery.')">
             <h3>My Tasks</h3>
             <div class="metric">5</div>
-            <p class="muted">Assigned tasks that require user action.</p>
-          </div>
+            <p class="muted">Work items waiting for direct user action.</p>
+          </button>
 
-          <div class="card">
+          <button class="card clickable" onclick="openDetail('My Approvals', 'Approval requests waiting for accept, reject or request changes.')">
             <h3>My Approvals</h3>
             <div class="metric">2</div>
-            <p class="muted">Requests waiting for approval or rejection.</p>
-          </div>
+            <p class="muted">Approvals blocking process movement.</p>
+          </button>
 
-          <div class="card">
+          <button class="card clickable" onclick="openDetail('Running Cases', 'Processes where this user is owner, participant or approver.')">
             <h3>Running Cases</h3>
             <div class="metric">4</div>
-            <p class="muted">Processes currently moving where the user is involved.</p>
+            <p class="muted">Live workflows currently moving.</p>
+          </button>
+        </div>
+
+        <div class="section-title">Today’s Execution Queue</div>
+
+        <div class="task-list">
+          <div class="task-row">
+            <div>
+              <span class="tag">IT · User / Account Management</span>
+              <strong>Create Microsoft 365 account for new hire</strong>
+              <p>State: Waiting for IT execution · Owner: IT Admin</p>
+            </div>
+            <button onclick="markDone(this)">Mark done</button>
+          </div>
+
+          <div class="task-row">
+            <div>
+              <span class="tag">HR · Onboarding</span>
+              <strong>Validate employee personal information</strong>
+              <p>State: Pending HR validation · Owner: HR</p>
+            </div>
+            <button onclick="markDone(this)">Mark done</button>
+          </div>
+
+          <div class="task-row">
+            <div>
+              <span class="tag">Finance · Billing</span>
+              <strong>Approve invoice before sending</strong>
+              <p>State: Waiting approval · Owner: Finance Lead</p>
+            </div>
+            <button onclick="markDone(this)">Mark done</button>
+          </div>
+
+          <div class="task-row">
+            <div>
+              <span class="tag">Delivery · Handoff</span>
+              <strong>Confirm project kickoff readiness</strong>
+              <p>State: Blocked until checklist is complete · Owner: Delivery Manager</p>
+            </div>
+            <button onclick="markDone(this)">Mark done</button>
+          </div>
+        </div>
+
+        <div class="section-title">Running Process Example</div>
+
+        <div class="running-case">
+          <div class="case-header">
+            <div>
+              <h3>New Employee Onboarding</h3>
+              <p class="muted">The user sees only the active path, not the full technical state machine.</p>
+            </div>
+            <button onclick="openDetail('View in Flow', 'This would open the full taxonomy path inside Flow: HR → Onboarding → Pre-boarding → Account Creation → App Access → Completed.')">Open in Flow</button>
+          </div>
+
+          <div class="progress-chain">
+            <div class="progress-step done">Request received</div>
+            <div class="progress-step done">HR validated</div>
+            <div class="progress-step active">IT accounts</div>
+            <div class="progress-step">Apps assigned</div>
+            <div class="progress-step">Completed</div>
           </div>
         </div>
       </section>
@@ -722,6 +903,13 @@
       });
     });
 
+
+
+    function markDone(button) {
+      const row = button.closest('.task-row');
+      row.classList.toggle('completed');
+      button.textContent = row.classList.contains('completed') ? 'Completed' : 'Mark done';
+    }
 
     function selectDomain(title, metric, description, owner, risk) {
       document.getElementById('domainTitle').textContent = title;
