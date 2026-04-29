@@ -184,6 +184,150 @@
       color: #98a2b3;
     }
 
+
+    .clickable {
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .section-title {
+      margin: 28px 0 12px;
+      font-size: 13px;
+      color: #667085;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .spine {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #f9fafb;
+      border: 1px solid #eaecf0;
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .spine-node {
+      border: 1px solid #d0d5dd;
+      background: white;
+      padding: 12px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    .spine-node.done {
+      background: #ecfdf3;
+      border-color: #abefc6;
+      color: #027a48;
+    }
+
+    .spine-node.active {
+      background: #eff8ff;
+      border-color: #b2ddff;
+      color: #175cd3;
+    }
+
+    .spine-node.risk {
+      background: #fffaeb;
+      border-color: #fedf89;
+      color: #b54708;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .risk-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .risk-list button {
+      border: 1px solid #eaecf0;
+      background: white;
+      border-radius: 14px;
+      padding: 14px;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .risk-list strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .risk-list span {
+      color: #667085;
+      font-size: 12px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(16, 24, 40, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 20;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal {
+      max-width: 620px;
+      width: 100%;
+      background: white;
+      border-radius: 26px;
+      padding: 26px;
+      box-shadow: 0 30px 80px rgba(16, 24, 40, 0.25);
+    }
+
+    .modal h3 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .modal p {
+      margin: 0;
+      color: #667085;
+      line-height: 1.5;
+    }
+
+    .modal button {
+      margin-top: 20px;
+      border: 0;
+      background: #101828;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 900px) {
       .tabs, .grid {
         grid-template-columns: 1fr;
@@ -233,27 +377,84 @@
         <div class="panel-header">
           <div>
             <h2>CEO Dashboard</h2>
-            <p>High-level operational command center showing business health, blockers, risk areas and decisions that need executive attention.</p>
+            <p>Executive command view for company health, revenue movement, operational risks, pending decisions and cross-domain bottlenecks.</p>
           </div>
+          <div class="status-pill">CEO View · Live sample</div>
         </div>
 
         <div class="grid">
-          <div class="card">
+          <button class="card clickable" onclick="openDetail('Company Health', 'Overall operational health based on Revenue Spine, Delivery, Finance, HR and IT readiness.')">
             <h3>Company Health</h3>
             <div class="metric">82%</div>
-            <p class="muted">Overall score based on revenue spine, delivery status, finance controls and operational risks.</p>
-          </div>
+            <p class="muted">Stable, but Finance and IT have active bottlenecks affecting speed.</p>
+          </button>
 
-          <div class="card">
+          <button class="card clickable" onclick="openDetail('Executive Decisions', 'Decisions waiting for CEO or leadership approval: pricing, hiring, budget, escalations and project risks.')">
             <h3>Executive Decisions</h3>
             <div class="metric">7</div>
-            <p class="muted">Approvals or decisions waiting for leadership action.</p>
+            <p class="muted">Pending approvals that may delay revenue, delivery or internal execution.</p>
+          </button>
+
+          <button class="card clickable" onclick="openDetail('Critical Bottlenecks', 'Cross-domain blockers that need escalation because ownership or SLA is unclear.')">
+            <h3>Critical Bottlenecks</h3>
+            <div class="metric">3</div>
+            <p class="muted">Main blockers detected across Finance, Delivery and IT Operations.</p>
+          </button>
+        </div>
+
+        <div class="section-title">Revenue Spine</div>
+
+        <div class="spine">
+          <button class="spine-node done" onclick="openDetail('Lead', 'Lead identified in Salesforce. Owner: Sales.')">Lead</button>
+          <span>→</span>
+          <button class="spine-node done" onclick="openDetail('Qualified', 'Lead qualified. Owner: Account Manager.')">Qualified</button>
+          <span>→</span>
+          <button class="spine-node active" onclick="openDetail('Technical Validation', 'Technical validation in progress. Owners: Presales + DevOps + AWS Program Manager.')">Technical Validation</button>
+          <span>→</span>
+          <button class="spine-node risk" onclick="openDetail('Business Validation', 'Commercial approval waiting. Risk: unclear pricing and margin assumptions.')">Business Validation</button>
+          <span>→</span>
+          <button class="spine-node" onclick="openDetail('Closed Won', 'Contract not signed yet. Pending DocuSign and delivery handoff.')">Closed Won</button>
+          <span>→</span>
+          <button class="spine-node" onclick="openDetail('Delivery', 'Delivery starts after SOW-to-Delivery handoff.')">Delivery</button>
+          <span>→</span>
+          <button class="spine-node" onclick="openDetail('Payment', 'Payment tracked by Finance through invoice and AR process.')">Payment</button>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <h3>Top Risks</h3>
+            <div class="risk-list">
+              <button onclick="openDetail('Finance Risk', 'Booked vs billed gap detected. Owner: Finance. Action: validate invoice status and expected payment date.')">
+                <strong>Booked vs Billed gap</strong>
+                <span>Finance · High</span>
+              </button>
+              <button onclick="openDetail('Delivery Risk', 'Project handoff missing technical readiness checklist. Owner: Delivery Manager.')">
+                <strong>Delivery handoff incomplete</strong>
+                <span>Delivery · Medium</span>
+              </button>
+              <button onclick="openDetail('IT Risk', 'Manual software installs need to move to Intune-based controlled deployment. Owner: IT.')">
+                <strong>Software control not standardized</strong>
+                <span>IT · Medium</span>
+              </button>
+            </div>
           </div>
 
           <div class="card">
-            <h3>Critical Bottlenecks</h3>
-            <div class="metric">3</div>
-            <p class="muted">Issues blocking process movement across domains.</p>
+            <h3>CEO Action Queue</h3>
+            <div class="risk-list">
+              <button onclick="openDetail('Approve Hiring', 'Approve new technical role before client delivery begins.')">
+                <strong>Approve hiring request</strong>
+                <span>HR · Due today</span>
+              </button>
+              <button onclick="openDetail('Approve Budget', 'Approve budget for project tools and client environment readiness.')">
+                <strong>Approve delivery budget</strong>
+                <span>Finance · Due this week</span>
+              </button>
+              <button onclick="openDetail('Resolve Ownership', 'Assign final owner for cross-area operating issue.')">
+                <strong>Resolve ownership conflict</strong>
+                <span>Ops · Escalated</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -360,6 +561,26 @@
         document.getElementById(view).classList.add('active');
       });
     });
+
+    function openDetail(title, text) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalText').textContent = text;
+      document.getElementById('modalBackdrop').classList.add('active');
+    }
+
+    function closeDetail() {
+      document.getElementById('modalBackdrop').classList.remove('active');
+    }
+
   </script>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <h3 id="modalTitle">Detail</h3>
+      <p id="modalText">Detail text.</p>
+      <button onclick="closeDetail()">Close</button>
+    </div>
+  </div>
+
 </body>
 </html>
