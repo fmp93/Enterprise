@@ -3083,5 +3083,198 @@ setTimeout(()=>{
 </script>
 <!-- END VERSION 04/29 PART 4: STATE AREA TASKS -->
 
+
+<!-- VERSION 04/29 PART 5: TASK ACTION GUIDE -->
+<style>
+  .v0429TaskRow {
+    cursor: pointer;
+    transition: .16s ease;
+  }
+
+  .v0429TaskRow:hover {
+    background: rgba(124,58,237,.10);
+    padding-left: 8px;
+    border-radius: 10px;
+  }
+
+  .v0429GuideCard {
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.035);
+    border-radius: 16px;
+    padding: 14px;
+    margin-top: 12px;
+  }
+
+  .v0429GuideLabel {
+    color: #c4b5fd;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .v0429GuideText {
+    color: #e5eaf5;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+</style>
+
+<script>
+(function () {
+  function getTaskGuide0429(task, area, stateName) {
+    return {
+      state: stateName,
+      area: area.area,
+      role: area.role,
+      task: task,
+      system: inferSystem(task),
+      owner: area.area,
+      whatToDo: inferWhatToDo(task),
+      evidence: inferEvidence(task),
+      output: inferOutput(task),
+      notify: inferNotify(area.area, task)
+    };
+  }
+
+  function inferSystem(task) {
+    const t = task.toLowerCase();
+    if (t.includes("bamboo")) return "BambooHR";
+    if (t.includes("contract")) return "DocuSign / Contract Repository";
+    if (t.includes("email")) return "Email / Microsoft 365";
+    if (t.includes("slack") || t.includes("teams")) return "Slack / Teams";
+    if (t.includes("jira") || t.includes("task")) return "Jira";
+    if (t.includes("laptop") || t.includes("equipment")) return "Device Inventory";
+    if (t.includes("calendar") || t.includes("check-in")) return "Calendar";
+    if (t.includes("training")) return "BambooHR Training";
+    return "Enterprise OS / Relevant System";
+  }
+
+  function inferWhatToDo(task) {
+    return [
+      "Open the assigned system.",
+      "Search or create the employee record.",
+      "Complete the required action: " + task + ".",
+      "Validate that the information is accurate.",
+      "Save the record and capture evidence if required."
+    ];
+  }
+
+  function inferEvidence(task) {
+    const t = task.toLowerCase();
+    if (t.includes("confirm") || t.includes("validate")) return "Confirmation note or completed checklist item.";
+    if (t.includes("create")) return "Created account/profile record.";
+    if (t.includes("upload")) return "Uploaded file or document link.";
+    if (t.includes("send")) return "Sent email or notification record.";
+    if (t.includes("approve")) return "Approval confirmation.";
+    return "System record, screenshot, or completion note.";
+  }
+
+  function inferOutput(task) {
+    return "Task completed and ready for the next owner or next process step.";
+  }
+
+  function inferNotify(area, task) {
+    if (area.includes("IT")) return "Notify HR and Manager if access/equipment is completed or blocked.";
+    if (area.includes("HR")) return "Notify Manager, IT, or Employee depending on the task result.";
+    if (area.includes("Manager")) return "Notify HR if there are blockers or readiness concerns.";
+    if (area.includes("Employee")) return "Notify HR or Manager if something is missing.";
+    return "Notify the next responsible owner.";
+  }
+
+  function findRightPanel0429Part5() {
+    const candidates = Array.from(document.querySelectorAll("div, aside, section"))
+      .filter(el => {
+        const r = el.getBoundingClientRect();
+        return r.left > window.innerWidth * 0.60 &&
+               r.width > 260 &&
+               r.height > 400;
+      })
+      .sort((a,b) => b.getBoundingClientRect().height - a.getBoundingClientRect().height);
+
+    return candidates[0];
+  }
+
+  function renderTaskGuide0429(guide) {
+    const panel = findRightPanel0429Part5();
+    if (!panel) return;
+
+    panel.innerHTML = `
+      <div class="v0429Panel">
+        <button class="v0429BackButton" id="v0429BackToState">← Back to State Tasks</button>
+
+        <div class="v0429PanelBadge">Action Guide</div>
+        <div class="v0429PanelTitle">${guide.task}</div>
+        <div class="v0429PanelMuted">
+          <strong>State:</strong> ${guide.state}<br>
+          <strong>Area:</strong> ${guide.area}<br>
+          <strong>Role:</strong> ${guide.role}<br>
+          <strong>System:</strong> ${guide.system}
+        </div>
+
+        <div class="v0429GuideCard">
+          <div class="v0429GuideLabel">What to do</div>
+          <div class="v0429GuideText">
+            ${guide.whatToDo.map(step => `☐ ${step}`).join("<br>")}
+          </div>
+        </div>
+
+        <div class="v0429GuideCard">
+          <div class="v0429GuideLabel">Evidence required</div>
+          <div class="v0429GuideText">${guide.evidence}</div>
+        </div>
+
+        <div class="v0429GuideCard">
+          <div class="v0429GuideLabel">Expected output</div>
+          <div class="v0429GuideText">${guide.output}</div>
+        </div>
+
+        <div class="v0429GuideCard">
+          <div class="v0429GuideLabel">Who to notify</div>
+          <div class="v0429GuideText">${guide.notify}</div>
+        </div>
+      </div>
+    `;
+
+    const back = panel.querySelector("#v0429BackToState");
+    if (back && window.renderStateDetails0429) {
+      back.onclick = () => window.renderStateDetails0429(guide.state);
+    }
+  }
+
+  function bindTaskRows0429() {
+    const interval = setInterval(() => {
+      const rows = Array.from(document.querySelectorAll(".v0429TaskRow"));
+      if (!rows.length) return;
+
+      rows.forEach(row => {
+        if (row.dataset.v0429TaskClickable === "true") return;
+
+        row.dataset.v0429TaskClickable = "true";
+
+        row.onclick = function () {
+          const task = row.textContent.replace("☐", "").trim();
+          const areaCard = row.closest(".v0429AreaCard");
+          const areaTop = areaCard ? areaCard.querySelector(".v0429AreaTop") : null;
+          const areaName = areaTop ? areaTop.children[0].textContent.trim() : "Unknown Area";
+          const role = areaTop ? areaTop.children[1].textContent.trim() : "Contributor";
+          const title = document.querySelector(".v0429PanelTitle");
+          const stateName = title ? title.textContent.trim() : "Employee Onboarding";
+
+          renderTaskGuide0429(getTaskGuide0429(task, { area: areaName, role }, stateName));
+        };
+      });
+    }, 300);
+
+    setTimeout(() => clearInterval(interval), 10000);
+  }
+
+  window.addEventListener("load", bindTaskRows0429);
+  document.addEventListener("click", () => setTimeout(bindTaskRows0429, 100));
+})();
+</script>
+<!-- END VERSION 04/29 PART 5: TASK ACTION GUIDE -->
+
 </body>
 </html>
