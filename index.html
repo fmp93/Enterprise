@@ -50,7 +50,7 @@ body:after{content:"";position:fixed;inset:0;z-index:-3;opacity:.035;background-
     <div class="eyebrow">Command Center · Autonomous Enterprise Execution</div>
     <h1 class="headline">8 hours<br>in 8 seconds.</h1>
     <p class="sub">Open your computer. See the day. Watch agents move work forward. Close it with confidence.</p>
-    <div class="hero-actions"><a class="btn primary" href="#demo">Watch the 8-second loop</a><a class="btn" href="#features">See what it controls</a></div>
+    <div class="hero-actions"><a class="btn primary" href="/Enterprise/demo/index.html">Watch the 8-second loop</a><a class="btn" href="#features">See what it controls</a></div>
 
     <div class="demo-shell" id="demo">
       <div class="demo-top"><div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div><div class="demo-title"><b>CEO Command Center</b><span>Today · April 30</span></div><div class="live">Agents Live</div></div>
@@ -72,7 +72,7 @@ body:after{content:"";position:fixed;inset:0;z-index:-3;opacity:.035;background-
     </div>
   </section>
   <section class="section" id="features"><h2>From chaos to clarity.</h2><p class="lead">The landing should not explain every feature. It should make the executive feel the operating system is already coordinating calendar, agents, processes, alerts, and executive decisions.</p><div class="cards"><div class="card"><small>01</small><h3>Calendar-aware execution</h3><p>The system knows what matters today and prepares the executive before meetings begin.</p></div><div class="card"><small>02</small><h3>Agents move the work</h3><p>Agents update tasks, detect blockers, route approvals, and keep the process spine alive.</p></div><div class="card"><small>03</small><h3>CEO visibility</h3><p>One view summarizes active cases, SLA health, risk, and what requires human attention.</p></div></div></section>
-  <section class="section final-cta" id="cta"><h2>Run the company before the day begins.</h2><p class="lead">A premium landing experience for Enterprise OS — built around the promise: 8 hours in 8 seconds.</p><a class="btn primary" href="#demo">Replay the loop</a></section>
+  <section class="section final-cta" id="cta"><h2>Run the company before the day begins.</h2><p class="lead">A premium landing experience for Enterprise OS — built around the promise: 8 hours in 8 seconds.</p><a class="btn primary" href="/Enterprise/demo/index.html">Replay the loop</a></section>
 </main>
 <script>
 const scenes=[
@@ -111,5 +111,22 @@ function tick(now){
 requestAnimationFrame(tick);
 els.shell.addEventListener('mousemove',e=>{const r=els.shell.getBoundingClientRect();els.shell.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');els.shell.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%')});
 </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll("a, button").forEach(function (el) {
+    const text = (el.textContent || "").toLowerCase().trim();
+    if (text.includes("run the demo") || text.includes("run demo") || text.includes("see the command center")) {
+      el.style.pointerEvents = "auto";
+      el.style.cursor = "pointer";
+      el.addEventListener("click", function (e) {
+        e.preventDefault();
+        window.location.href = "/Enterprise/demo/index.html";
+      });
+    }
+  });
+});
+</script>
+
 </body>
 </html>
