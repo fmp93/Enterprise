@@ -1,0 +1,41 @@
+[
+  {
+    "id": "revoke-ad-access",
+    "processId": "employee-offboarding",
+    "stage": "it-revoke",
+    "name": "Revoke AD Access",
+    "owner": "IT Operations",
+    "system": "Active Directory",
+    "status": "blocked",
+    "priority": "critical",
+    "sla": "Same day",
+    "evidence": "Screenshot or system log showing AD account disabled",
+    "nextAction": "Disable user account and confirm revocation in ITSM."
+  },
+  {
+    "id": "issue-laptop-po",
+    "processId": "laptop-lifecycle",
+    "stage": "procurement",
+    "name": "Issue Laptop Purchase Order",
+    "owner": "IT Procurement",
+    "system": "SAP / ERP",
+    "status": "active",
+    "priority": "normal",
+    "sla": "2 business days",
+    "evidence": "PO number linked to ITSM ticket",
+    "nextAction": "Create PO and send vendor confirmation."
+  },
+  {
+    "id": "chase-overdue-payment",
+    "processId": "monthly-billing",
+    "stage": "payment",
+    "name": "Chase Overdue Payment",
+    "owner": "Finance",
+    "system": "ERP / Banking",
+    "status": "overdue",
+    "priority": "high",
+    "sla": "Immediate follow-up",
+    "evidence": "Email reminder logged in ERP",
+    "nextAction": "Send formal payment reminder and CC Account Manager."
+  }
+]

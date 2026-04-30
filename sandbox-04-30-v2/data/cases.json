@@ -1,0 +1,47 @@
+[
+  {
+    "id": "case-sergio-vega-offboarding",
+    "processId": "employee-offboarding",
+    "title": "Sergio Vega — IT Access Revocation",
+    "person": "Sergio Vega",
+    "owner": "IT Operations",
+    "status": "blocked",
+    "priority": "critical",
+    "system": "AD + MDM + SaaS Apps",
+    "blocker": "AD account still active 3 days after departure.",
+    "nextAction": "Revoke access immediately and escalate to IT Manager.",
+    "suggestedMessage": "ESCALATION: Sergio Vega's AD account is still active 3 days after departure. Please authorize emergency revocation immediately.",
+    "slaDays": 0,
+    "daysInStage": 3
+  },
+  {
+    "id": "case-sam-okafor-laptop",
+    "processId": "laptop-lifecycle",
+    "title": "Sam Okafor — Laptop Procurement",
+    "person": "Sam Okafor",
+    "owner": "IT Procurement",
+    "status": "watch",
+    "priority": "high",
+    "system": "SAP / ERP",
+    "blocker": "Preferred vendor is out of stock.",
+    "nextAction": "Approve alternative laptop and issue PO today.",
+    "suggestedMessage": "Hi Manager, Dell XPS is out of stock for Sam Okafor. Can you approve MacBook Pro 14 today? Start date is in 3 days.",
+    "slaDays": 5,
+    "daysInStage": 5
+  },
+  {
+    "id": "case-auna-payment",
+    "processId": "monthly-billing",
+    "title": "AUNA Group — Overdue Invoice",
+    "person": "AUNA Group",
+    "owner": "Finance",
+    "status": "overdue",
+    "priority": "high",
+    "system": "ERP / Banking",
+    "blocker": "Invoice unpaid after second reminder.",
+    "nextAction": "Send escalation to client finance team and CC Account Manager.",
+    "suggestedMessage": "Hi AUNA Finance Team, following up on the overdue invoice. Please confirm expected payment date today.",
+    "slaDays": 30,
+    "daysInStage": 38
+  }
+]
