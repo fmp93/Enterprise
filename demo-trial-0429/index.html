@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Command Center — OS Navigator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ═══ LEFT NAV ═══ -->
+<nav id="nav">
+  <div class="nav-logo">⬡</div>
+  <button class="nav-btn active" id="btn-ceo"  onclick="switchView('ceo')"  title="Executive View">
+    <span>◈</span><span class="lbl">Exec</span>
+  </button>
+  <button class="nav-btn" id="btn-area" onclick="switchView('area')" title="Area View">
+    <span>⊞</span><span class="lbl">Area</span>
+  </button>
+  <button class="nav-btn" id="btn-user" onclick="switchView('user')" title="My Work">
+    <span>◉</span><span class="lbl">Mine</span>
+  </button>
+  <div class="nav-sep"></div>
+  <button class="nav-btn" id="btn-flow" onclick="switchView('flow')" title="Flow Navigator">
+    <span>⬡</span><span class="lbl">Flow</span>
+  </button>
+</nav>
+
+<!-- ═══ SHELL ═══ -->
+<div id="shell">
+<div id="main">
+
+  <!-- ─── CEO VIEW ─── -->
+  <div class="view active" id="view-ceo">
+    <div class="view-header">
+      <div>
+        <h1>Executive View</h1>
+        <div class="sub">Revenue Command · All processes · Live</div>
+      </div>
+      <div class="header-meta"><span class="badge badge-live">● Live</span></div>
+    </div>
+    <div class="view-body" id="ceo-body"></div>
+  </div>
+
+  <!-- ─── AREA VIEW ─── -->
+  <div class="view" id="view-area">
+    <div class="view-header">
+      <div>
+        <h1 id="area-title">HR Area View</h1>
+        <div class="sub" id="area-sub">Human Resources · Manager control panel</div>
+      </div>
+      <div class="header-meta">
+        <select id="area-sel" onchange="switchArea(this.value)">
+          <option value="hr">Human Resources</option>
+          <option value="operations">Operations / IT</option>
+          <option value="finance">Finance</option>
+        </select>
+      </div>
+    </div>
+    <div class="view-body" id="area-body"></div>
+  </div>
+
+  <!-- ─── USER VIEW ─── -->
+  <div class="view" id="view-user">
+    <div class="view-header">
+      <div>
+        <h1>My Work</h1>
+        <div class="sub">Jordan Davis · IT Operations · All active tasks</div>
+      </div>
+      <div class="header-meta"><div class="avatar">JD</div></div>
+    </div>
+    <div class="view-body" id="user-body"></div>
+  </div>
+
+  <!-- ─── FLOW VIEW ─── -->
+  <div class="view" id="view-flow">
+    <div class="view-header">
+      <div>
+        <h1>Flow — Process Navigator</h1>
+        <div class="sub">Explore processes, stages, and tasks across the organization</div>
+      </div>
+    </div>
+    <div id="flow-nav"></div>
+    <div class="breadcrumb" id="flow-bc"></div>
+    <div id="flow-body"></div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ═══ RIGHT PANEL ═══ -->
+<div id="panel">
+  <div id="panel-hdr"><div id="panel-title">Detail</div></div>
+  <div id="panel-body">
+    <div class="panel-empty">
+      <div class="ico">◈</div>
+      <div class="msg">Select any item to see its owner, status, next action, evidence required, and suggested messages.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /shell -->
+
+<script src="app.js"></script>
+</body>
+</html>
