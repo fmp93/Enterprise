@@ -1,7 +1,8 @@
 let DATA = {
   processes: [],
   tasks: [],
-  cases: []
+  cases: [],
+  audit: []
 };
 
 let STATES = [];
@@ -16,13 +17,14 @@ const panelContent = document.getElementById("panel-content");
 async function init() {
   await loadStateMachine();
 
-  const [processes, tasks, cases] = await Promise.all([
+  const [processes, tasks, cases, audit] = await Promise.all([
     fetch("data/processes.json").then(r => r.json()),
     fetch("data/tasks.json").then(r => r.json()),
-    fetch("data/cases.json").then(r => r.json())
+    fetch("data/cases.json").then(r => r.json()),
+    fetch("data/audit.json").then(r => r.json())
   ]);
 
-  DATA = { processes, tasks, cases };
+  DATA = { processes, tasks, cases, audit };
 
   document.querySelectorAll(".nav-btn").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -244,6 +246,7 @@ function showCase(id) {
       <div class="message-box">${c.suggestedMessage}</div>
     </div>
     <button class="action-btn" onclick="copyText('${safe(c.suggestedMessage)}')">Copy Escalation Message</button>
+    ${renderAudit(c.id)}
   `;
 }
 
@@ -305,6 +308,50 @@ function changeStatus(type, id, newStatus) {
 }
 
 
+
+function renderAudit(caseId) {
+  const record = DATA.audit.find(a => a.caseId === caseId);
+  const events = record ? record.events : [];
+
+  if (!events.length) {
+    return `
+      <div class="detail-block" style="margin-top:18px;">
+        <div class="detail-label">Timeline</div>
+        <div class="detail-value">No timeline events yet.</div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="detail-block" style="margin-top:18px;">
+      <div class="detail-label">Timeline / Audit Trail</div>
+      ${events.map(e => `
+        <div style="border-left:2px solid var(--border); padding:0 0 12px 10px; margin-left:4px;">
+          <div style="font-size:10px; color:var(--dim);">${e.time} · ${e.actor}</div>
+          <div style="font-size:12px; color:var(--text); line-height:1.45;">${e.action}</div>
+          <div style="font-size:10px; color:var(--muted); text-transform:uppercase; margin-top:2px;">${e.type}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function addAuditEvent(caseId, action, actor = "Enterprise OS", type = "system") {
+  let record = DATA.audit.find(a => a.caseId === caseId);
+
+  if (!record) {
+    record = { caseId, events: [] };
+    DATA.audit.push(record);
+  }
+
+  record.events.unshift({
+    time: "Now",
+    actor,
+    action,
+    type
+  });
+}
+
 function createNewCase() {
   const newCase = {
     id: "case-auto-" + Date.now(),
@@ -323,6 +370,7 @@ function createNewCase() {
   };
 
   DATA.cases.unshift(newCase);
+  addAuditEvent(newCase.id, "New live case created from Executive View.", "User", "human");
   renderExec();
   showCase(newCase.id);
 }

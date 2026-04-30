@@ -1,0 +1,71 @@
+[
+  {
+    "caseId": "case-sergio-vega-offboarding",
+    "events": [
+      {
+        "time": "Apr 30 · 09:00",
+        "actor": "Security System",
+        "action": "Detected AD account still active after departure.",
+        "type": "blocked"
+      },
+      {
+        "time": "Apr 29 · 14:20",
+        "actor": "HR",
+        "action": "Confirmed final day and triggered offboarding checklist.",
+        "type": "human"
+      },
+      {
+        "time": "Apr 27 · 17:00",
+        "actor": "HRIS",
+        "action": "Employee status changed to terminated.",
+        "type": "system"
+      }
+    ]
+  },
+  {
+    "caseId": "case-sam-okafor-laptop",
+    "events": [
+      {
+        "time": "Apr 30 · 10:15",
+        "actor": "IT Procurement",
+        "action": "Vendor reported Dell XPS out of stock.",
+        "type": "warning"
+      },
+      {
+        "time": "Apr 29 · 16:40",
+        "actor": "Manager",
+        "action": "Approved laptop request.",
+        "type": "human"
+      },
+      {
+        "time": "Apr 29 · 11:20",
+        "actor": "ITSM Portal",
+        "action": "Laptop request submitted.",
+        "type": "system"
+      }
+    ]
+  },
+  {
+    "caseId": "case-auna-payment",
+    "events": [
+      {
+        "time": "Apr 30 · 08:30",
+        "actor": "ERP",
+        "action": "Invoice passed payment SLA by 8 days.",
+        "type": "blocked"
+      },
+      {
+        "time": "Apr 26 · 09:00",
+        "actor": "Finance",
+        "action": "Second payment reminder sent.",
+        "type": "human"
+      },
+      {
+        "time": "Apr 14 · 13:10",
+        "actor": "ERP",
+        "action": "Invoice generated and sent to client.",
+        "type": "system"
+      }
+    ]
+  }
+]
