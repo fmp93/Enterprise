@@ -1,0 +1,8 @@
+[
+  { "from": "not-started", "to": ["active"] },
+  { "from": "active", "to": ["waiting", "blocked", "done"] },
+  { "from": "waiting", "to": ["active", "blocked"] },
+  { "from": "blocked", "to": ["active"] },
+  { "from": "overdue", "to": ["active", "blocked"] },
+  { "from": "done", "to": [] }
+]

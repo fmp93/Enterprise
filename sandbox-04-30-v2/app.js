@@ -4,6 +4,9 @@ let DATA = {
   cases: []
 };
 
+let STATES = [];
+let TRANSITIONS = [];
+
 let currentView = "exec";
 
 const content = document.getElementById("content");
@@ -11,6 +14,8 @@ const panelTitle = document.getElementById("panel-title");
 const panelContent = document.getElementById("panel-content");
 
 async function init() {
+  await loadStateMachine();
+
   const [processes, tasks, cases] = await Promise.all([
     fetch("data/processes.json").then(r => r.json()),
     fetch("data/tasks.json").then(r => r.json()),
@@ -265,6 +270,36 @@ function safe(text) {
 function copyText(text) {
   navigator.clipboard.writeText(text);
   alert("Copied to clipboard");
+}
+
+
+async function loadStateMachine() {
+  STATES = await fetch("data/states.json").then(r => r.json());
+  TRANSITIONS = await fetch("data/transitions.json").then(r => r.json());
+}
+
+function getAllowedTransitions(current) {
+  const rule = TRANSITIONS.find(t => t.from === current);
+  return rule ? rule.to : [];
+}
+
+function changeStatus(type, id, newStatus) {
+  let item;
+
+  if (type === "task") item = DATA.tasks.find(x => x.id === id);
+  if (type === "case") item = DATA.cases.find(x => x.id === id);
+
+  if (!item) return;
+
+  const allowed = getAllowedTransitions(item.status);
+
+  if (!allowed.includes(newStatus)) {
+    alert("Invalid transition");
+    return;
+  }
+
+  item.status = newStatus;
+  render();
 }
 
 init();
