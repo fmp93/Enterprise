@@ -40,6 +40,57 @@ body:after{content:"";position:fixed;inset:0;z-index:-3;opacity:.035;background-
 </style>
 </head>
 <body>
+
+<style>
+.hard-demo-link {
+  position: fixed;
+  top: 28px;
+  right: 32px;
+  z-index: 999999;
+  pointer-events: auto !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.92);
+  color: #05050c;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+}
+.hard-demo-link:hover {
+  transform: translateY(-1px);
+}
+</style>
+
+<a class="hard-demo-link" href="/Enterprise/demo/index.html">
+  Run the demo
+</a>
+
+<script>
+window.goToDemo = function () {
+  window.location.href = "/Enterprise/demo/index.html";
+};
+
+document.addEventListener("click", function(e) {
+  const target = e.target.closest("a, button, .btn, [role='button']");
+  if (!target) return;
+
+  const text = (target.textContent || "").toLowerCase();
+  if (
+    text.includes("run the demo") ||
+    text.includes("run demo") ||
+    text.includes("see the command center")
+  ) {
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = "/Enterprise/demo/index.html";
+  }
+}, true);
+</script>
+
 <div class="grid-bg"></div><div class="orb one"></div><div class="orb two"></div>
 <nav class="nav">
   <div class="brand"><div class="mark"></div><div><strong>Enterprise OS</strong><span>AI Command Center</span></div></div>
