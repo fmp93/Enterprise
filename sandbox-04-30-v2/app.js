@@ -170,6 +170,7 @@ function renderCaseRow(item) {
       <div>
         <div class="row-title">${item.title}</div>
         <div class="row-sub">${item.owner} · ${item.system} · ${item.daysInStage} days in stage</div>
+        <div class="live-source">Source: ${item.source || "Manual Case"}</div>
       </div>
       ${badge(item.status)}
     </div>
@@ -236,6 +237,8 @@ function showCase(id) {
     ${detail("Status", badge(c.status))}
     ${detail("Priority", c.priority)}
     ${detail("Days in Stage", c.daysInStage)}
+    ${detail("Source System", c.source || "Manual Case")}
+    ${renderIntegrations(c)}
     <div class="detail-block">
       <div class="detail-label">Blocker</div>
       <div class="blocker-box">${c.blocker}</div>
@@ -246,6 +249,7 @@ function showCase(id) {
       <div class="message-box">${c.suggestedMessage}</div>
     </div>
     <button class="action-btn" onclick="copyText('${safe(c.suggestedMessage)}')">Copy Escalation Message</button>
+    <button class="action-btn" onclick="openSourceSystem('${safe(c.sourceUrl || "#")}')">Open Source System</button>
     ${renderAudit(c.id)}
   `;
 }
@@ -308,6 +312,29 @@ function changeStatus(type, id, newStatus) {
 }
 
 
+
+
+function renderIntegrations(c) {
+  const integrations = c.integrations || [];
+  if (!integrations.length) return "";
+
+  return `
+    <div class="detail-block">
+      <div class="detail-label">Connected Integrations</div>
+      <div class="integration-row">
+        ${integrations.map(i => `<span class="integration-chip">${i}</span>`).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function openSourceSystem(url) {
+  if (!url || url === "#") {
+    alert("No source system URL configured yet.");
+    return;
+  }
+  window.open(url, "_blank");
+}
 
 function renderAudit(caseId) {
   const record = DATA.audit.find(a => a.caseId === caseId);
