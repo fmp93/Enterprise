@@ -40,39 +40,13 @@ body:after{content:"";position:fixed;inset:0;z-index:-3;opacity:.035;background-
 </style>
 
 
-<style id="final-demo-click-fix">
-/* Only purely visual layers should ignore clicks */
-.bg,
-.grain,
-.gridlines,
-.aurora,
-.orb,
-.scene-stage,
-.scene,
-#scene-overlay,
-.overlay {
-  pointer-events: none !important;
-}
-
-/* Keep all CTA/navigation elements clickable */
-a,
-button,
-.btn,
-.cta,
-[role="button"] {
-  pointer-events: auto !important;
-  position: relative;
-  z-index: 999999 !important;
-}
-</style>
-
 </head>
 <body>
 
 <div class="grid-bg"></div><div class="orb one"></div><div class="orb two"></div>
 <nav class="nav">
   <div class="brand"><div class="mark"></div><div><strong>Enterprise OS</strong><span>AI Command Center</span></div></div>
-  <div class="navlinks"><a href="#experience">Experience</a><a href="#features">Features</a><a class="cta-small" href="#cta">Run the demo</a></div>
+  <div class="navlinks"><a href="#experience">Experience</a><a href="#features">Features</a><a class="cta-small" href="/Enterprise/demo/index.html">Run the demo</a></div>
 </nav>
 <main>
   <section class="hero" id="experience">
@@ -159,54 +133,80 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-<script id="final-demo-routing-fix">
+
+<style id="enterprise-final-demo-fix">
+/* Visual-only layers cannot block clicks */
+.bg,
+.grain,
+.gridlines,
+.aurora,
+.orb,
+.scene-stage,
+.scene,
+#scene-overlay,
+.overlay {
+  pointer-events: none !important;
+}
+
+/* CTAs must stay clickable */
+a,
+button,
+.btn,
+.cta,
+[class*="cta"],
+[role="button"] {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 999999 !important;
+}
+</style>
+
+<script id="enterprise-final-demo-router">
 (function () {
   const DEMO_URL = "/Enterprise/demo/index.html";
 
-  function wireDemoButtons() {
-    document.querySelectorAll("a, button, .btn, .cta, [role='button']").forEach(function (el) {
-      const text = (el.textContent || "").toLowerCase().trim();
+  function isDemoCTA(el) {
+    if (!el) return false;
+    const text = (el.textContent || "").toLowerCase();
+    const href = (el.getAttribute && (el.getAttribute("href") || "")) || "";
+    return (
+      text.includes("run the demo") ||
+      text.includes("run demo") ||
+      text.includes("view demo") ||
+      text.includes("see the command center") ||
+      href === "#cta" ||
+      href === "#demo"
+    );
+  }
 
-      if (
-        text.includes("run the demo") ||
-        text.includes("run demo") ||
-        text.includes("view demo") ||
-        text.includes("see the command center")
-      ) {
+  function wire() {
+    document.querySelectorAll("a, button, .btn, .cta, [role='button']").forEach(function(el) {
+      if (isDemoCTA(el)) {
         el.setAttribute("href", DEMO_URL);
         el.style.pointerEvents = "auto";
         el.style.cursor = "pointer";
         el.style.zIndex = "999999";
-        el.onclick = function (e) {
+        el.onclick = function(e) {
           e.preventDefault();
-          e.stopPropagation();
-          window.location.assign(DEMO_URL);
+          e.stopImmediatePropagation();
+          window.location.href = DEMO_URL;
           return false;
         };
       }
     });
   }
 
-  document.addEventListener("DOMContentLoaded", wireDemoButtons);
-  window.addEventListener("load", wireDemoButtons);
-  setTimeout(wireDemoButtons, 500);
-  setTimeout(wireDemoButtons, 1500);
+  document.addEventListener("DOMContentLoaded", wire);
+  window.addEventListener("load", wire);
+  setInterval(wire, 1000);
 
-  document.addEventListener("click", function (e) {
+  document.addEventListener("click", function(e) {
     const target = e.target.closest("a, button, .btn, .cta, [role='button']");
-    if (!target) return;
-
-    const text = (target.textContent || "").toLowerCase();
-
-    if (
-      text.includes("run the demo") ||
-      text.includes("run demo") ||
-      text.includes("view demo") ||
-      text.includes("see the command center")
-    ) {
+    if (isDemoCTA(target)) {
       e.preventDefault();
-      e.stopPropagation();
-      window.location.assign(DEMO_URL);
+      e.stopImmediatePropagation();
+      window.location.href = DEMO_URL;
+      return false;
     }
   }, true);
 })();
