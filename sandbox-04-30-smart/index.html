@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise OS — Sandbox 04/30 v2</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<nav id="nav">
+  <div class="nav-logo">⬡</div>
+  <button class="nav-btn active" data-view="exec">◈<span>Exec</span></button>
+  <button class="nav-btn" data-view="area">⊞<span>Area</span></button>
+  <button class="nav-btn" data-view="mine">◉<span>Mine</span></button>
+  <button class="nav-btn" data-view="flow">⬡<span>Flow</span></button>
+</nav>
+
+<main id="app">
+  <header id="topbar">
+    <div>
+      <h1 id="view-title">Executive View</h1>
+      <p id="view-subtitle">Live company operating system powered by real process data.</p>
+    </div>
+    <div class="status-pill">● Live Data</div>
+  </header>
+
+  <section id="content"></section>
+</main>
+
+<aside id="detail-panel">
+  <div class="panel-header">
+    <h2 id="panel-title">Detail</h2>
+    <button id="close-panel">×</button>
+  </div>
+
+  <div id="panel-content">
+    <div class="empty-state">
+      Select a process, task or live case to inspect owner, system, status, blocker and next action.
+    </div>
+  </div>
+</aside>
+
+<script src="app.js"></script>
+</body>
+</html>

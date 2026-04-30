@@ -1,0 +1,71 @@
+[
+  {
+    "id": "case-sergio-vega-offboarding",
+    "processId": "employee-offboarding",
+    "title": "Sergio Vega \u2014 IT Access Revocation",
+    "person": "Sergio Vega",
+    "owner": "IT Operations",
+    "status": "blocked",
+    "priority": "critical",
+    "system": "AD + MDM + SaaS Apps",
+    "blocker": "AD account still active 3 days after departure.",
+    "nextAction": "Revoke access immediately and escalate to IT Manager.",
+    "suggestedMessage": "ESCALATION: Sergio Vega's AD account is still active 3 days after departure. Please authorize emergency revocation immediately.",
+    "slaDays": 0,
+    "daysInStage": 3,
+    "source": "Jira Service Management",
+    "sourceUrl": "https://jira.example.com/IT-1042",
+    "integrations": [
+      "HRIS",
+      "Active Directory",
+      "MDM",
+      "Slack"
+    ]
+  },
+  {
+    "id": "case-sam-okafor-laptop",
+    "processId": "laptop-lifecycle",
+    "title": "Sam Okafor \u2014 Laptop Procurement",
+    "person": "Sam Okafor",
+    "owner": "IT Procurement",
+    "status": "watch",
+    "priority": "high",
+    "system": "SAP / ERP",
+    "blocker": "Preferred vendor is out of stock.",
+    "nextAction": "Approve alternative laptop and issue PO today.",
+    "suggestedMessage": "Hi Manager, Dell XPS is out of stock for Sam Okafor. Can you approve MacBook Pro 14 today? Start date is in 3 days.",
+    "slaDays": 5,
+    "daysInStage": 5,
+    "source": "Jira Service Management",
+    "sourceUrl": "https://jira.example.com/IT-1088",
+    "integrations": [
+      "Jira",
+      "SAP / ERP",
+      "Outlook",
+      "Slack"
+    ]
+  },
+  {
+    "id": "case-auna-payment",
+    "processId": "monthly-billing",
+    "title": "AUNA Group \u2014 Overdue Invoice",
+    "person": "AUNA Group",
+    "owner": "Finance",
+    "status": "overdue",
+    "priority": "high",
+    "system": "ERP / Banking",
+    "blocker": "Invoice unpaid after second reminder.",
+    "nextAction": "Send escalation to client finance team and CC Account Manager.",
+    "suggestedMessage": "Hi AUNA Finance Team, following up on the overdue invoice. Please confirm expected payment date today.",
+    "slaDays": 30,
+    "daysInStage": 38,
+    "source": "ERP / Finance",
+    "sourceUrl": "https://erp.example.com/invoices/INV-0038",
+    "integrations": [
+      "ERP",
+      "Banking",
+      "Outlook",
+      "Salesforce"
+    ]
+  }
+]

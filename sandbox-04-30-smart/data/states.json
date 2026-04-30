@@ -1,0 +1,8 @@
+[
+  { "id": "not-started", "label": "Not Started", "type": "neutral" },
+  { "id": "active", "label": "In Progress", "type": "progress" },
+  { "id": "waiting", "label": "Waiting Approval", "type": "warning" },
+  { "id": "blocked", "label": "Blocked", "type": "danger" },
+  { "id": "overdue", "label": "Overdue", "type": "danger" },
+  { "id": "done", "label": "Completed", "type": "success" }
+]

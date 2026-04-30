@@ -1,0 +1,83 @@
+[
+  {
+    "id": "employee-offboarding",
+    "domain": "hr",
+    "name": "Employee Offboarding",
+    "owner": "Human Resources",
+    "status": "active",
+    "sla": "5 business days",
+    "description": "Structured departure process covering HR exit, IT access revocation, equipment return, final pay and closure.",
+    "stages": [
+      "notice",
+      "hr-exit",
+      "it-revoke",
+      "equipment-return",
+      "final-pay",
+      "closed"
+    ],
+    "trigger_type": "event",
+    "trigger_domain": "hr",
+    "outcome_type": "access_change",
+    "spine_connection": "people_operations",
+    "systems_touched": [
+      "HRIS",
+      "Active Directory",
+      "MDM",
+      "Slack"
+    ]
+  },
+  {
+    "id": "laptop-lifecycle",
+    "domain": "operations",
+    "name": "Laptop Lifecycle",
+    "owner": "IT Operations",
+    "status": "active",
+    "sla": "10 business days",
+    "description": "Full lifecycle for employee laptop request, approval, procurement, setup, delivery, usage and return.",
+    "stages": [
+      "request",
+      "approval",
+      "procurement",
+      "setup",
+      "delivery",
+      "in-use",
+      "return"
+    ],
+    "trigger_type": "request",
+    "trigger_domain": "procurement",
+    "outcome_type": "asset_change",
+    "spine_connection": "cost_management",
+    "systems_touched": [
+      "Jira",
+      "SAP / ERP",
+      "MDM",
+      "Outlook"
+    ]
+  },
+  {
+    "id": "monthly-billing",
+    "domain": "finance",
+    "name": "Monthly Billing Cycle",
+    "owner": "Finance",
+    "status": "active",
+    "sla": "30 days",
+    "description": "Invoice generation, review, approval, payment tracking and reconciliation.",
+    "stages": [
+      "invoice-generation",
+      "invoice-review",
+      "approval",
+      "payment",
+      "reconciliation"
+    ],
+    "trigger_type": "threshold",
+    "trigger_domain": "finance",
+    "outcome_type": "payment",
+    "spine_connection": "revenue_protection",
+    "systems_touched": [
+      "ERP",
+      "Banking",
+      "Outlook",
+      "Salesforce"
+    ]
+  }
+]
