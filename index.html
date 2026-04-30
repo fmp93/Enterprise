@@ -38,58 +38,35 @@ body:after{content:"";position:fixed;inset:0;z-index:-3;opacity:.035;background-
 .section{padding:84px 28px;max-width:1180px;margin:0 auto}.section h2{font-family:var(--display);font-size:clamp(2.2rem,5vw,4.4rem);line-height:1;letter-spacing:-.05em;text-align:center}.section p.lead{max-width:680px;margin:18px auto 0;text-align:center;color:var(--muted);line-height:1.6}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:38px}.card{border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.035);padding:22px;min-height:190px}.card small{font-family:var(--mono);color:var(--blue);font-size:10px}.card h3{margin-top:18px;font-size:18px}.card p{margin-top:10px;color:var(--dim);line-height:1.55;font-size:14px}.final-cta{text-align:center;padding-bottom:110px}.final-cta .btn{margin-top:24px}
 @media(max-width:900px){.navlinks{display:none}.scene-strip{grid-template-columns:1fr;gap:6px;height:auto;padding:14px}.timer-wrap,.scene-dots{justify-content:center}.workspace{height:auto;grid-template-columns:1fr;grid-template-rows:auto}.calendar,.ceo,.flow,.agents,.alerts{grid-column:1;grid-row:auto}.module{min-height:220px}.kpis,.cards{grid-template-columns:1fr}.nodes{transform:scale(.82);transform-origin:center}.demo-shell{border-radius:20px}.headline{font-size:clamp(3rem,15vw,5rem)}}
 </style>
-</head>
-<body>
 
-<style>
-.hard-demo-link {
-  position: fixed;
-  top: 28px;
-  right: 32px;
-  z-index: 999999;
-  pointer-events: auto !important;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 18px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.92);
-  color: #05050c;
-  font-weight: 600;
-  font-size: 14px;
-  text-decoration: none;
-  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+<style id="clean-demo-click-fix">
+/* Visual layers should never block CTA clicks */
+.bg,
+.grain,
+.grid,
+.gridlines,
+.aurora,
+.orb,
+.scene-stage,
+.scene,
+#scene-overlay,
+.overlay {
+  pointer-events: none !important;
 }
-.hard-demo-link:hover {
-  transform: translateY(-1px);
+
+/* Real interactive elements stay clickable */
+a,
+button,
+.btn,
+[role="button"] {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 9999;
 }
 </style>
 
-<a class="hard-demo-link" href="/Enterprise/demo/index.html">
-  Run the demo
-</a>
-
-<script>
-window.goToDemo = function () {
-  window.location.href = "/Enterprise/demo/index.html";
-};
-
-document.addEventListener("click", function(e) {
-  const target = e.target.closest("a, button, .btn, [role='button']");
-  if (!target) return;
-
-  const text = (target.textContent || "").toLowerCase();
-  if (
-    text.includes("run the demo") ||
-    text.includes("run demo") ||
-    text.includes("see the command center")
-  ) {
-    e.preventDefault();
-    e.stopPropagation();
-    window.location.href = "/Enterprise/demo/index.html";
-  }
-}, true);
-</script>
+</head>
+<body>
 
 <div class="grid-bg"></div><div class="orb one"></div><div class="orb two"></div>
 <nav class="nav">
@@ -177,6 +154,25 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+</script>
+
+
+<script id="clean-demo-routing-fix">
+document.addEventListener("click", function(e) {
+  const target = e.target.closest("a, button, .btn, [role='button']");
+  if (!target) return;
+
+  const text = (target.textContent || "").toLowerCase();
+
+  if (
+    text.includes("run the demo") ||
+    text.includes("run demo") ||
+    text.includes("see the command center")
+  ) {
+    e.preventDefault();
+    window.location.href = "/Enterprise/demo/index.html";
+  }
+}, true);
 </script>
 
 </body>
