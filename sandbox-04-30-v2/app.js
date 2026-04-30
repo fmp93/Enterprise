@@ -70,6 +70,8 @@ function renderExec() {
       ${kpi("Risks", blocked, "Blocked or overdue")}
     </div>
 
+    <button class="action-btn" onclick="createNewCase()">+ Create New Live Case</button>
+
     <div class="section-title">Critical live cases</div>
     ${DATA.cases.map(renderCaseRow).join("")}
 
@@ -300,6 +302,29 @@ function changeStatus(type, id, newStatus) {
 
   item.status = newStatus;
   render();
+}
+
+
+function createNewCase() {
+  const newCase = {
+    id: "case-auto-" + Date.now(),
+    processId: "employee-offboarding",
+    title: "New Employee Offboarding — IT Access Review",
+    person: "New Employee",
+    owner: "IT Operations",
+    status: "active",
+    priority: "normal",
+    system: "AD + MDM + SaaS Apps",
+    blocker: "No blocker yet.",
+    nextAction: "Review account access and confirm revocation checklist.",
+    suggestedMessage: "Hi IT team, please review this offboarding access checklist and confirm completion.",
+    slaDays: 5,
+    daysInStage: 0
+  };
+
+  DATA.cases.unshift(newCase);
+  renderExec();
+  showCase(newCase.id);
 }
 
 init();
