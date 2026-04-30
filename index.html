@@ -39,11 +39,11 @@ body:after{content:"";position:fixed;inset:0;z-index:-3;opacity:.035;background-
 @media(max-width:900px){.navlinks{display:none}.scene-strip{grid-template-columns:1fr;gap:6px;height:auto;padding:14px}.timer-wrap,.scene-dots{justify-content:center}.workspace{height:auto;grid-template-columns:1fr;grid-template-rows:auto}.calendar,.ceo,.flow,.agents,.alerts{grid-column:1;grid-row:auto}.module{min-height:220px}.kpis,.cards{grid-template-columns:1fr}.nodes{transform:scale(.82);transform-origin:center}.demo-shell{border-radius:20px}.headline{font-size:clamp(3rem,15vw,5rem)}}
 </style>
 
-<style id="clean-demo-click-fix">
-/* Visual layers should never block CTA clicks */
+
+<style id="final-demo-click-fix">
+/* Only purely visual layers should ignore clicks */
 .bg,
 .grain,
-.grid,
 .gridlines,
 .aurora,
 .orb,
@@ -54,14 +54,15 @@ body:after{content:"";position:fixed;inset:0;z-index:-3;opacity:.035;background-
   pointer-events: none !important;
 }
 
-/* Real interactive elements stay clickable */
+/* Keep all CTA/navigation elements clickable */
 a,
 button,
 .btn,
+.cta,
 [role="button"] {
   pointer-events: auto !important;
   position: relative;
-  z-index: 9999;
+  z-index: 999999 !important;
 }
 </style>
 
@@ -157,22 +158,58 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 
-<script id="clean-demo-routing-fix">
-document.addEventListener("click", function(e) {
-  const target = e.target.closest("a, button, .btn, [role='button']");
-  if (!target) return;
 
-  const text = (target.textContent || "").toLowerCase();
+<script id="final-demo-routing-fix">
+(function () {
+  const DEMO_URL = "/Enterprise/demo/index.html";
 
-  if (
-    text.includes("run the demo") ||
-    text.includes("run demo") ||
-    text.includes("see the command center")
-  ) {
-    e.preventDefault();
-    window.location.href = "/Enterprise/demo/index.html";
+  function wireDemoButtons() {
+    document.querySelectorAll("a, button, .btn, .cta, [role='button']").forEach(function (el) {
+      const text = (el.textContent || "").toLowerCase().trim();
+
+      if (
+        text.includes("run the demo") ||
+        text.includes("run demo") ||
+        text.includes("view demo") ||
+        text.includes("see the command center")
+      ) {
+        el.setAttribute("href", DEMO_URL);
+        el.style.pointerEvents = "auto";
+        el.style.cursor = "pointer";
+        el.style.zIndex = "999999";
+        el.onclick = function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.location.assign(DEMO_URL);
+          return false;
+        };
+      }
+    });
   }
-}, true);
+
+  document.addEventListener("DOMContentLoaded", wireDemoButtons);
+  window.addEventListener("load", wireDemoButtons);
+  setTimeout(wireDemoButtons, 500);
+  setTimeout(wireDemoButtons, 1500);
+
+  document.addEventListener("click", function (e) {
+    const target = e.target.closest("a, button, .btn, .cta, [role='button']");
+    if (!target) return;
+
+    const text = (target.textContent || "").toLowerCase();
+
+    if (
+      text.includes("run the demo") ||
+      text.includes("run demo") ||
+      text.includes("view demo") ||
+      text.includes("see the command center")
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.location.assign(DEMO_URL);
+    }
+  }, true);
+})();
 </script>
 
 </body>
