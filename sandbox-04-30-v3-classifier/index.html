@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise OS — Command Center v2</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0b0b14;
+      --surface:  #111120;
+      --surface2: #16162a;
+      --border:   #1e1e35;
+      --border-lt:#252540;
+      --accent:   #4f9cf9;
+      --accent2:  #a78bfa;
+      --accent3:  #34d399;
+      --accent4:  #fb923c;
+      --danger:   #f87171;
+      --text:     #e2e8f0;
+      --text2:    #94a3b8;
+      --text3:    #475569;
+      --nav-w:    58px;
+      --panel-w:  310px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+      font-size: 13px;
+    }
+
+    /* ── Left Nav ── */
+    #nav {
+      width: var(--nav-w); background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center;
+      padding: 14px 0; gap: 2px; flex-shrink: 0; z-index: 10;
+    }
+    .nav-logo { font-size: 19px; color: var(--accent); margin-bottom: 14px; font-weight: 800; letter-spacing: -1px; }
+    .nav-btn {
+      width: 42px; height: 42px; border-radius: 10px; border: none;
+      background: transparent; color: var(--text3); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 2px; transition: all 0.15s; font-size: 16px;
+    }
+    .nav-btn .lbl { font-size: 8px; letter-spacing: 0.4px; text-transform: uppercase; font-weight: 600; }
+    .nav-btn:hover { background: var(--surface2); color: var(--text2); }
+    .nav-btn.active { background: rgba(79,156,249,.13); color: var(--accent); }
+    .nav-sep { width: 26px; height: 1px; background: var(--border); margin: 8px 0; }
+
+    /* ── Shell / Main ── */
+    #shell { flex: 1; display: flex; overflow: hidden; }
+    #main  { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .view  { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+    .view.active { display: flex; }
+
+    /* ── View header ── */
+    .view-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 20px; border-bottom: 1px solid var(--border);
+      background: var(--surface); flex-shrink: 0;
+    }
+    .view-header h1 { font-size: 13px; font-weight: 600; }
+    .view-header .sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+    .header-meta { display: flex; align-items: center; gap: 8px; }
+
+    /* ── Badges ── */
+    .badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; }
+    .badge-live { background: rgba(52,211,153,.15); color: var(--accent3); }
+    .badge-warn { background: rgba(251,146,60,.15); color: var(--accent4); }
+    .badge-ai   { background: rgba(167,139,250,.15); color: var(--accent2); display: inline-flex; align-items: center; gap: 5px; }
+    .pulse { width:6px; height:6px; border-radius:50%; background: var(--accent2); animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.5; transform:scale(.7); } }
+
+    /* ── View tabs (User view) ── */
+    .view-tabs {
+      display: flex; gap: 0; padding: 0 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface); flex-shrink: 0;
+    }
+    .vtab {
+      padding: 8px 14px; font-size: 11px; font-weight: 500; color: var(--text3);
+      cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; white-space: nowrap;
+    }
+    .vtab:hover { color: var(--text2); }
+    .vtab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .vtab-count { display: inline-block; background: rgba(248,113,113,.18); color: var(--danger);
+      border-radius: 9px; padding: 0 5px; font-size: 9px; font-weight: 700; margin-left: 4px; }
+    .vtab-count.ok { background: rgba(52,211,153,.12); color: var(--accent3); }
+
+    /* ── Domain chips (Area view) ── */
+    .domain-bar {
+      display: flex; gap: 6px; padding: 9px 20px;
+      background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap;
+    }
+    .domain-chip {
+      padding: 4px 12px; border-radius: 100px; border: 1px solid var(--border);
+      font-size: 11px; font-weight: 500; cursor: pointer; color: var(--text2);
+      background: transparent; transition: all .15s; display: inline-flex; align-items: center; gap: 5px;
+    }
+    .domain-chip:hover { border-color: var(--border-lt); color: var(--text); }
+    .domain-chip.active { color: #000; border-color: transparent; font-weight: 600; }
+
+    /* ── Scrollable body ── */
+    .view-body {
+      flex: 1; overflow-y: auto; padding: 14px 20px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    /* ── Calendar strip ── */
+    .cal-strip {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 15px;
+    }
+    .cal-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .cal-hdr-lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); }
+    .cal-hdr-nav { display: flex; gap: 2px; }
+    .cal-nav-btn { width:20px; height:20px; border:none; background:transparent; color:var(--text3); cursor:pointer; border-radius:4px; font-size:10px; }
+    .cal-nav-btn:hover { background:var(--surface2); color:var(--text2); }
+    .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-day {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      padding: 5px 2px; border-radius: 7px; cursor: pointer; transition: background .1s;
+    }
+    .cal-day:hover { background: var(--surface2); }
+    .cal-day.today { background: rgba(79,156,249,.1); }
+    .cal-day-name { font-size: 9px; color: var(--text3); font-weight: 500; text-transform: uppercase; }
+    .cal-day-num  { font-size: 13px; font-weight: 600; color: var(--text2); }
+    .cal-day.today .cal-day-num { color: var(--accent); }
+    .cal-dots { display: flex; gap: 2px; justify-content: center; min-height: 6px; }
+    .cal-dot { width: 4px; height: 4px; border-radius: 50%; }
+
+    /* ── KPI row ── */
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+    .kpi-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+      cursor: pointer; transition: border-color .15s, background .15s;
+    }
+    .kpi-card:hover { border-color: var(--border-lt); background: var(--surface2); }
+    .kpi-card.sel   { border-color: var(--accent); background: rgba(79,156,249,.06); }
+    .kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; line-height: 1; }
+    .kpi-delta { font-size: 10px; color: var(--text3); margin-top: 4px; }
+    .kpi-delta.up   { color: var(--accent3); }
+    .kpi-delta.down { color: var(--danger); }
+
+    /* ── Section card ── */
+    .section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .sec-hdr { padding: 9px 15px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .sec-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); }
+    .sec-count { font-size: 10px; color: var(--text3); }
+
+    /* ── List item ── */
+    .li {
+      padding: 9px 15px; border-bottom: 1px solid var(--border);
+      cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background .1s;
+    }
+    .li:last-child { border-bottom: none; }
+    .li:hover { background: var(--surface2); }
+    .li.sel   { background: rgba(79,156,249,.06); border-left: 2px solid var(--accent); }
+    .li.done-row { opacity: .5; }
+    .li-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+    .li-body { flex: 1; min-width: 0; }
+    .li-name { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .li-sub  { font-size: 10px; color: var(--text3); margin-top: 1px; }
+
+    /* ── Status pill ── */
+    .st {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 7px; border-radius: 100px; font-size: 10px; font-weight: 500; flex-shrink: 0;
+    }
+    .st::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
+    .st-active  { color: var(--accent3);  background: rgba(52,211,153,.12); }
+    .st-pending { color: var(--accent);   background: rgba(79,156,249,.12); }
+    .st-blocked { color: var(--danger);   background: rgba(248,113,113,.12); }
+    .st-done    { color: var(--text3);    background: var(--border); }
+    .st-warn    { color: var(--accent4);  background: rgba(251,146,60,.12); }
+
+    /* ── Alert item ── */
+    .alert-li {
+      padding: 9px 15px; border-bottom: 1px solid var(--border);
+      cursor: pointer; display: flex; gap: 10px; align-items: flex-start; transition: background .1s;
+    }
+    .alert-li:last-child { border-bottom: none; }
+    .alert-li:hover { background: var(--surface2); }
+    .alert-li.sel   { background: rgba(248,113,113,.05); border-left: 2px solid var(--danger); }
+    .alert-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+
+    /* ── Table ── */
+    .dtable { width: 100%; border-collapse: collapse; }
+    .dtable th { padding: 7px 15px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); text-align: left; border-bottom: 1px solid var(--border); }
+    .dtable td { padding: 9px 15px; font-size: 12px; border-bottom: 1px solid var(--border); }
+    .dtable tr:last-child td { border-bottom: none; }
+    .dtable tr.row { cursor: pointer; }
+    .dtable tr.row:hover td { background: var(--surface2); }
+    .dtable tr.row.sel td   { background: rgba(79,156,249,.06); }
+
+    /* ── Two-col ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* ── Pipeline ── */
+    .pipeline { display: flex; align-items: center; padding: 10px 15px; overflow-x: auto; gap: 0; }
+    .pipe-st { flex: 1; min-width: 70px; text-align: center; padding: 7px 4px; cursor: pointer; border-radius: 6px; transition: background .1s; }
+    .pipe-st:hover { background: var(--surface2); }
+    .pipe-st-name  { font-size: 10px; color: var(--text2); font-weight: 500; }
+    .pipe-st-count { font-size: 18px; font-weight: 700; color: var(--text); margin-top: 1px; }
+    .pipe-st-lbl   { font-size: 9px; color: var(--text3); }
+    .pipe-arrow    { color: var(--text3); font-size: 12px; padding: 0 2px; flex-shrink: 0; }
+
+
+    .tier-badge {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      margin-left:6px;
+      padding:2px 6px;
+      border-radius:999px;
+      font-size:9px;
+      font-weight:800;
+      letter-spacing:.04em;
+      background:rgba(79,156,249,.14);
+      color:var(--accent);
+      border:1px solid rgba(79,156,249,.24);
+      vertical-align:middle;
+    }
+
+    /* ── Right Panel ── */
+    #panel {
+      width: var(--panel-w); background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden;
+    }
+    #panel-hdr {
+      padding: 11px 15px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-shrink: 0;
+    }
+    #panel-title { font-size: 13px; font-weight: 600; line-height: 1.4; flex: 1; }
+    /* Panel tabs */
+    .panel-tabs {
+      display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface);
+    }
+    .ptab {
+      flex: 1; padding: 7px 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px;
+      color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent;
+      text-align: center; transition: all .15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ptab:hover { color: var(--text2); }
+    .ptab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .panel-tab-content { display: none; flex: 1; overflow-y: auto; padding: 14px; }
+    .panel-tab-content.active { display: block; }
+
+    /* Panel content pieces */
+    .panel-empty {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 160px; color: var(--text3); gap: 10px; text-align: center; padding: 20px;
+    }
+    .panel-empty .ico { font-size: 20px; opacity: .3; }
+    .panel-empty .msg { font-size: 11px; line-height: 1.6; }
+
+    .d-row { margin-bottom: 12px; }
+    .d-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); font-weight: 600; margin-bottom: 3px; }
+    .d-val { font-size: 12px; color: var(--text); line-height: 1.5; }
+    .d-sep { height: 1px; background: var(--border); margin: 11px 0; }
+
+    .msg-box {
+      background: var(--surface2); border: 1px solid var(--border-lt); border-left: 3px solid var(--accent);
+      border-radius: 6px; padding: 9px 12px; font-size: 11px; color: var(--text2); line-height: 1.6;
+      font-style: italic; margin-top: 4px;
+    }
+    .blocker-box {
+      background: rgba(248,113,113,.06); border: 1px solid rgba(248,113,113,.2); border-left: 3px solid var(--danger);
+      border-radius: 6px; padding: 9px 12px; font-size: 11px; color: var(--danger); line-height: 1.5; margin-top: 4px;
+    }
+
+    /* Audit trail */
+    .at-label { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); font-weight: 600; margin-bottom: 10px; }
+    .at-event { display: flex; gap: 10px; }
+    .at-dot-col { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 12px; padding-top: 3px; }
+    .at-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .at-dot.system  { background: var(--accent); }
+    .at-dot.human   { background: var(--accent3); }
+    .at-dot.alert   { background: var(--accent4); }
+    .at-dot.blocked { background: var(--danger); }
+    .at-dot.done    { background: var(--border-lt); }
+    .at-line { flex: 1; width: 1px; background: var(--border); min-height: 10px; margin: 3px 0 0; }
+    .at-body { padding-bottom: 11px; flex: 1; min-width: 0; }
+    .at-time   { font-size: 9px; color: var(--text3); margin-bottom: 1px; }
+    .at-action { font-size: 11px; color: var(--text); line-height: 1.45; }
+    .at-actor  { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+    /* Action buttons */
+    .action-btns { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+    .btn {
+      padding: 9px 14px; border-radius: 8px; border: none; cursor: pointer;
+      font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 7px;
+      transition: all .15s; width: 100%; text-align: left;
+    }
+    .btn-primary   { background: var(--accent); color: #000; }
+    .btn-primary:hover   { background: #6faff9; }
+    .btn-danger    { background: rgba(248,113,113,.15); color: var(--danger); border: 1px solid rgba(248,113,113,.25); }
+    .btn-danger:hover    { background: rgba(248,113,113,.25); }
+    .btn-secondary { background: var(--surface2); color: var(--text2); border: 1px solid var(--border-lt); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-success   { background: rgba(52,211,153,.15); color: var(--accent3); border: 1px solid rgba(52,211,153,.25); }
+    .btn-success:hover   { background: rgba(52,211,153,.25); }
+    .btn-done { background: var(--border); color: var(--text3); cursor: default; }
+    .btn-note { font-size: 10px; color: var(--text3); line-height: 1.5; margin-top: 2px; }
+
+    /* ── FLOW view ── */
+    #flow-domain-nav {
+      display: flex; gap: 6px; padding: 9px 20px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      flex-shrink: 0; flex-wrap: wrap;
+    }
+    .breadcrumb {
+      display: none; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--text3);
+      padding: 7px 20px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .breadcrumb.show { display: flex; }
+    .bc-link { cursor: pointer; }
+    .bc-link:hover { color: var(--text2); }
+    .bc-cur { color: var(--text); cursor: default; }
+
+    #flow-body { flex: 1; overflow-y: auto; }
+
+    /* Stage circles */
+    #stages-row { display: flex; gap: 0; padding: 18px 20px 10px; overflow-x: auto; align-items: flex-start; }
+    .stage-node { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 88px; cursor: pointer; }
+    .stage-circle {
+      width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center; font-size: 17px;
+      background: var(--surface); transition: all .15s;
+    }
+    .stage-circle.done    { border-color: var(--accent3); background: rgba(52,211,153,.08); }
+    .stage-circle.active  { border-color: var(--accent);  background: rgba(79,156,249,.08); box-shadow: 0 0 0 4px rgba(79,156,249,.12); }
+    .stage-circle.blocked { border-color: var(--danger);  background: rgba(248,113,113,.08); }
+    .stage-node:hover .stage-circle { border-color: var(--accent); }
+    .stage-node.sel .stage-circle   { box-shadow: 0 0 0 5px rgba(79,156,249,.2); }
+    .stage-name { font-size: 9px; color: var(--text2); text-align: center; font-weight: 500; max-width: 76px; }
+    .stage-conn { width: 26px; height: 2px; background: var(--border); margin-top: 24px; flex-shrink: 0; }
+    .stage-conn.done { background: rgba(52,211,153,.4); }
+    .stage-circle-wrap { position: relative; display: inline-flex; }
+    .stage-badge {
+      position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; border-radius: 9px;
+      background: var(--accent); color: #fff; font-size: 9px; font-weight: 700;
+      line-height: 18px; text-align: center; padding: 0 4px; border: 2px solid var(--bg); pointer-events: none;
+    }
+    .stage-badge.blocked { background: var(--danger); }
+
+    .task-list { padding: 0 20px 14px; display: flex; flex-direction: column; gap: 5px; }
+    .task-lbl  { font-size: 10px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; padding: 6px 0 4px; }
+    .task-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 12px; cursor: pointer;
+      display: flex; align-items: center; gap: 10px; transition: border-color .1s, background .1s;
+    }
+    .task-card:hover { background: var(--surface2); border-color: var(--border-lt); }
+    .task-card.sel   { border-color: var(--accent); }
+    .tc-body  { flex: 1; }
+    .tc-name  { font-size: 12px; font-weight: 500; }
+    .tc-meta  { font-size: 10px; color: var(--text3); margin-top: 1px; }
+
+    /* Dept ownership */
+    .dept-strip { padding: 0 20px 14px; }
+    .dept-strip-lbl { font-size: 10px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; padding: 10px 0 7px; border-top: 1px solid var(--border); margin-top: 4px; }
+    .dept-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+    .dept-chip {
+      padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 500;
+      cursor: pointer; border: 1px solid var(--border); color: var(--text2); background: var(--surface);
+      transition: all .1s;
+    }
+    .dept-chip:hover { border-color: var(--border-lt); color: var(--text); }
+    .dept-chip.primary { border-color: var(--accent); color: var(--accent); background: rgba(79,156,249,.08); }
+
+    /* Case roster */
+    .case-roster { padding: 0 20px 16px; display: flex; flex-direction: column; gap: 4px; }
+    .case-roster-lbl { font-size: 10px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; padding: 10px 0 4px; border-top: 1px solid var(--border); margin-top: 4px; }
+    .case-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 7px; cursor: pointer;
+      border: 1px solid transparent; transition: background .1s, border-color .1s;
+    }
+    .case-row:hover { background: var(--surface2); border-color: var(--border); }
+    .case-row.sel   { border-color: var(--accent); background: rgba(79,156,249,.05); }
+    .case-av {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; flex-shrink: 0; letter-spacing: .3px;
+    }
+    .case-av.ok      { background: rgba(79,156,249,.15); color: var(--accent); }
+    .case-av.warn    { background: rgba(251,146,60,.15);  color: var(--accent4); }
+    .case-av.overdue { background: rgba(248,113,113,.15); color: var(--danger); }
+    .case-body { flex: 1; min-width: 0; }
+    .case-name { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .case-meta { font-size: 10px; color: var(--text3); margin-top: 1px; }
+    .case-right { text-align: right; flex-shrink: 0; }
+    .case-days { font-size: 10px; color: var(--text3); }
+    .case-days.warn    { color: var(--accent4); }
+    .case-days.overdue { color: var(--danger); font-weight: 600; }
+
+    /* Avatar */
+    .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent2); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(60px);
+      background: var(--surface2); border: 1px solid var(--border-lt);
+      color: var(--text); padding: 9px 18px; border-radius: 8px;
+      font-size: 12px; font-weight: 500; z-index: 999;
+      transition: transform .25s ease, opacity .25s; opacity: 0; pointer-events: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    #toast.ok   { border-color: rgba(52,211,153,.4); color: var(--accent3); }
+    #toast.err  { border-color: rgba(248,113,113,.4); color: var(--danger); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-lt); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ LEFT NAV ═══ -->
+<nav id="nav">
+  <div class="nav-logo">⬡</div>
+  <button class="nav-btn active" id="btn-ceo"  onclick="switchView('ceo')"  title="Executive View">
+    <span>◈</span><span class="lbl">Exec</span>
+  </button>
+  <button class="nav-btn" id="btn-area" onclick="switchView('area')" title="Area View">
+    <span>⊞</span><span class="lbl">Area</span>
+  </button>
+  <button class="nav-btn" id="btn-user" onclick="switchView('user')" title="My Work">
+    <span>◉</span><span class="lbl">Mine</span>
+  </button>
+  <div class="nav-sep"></div>
+  <button class="nav-btn" id="btn-flow" onclick="switchView('flow')" title="Process Navigator">
+    <span>⬡</span><span class="lbl">Flow</span>
+  </button>
+</nav>
+
+<!-- ═══ SHELL ═══ -->
+<div id="shell">
+<div id="main">
+
+  <!-- ─── CEO VIEW ─── -->
+  <div class="view active" id="view-ceo">
+    <div class="view-header">
+      <div><h1>Executive View</h1><div class="sub">Revenue Command · All processes · Live</div></div>
+      <div class="header-meta">
+        <span class="badge badge-ai"><span class="pulse"></span>6 Agents Active</span>
+        <span class="badge badge-live">● Live</span>
+      </div>
+    </div>
+    <div class="view-body" id="ceo-body"></div>
+  </div>
+
+  <!-- ─── AREA VIEW ─── -->
+  <div class="view" id="view-area">
+    <div class="view-header">
+      <div><h1 id="area-title">HR Area View</h1><div class="sub" id="area-sub">Human Resources · Manager control panel</div></div>
+      <div class="header-meta"><span class="badge badge-live">● Live</span></div>
+    </div>
+    <div class="domain-bar" id="area-domain-bar"></div>
+    <div class="view-body" id="area-body"></div>
+  </div>
+
+  <!-- ─── USER VIEW ─── -->
+  <div class="view" id="view-user">
+    <div class="view-header">
+      <div><h1>My Work</h1><div class="sub">Jordan Davis · IT Operations · All active tasks</div></div>
+      <div class="header-meta"><div class="avatar">JD</div></div>
+    </div>
+    <div class="view-tabs">
+      <div class="vtab active" id="utab-all"       onclick="switchUserTab('all')">All Tasks <span class="vtab-count ok" id="utab-count-all"></span></div>
+      <div class="vtab"        id="utab-attention"  onclick="switchUserTab('attention')">Needs Attention <span class="vtab-count" id="utab-count-attention"></span></div>
+      <div class="vtab"        id="utab-done"       onclick="switchUserTab('done')">Completed <span class="vtab-count ok" id="utab-count-done"></span></div>
+    </div>
+    <div class="view-body" id="user-body"></div>
+  </div>
+
+  <!-- ─── FLOW VIEW ─── -->
+  <div class="view" id="view-flow">
+    <div class="view-header">
+      <div><h1>Flow — Process Navigator</h1><div class="sub">Explore processes, stages, tasks, ownership across the org</div></div>
+    </div>
+    <div id="flow-domain-nav"></div>
+    <div class="breadcrumb" id="flow-bc"></div>
+    <div id="flow-body"></div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ═══ RIGHT PANEL ═══ -->
+<div id="panel">
+  <div id="panel-hdr">
+    <div id="panel-title">Detail</div>
+    <button onclick="resetPanel()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 2px">✕</button>
+  </div>
+  <div class="panel-tabs" id="panel-tabs" style="display:none">
+    <div class="ptab active" id="ptab-info"     onclick="switchPanelTab('info')">Info</div>
+    <div class="ptab"        id="ptab-blockers" onclick="switchPanelTab('blockers')">Blockers</div>
+    <div class="ptab"        id="ptab-timeline" onclick="switchPanelTab('timeline')">Timeline</div>
+    <div class="ptab"        id="ptab-actions"  onclick="switchPanelTab('actions')">Actions</div>
+  </div>
+  <div class="panel-tab-content active" id="pcon-info">
+    <div class="panel-empty">
+      <div class="ico">◈</div>
+      <div class="msg">Select any item to see owner, status, blockers, timeline and next actions.</div>
+    </div>
+  </div>
+  <div class="panel-tab-content" id="pcon-blockers"></div>
+  <div class="panel-tab-content" id="pcon-timeline"></div>
+  <div class="panel-tab-content" id="pcon-actions"></div>
+</div>
+
+</div><!-- /shell -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════
+   TOAST
+   ═══════════════════════════════ */
+let toastTimer;
+function showToast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = type==='ok' ? '✓  '+msg : '⚠  '+msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ t.className=''; }, 2800);
+}
+
+/* ═══════════════════════════════
+   VIEW SWITCHING
+   ═══════════════════════════════ */
+function switchView(v) {
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('btn-'+v).classList.add('active');
+  resetPanel();
+}
+
+/* ═══════════════════════════════
+   PANEL TABS
+   ═══════════════════════════════ */
+let _panelData = null;
+
+function switchPanelTab(tab) {
+  document.querySelectorAll('.ptab').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.panel-tab-content').forEach(e=>e.classList.remove('active'));
+  document.getElementById('ptab-'+tab).classList.add('active');
+  document.getElementById('pcon-'+tab).classList.add('active');
+}
+
+function resetPanel() {
+  _panelData = null;
+  document.getElementById('panel-title').textContent = 'Detail';
+  document.getElementById('panel-tabs').style.display = 'none';
+  switchPanelTab('info');
+  document.getElementById('pcon-info').innerHTML = `
+    <div class="panel-empty">
+      <div class="ico">◈</div>
+      <div class="msg">Select any item to see owner, status, blockers, timeline and next actions.</div>
+    </div>`;
+  document.getElementById('pcon-blockers').innerHTML = '';
+  document.getElementById('pcon-timeline').innerHTML = '';
+  document.getElementById('pcon-actions').innerHTML  = '';
+  document.querySelectorAll('.li.sel,.alert-li.sel,.row.sel,.task-card.sel,.case-row.sel,.kpi-card.sel').forEach(e=>e.classList.remove('sel'));
+}
+
+function renderPanel(data, auditKey) {
+  if (!data) return;
+  _panelData = data;
+  document.getElementById('panel-title').textContent = data.title || '—';
+  document.getElementById('panel-tabs').style.display = 'flex';
+  switchPanelTab('info');
+
+  /* ── INFO tab ── */
+  let info = '';
+  const field = (lbl, val) => val ? `<div class="d-row"><div class="d-lbl">${lbl}</div><div class="d-val">${val}</div></div>` : '';
+  if (data.status)      info += field('Status',   `<span class="st ${stCls(data.rawStatus||data.status)}">${data.status}</span>`);
+  if (data.owner)       info += field('Owner',    data.owner);
+  if (data.process)     info += field('Process',  data.process);
+  if (data.system)      info += field('System',   data.system);
+  if (data.priority)    info += field('Priority', data.priority);
+  if (data.evidence)    info += field('Evidence Required', data.evidence);
+  if (data.description) info += `<div class="d-sep"></div><div class="d-row"><div class="d-lbl">Overview</div><div class="d-val" style="line-height:1.6">${data.description}</div></div>`;
+  if (data.nextAction)  info += `<div class="d-row"><div class="d-lbl">Next Action</div><div class="d-val" style="color:var(--accent3)">${data.nextAction}</div></div>`;
+  document.getElementById('pcon-info').innerHTML = info || '<div class="panel-empty"><div class="msg">No info available.</div></div>';
+
+  /* ── BLOCKERS tab ── */
+  let blockers = '';
+  if (data.blocker) {
+    blockers += `<div class="d-row"><div class="d-lbl">Active Blocker</div><div class="blocker-box">${data.blocker}</div></div>`;
+  }
+  if (data.suggestedMessage) {
+    blockers += `<div class="d-row"><div class="d-lbl">Suggested Escalation Message</div><div class="msg-box">${data.suggestedMessage}</div></div>`;
+  }
+  if (!blockers) blockers = '<div class="panel-empty"><div class="ico" style="font-size:16px;opacity:.2">✓</div><div class="msg">No active blockers for this item.</div></div>';
+  document.getElementById('pcon-blockers').innerHTML = blockers;
+
+  /* ── TIMELINE tab ── */
+  document.getElementById('pcon-timeline').innerHTML = buildAuditTrail(auditKey || data.id || '');
+
+  /* ── ACTIONS tab ── */
+  renderActions(data);
+}
+
+function renderActions(data) {
+  const c = document.getElementById('pcon-actions');
+  let h = '<div class="action-btns">';
+
+  // Context-aware buttons
+  if (data.status === 'Active' || data.rawStatus === 'active') {
+    h += btn('btn-success', '✓', 'Mark as Complete', `markComplete('${data.title||''}')`) ;
+    h += `<div class="btn-note">Advances the process to the next stage and notifies the owner.</div>`;
+  }
+  if (data.blocker || (data.status && data.status.toLowerCase().includes('block'))) {
+    h += btn('btn-danger', '↑', 'Escalate Now', `escalate('${data.title||''}', \`${(data.suggestedMessage||'Escalation required for: '+(data.title||'this item')).replace(/`/g,"'")}\`)`);
+    h += `<div class="btn-note">Copies the escalation message to clipboard and flags this as escalated.</div>`;
+  }
+  if (data.suggestedMessage) {
+    h += btn('btn-secondary', '✉', 'Copy Message to Clipboard', `copyMsg(\`${(data.suggestedMessage||'').replace(/`/g,"'")}\`)`);
+  }
+  if (data.status === 'Watch' || data.rawStatus === 'warn') {
+    h += btn('btn-danger', '⚑', 'Flag SLA Risk', `flagSLA('${data.title||''}')`) ;
+  }
+  // Always show
+  h += btn('btn-secondary', '↗', 'Open in Process Navigator', `openInFlow('${data.process||''}')`) ;
+  h += '</div>';
+
+  if (h === '<div class="action-btns"></div>') {
+    h = '<div class="panel-empty"><div class="msg">No context-aware actions available for this item.</div></div>';
+  }
+  c.innerHTML = h;
+}
+
+function btn(cls, ico, label, fn) {
+  return `<button class="btn ${cls}" onclick="${fn}">${ico} ${label}</button>`;
+}
+
+/* Button actions */
+function markComplete(title) {
+  showToast(`"${title}" marked complete — process advancing`);
+  document.getElementById('pcon-actions').querySelector('.btn-success').outerHTML =
+    '<button class="btn btn-done">✓ Marked as Complete</button>';
+}
+function escalate(title, msg) {
+  copyToClipboard(msg);
+  showToast(`Escalation message copied · ${title} flagged`);
+}
+function copyMsg(msg) {
+  copyToClipboard(msg);
+  showToast('Message copied to clipboard');
+}
+function flagSLA(title) {
+  showToast(`SLA risk flagged for "${title}"`, 'err');
+}
+function openInFlow(proc) {
+  switchView('flow');
+  showToast('Opening Process Navigator…');
+}
+function copyToClipboard(text) {
+  if (navigator.clipboard) navigator.clipboard.writeText(text).catch(()=>{});
+}
+
+/* ═══════════════════════════════
+   HELPERS
+   ═══════════════════════════════ */
+function stCls(s) {
+  if (!s) return 'st-done';
+  const m = { active:'st-active', pending:'st-pending', blocked:'st-blocked', warn:'st-warn', done:'st-done',
+    'Active':'st-active','Pending':'st-pending','Blocked':'st-blocked','Watch':'st-warn','Done':'st-done','Overdue':'st-blocked' };
+  return m[s] || 'st-done';
+}
+function stLbl(s) {
+  const m = { active:'Active', pending:'Pending', blocked:'Blocked', warn:'Watch', done:'Done' };
+  return m[s] || s || '—';
+}
+function sel(el, cls) {
+  document.querySelectorAll('.'+cls+'.sel').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+/* ═══════════════════════════════
+   AUDIT TRAIL BUILDER
+   ═══════════════════════════════ */
+const AUDIT = {
+  'procurement': [
+    { time:'Today 09:14', action:'PO issued to Dell via SAP', actor:'IT Procurement · System', type:'system' },
+    { time:'Today 08:52', action:'Budget check passed — Q2 allocation available', actor:'Finance · Automated', type:'system' },
+    { time:'Yesterday 17:30', action:'Manager approved request in ITSM', actor:'Maria Chen · Human', type:'human' },
+    { time:'Yesterday 14:10', action:'Employee submitted laptop request', actor:'Jordan Davis · Human', type:'human' },
+  ],
+  'it-revoke': [
+    { time:'Today 09:00', action:'ESCALATION: AD account still active — 3 days past departure', actor:'Security System · Alert', type:'blocked' },
+    { time:'2 days ago', action:'IT notified of departure — revocation not completed', actor:'HR → IT · Automated', type:'alert' },
+    { time:'3 days ago', action:'Employee last day logged in HRIS', actor:'HRIS · System', type:'system' },
+  ],
+  'payment': [
+    { time:'Today 09:00', action:'Payment still outstanding — 2nd automated reminder sent', actor:'ERP · System', type:'blocked' },
+    { time:'Apr 26', action:'First payment reminder sent with no response', actor:'Finance · System', type:'alert' },
+    { time:'Apr 22', action:'Invoice INV-0038 sent to AUNA Group', actor:'Finance · Maria Chen', type:'human' },
+    { time:'Apr 14', action:'Invoice generated and approved', actor:'Finance · System', type:'system' },
+  ],
+  'default': [
+    { time:'Today 08:00', action:'Status checked and confirmed active', actor:'System · Automated', type:'system' },
+    { time:'Yesterday', action:'Last update recorded in system', actor:'Owner · Human', type:'human' },
+  ]
+};
+
+function buildAuditTrail(key) {
+  const events = AUDIT[key] || AUDIT['default'];
+  let h = `<div class="at-label">Activity Timeline</div>`;
+  events.forEach((e,i) => {
+    const last = i === events.length - 1;
+    h += `<div class="at-event">
+      <div class="at-dot-col">
+        <div class="at-dot ${e.type}"></div>
+        ${!last ? '<div class="at-line"></div>' : ''}
+      </div>
+      <div class="at-body">
+        <div class="at-time">${e.time}</div>
+        <div class="at-action">${e.action}</div>
+        <div class="at-actor">${e.actor}</div>
+      </div>
+    </div>`;
+  });
+  return h;
+}
+
+/* ═══════════════════════════════
+   DATA
+   ═══════════════════════════════ */
+const DOMAINS = [
+  { id:'operations',  name:'Operations',       icon:'⚙', color:'#4f9cf9' },
+  { id:'hr',          name:'Human Resources',  icon:'◐', color:'#a78bfa' },
+  { id:'finance',     name:'Finance',          icon:'◈', color:'#34d399' },
+  { id:'procurement', name:'Procurement',      icon:'◉', color:'#fb923c' },
+];
+
+const PROCESSES = [
+  { id:'laptop-lifecycle',   domain:'operations',  name:'Laptop Lifecycle',     description:'Full lifecycle for employee laptops — request through decommission.',        owner:'IT Operations', status:'active', activeCases:8, sla:'10 business days', stages:['req','approval','procurement','setup','delivery','in-use','return'], depts:['Employee','Manager','IT Procurement','IT Operations','IT Operations','Employee','IT Operations'] },
+  { id:'equipment-return',   domain:'operations',  name:'Equipment Return',      description:'Collecting and decommissioning equipment from departing employees.',         owner:'IT Operations', status:'active', activeCases:3, sla:'5 business days',  stages:['initiation','pickup','assessment','decommission','closed-eq'], depts:['HR/Manager','IT Operations','IT Operations','IT Operations','IT Operations'] },
+  { id:'employee-onboarding',domain:'hr',           name:'Employee Onboarding',   description:'From signed offer letter to a fully operational new employee.',              owner:'Human Resources', status:'active', activeCases:5, sla:'15 business days', stages:['offer','documents','it-setup','orientation','training','review','active-emp'], depts:['HR','HR','IT Operations','HR','HR/Manager','HR','HR'] },
+  { id:'employee-offboarding',domain:'hr',          name:'Employee Offboarding',  description:'Structured departure process — accounts, equipment, final pay, handover.',   owner:'Human Resources', status:'active', activeCases:2, sla:'5 business days',  stages:['notice','hr-exit','it-revoke','equipment-ret','final-pay','closed-off'], depts:['Employee/Manager','HR','IT Operations','IT Operations','Finance','HR'] },
+  { id:'vendor-onboarding',  domain:'finance',      name:'Vendor Onboarding',     description:'Registering new vendors — compliance, due diligence, and ERP setup.',       owner:'Finance / Legal', status:'active', activeCases:4, sla:'20 business days', stages:['vendor-req','due-diligence','legal-review','erp-setup','vendor-active'], depts:['Procurement','Finance/Legal','Legal','Finance/IT','Finance'] },
+  { id:'monthly-billing',    domain:'finance',      name:'Monthly Billing Cycle', description:'End-to-end invoice generation, review, and payment tracking.',             owner:'Finance', status:'active', activeCases:6, sla:'30 days', stages:['invoice-gen','invoice-review','approval-fin','payment','reconcile'], depts:['Finance','Finance','Finance Manager','Client','Finance'] },
+  { id:'purchase-request',   domain:'procurement',  name:'Purchase Request',      description:'PR to PO pipeline — from request, approvals, to vendor delivery.',         owner:'Procurement', status:'active', activeCases:5, sla:'7 business days',  stages:['pr-submit','pr-approval','po-issuance','vendor-delivery','goods-received'], depts:['Requester','Manager + Finance','Procurement','Vendor','Warehouse/IT'] },
+];
+
+
+/* ═══════════════════════════════
+   PROCESS GENOME / ONTOLOGY LAYER
+   ═══════════════════════════════ */
+const PROCESS_GENOME = {
+  SPINE_NODES: [
+    { id:'revenue_generation', name:'Revenue Generation', icon:'📈', color:'#4f9cf9', description:'Lead, opportunity, contract and delivery creation.' },
+    { id:'revenue_protection', name:'Revenue Protection', icon:'💰', color:'#34d399', description:'Billing, payment, collections and revenue control.' },
+    { id:'cost_management', name:'Cost Management', icon:'🧾', color:'#fb923c', description:'Purchases, expenses, procurement and cost visibility.' },
+    { id:'risk_compliance', name:'Risk & Compliance', icon:'🛡', color:'#f87171', description:'Security, legal, audit, compliance and policy control.' },
+    { id:'people_operations', name:'People Operations', icon:'◐', color:'#a78bfa', description:'Hiring, onboarding, employee lifecycle and offboarding.' }
+  ],
+
+  TRIGGER_TYPES: [
+    { id:'request', label:'Request', description:'A user asks for something to be done.' },
+    { id:'event', label:'Event', description:'A business event triggers the process.' },
+    { id:'schedule', label:'Schedule', description:'The process starts on a recurring schedule.' },
+    { id:'threshold', label:'Threshold', description:'The process starts when a metric or limit is reached.' },
+    { id:'approval', label:'Approval', description:'The process starts from an approval requirement.' }
+  ],
+
+  OUTCOME_TYPES: [
+    { id:'asset_change', label:'Asset Change', affects_systems:['ERP','SAP','MDM','ITSM'] },
+    { id:'access_change', label:'Access Change', affects_systems:['AD','MDM','ITSM','HRIS'] },
+    { id:'payment', label:'Payment', affects_systems:['ERP','Banking','Payroll'] },
+    { id:'compliance', label:'Compliance', affects_systems:['CompliancePortal','DocuSign','HRIS'] },
+    { id:'status_change', label:'Status Change', affects_systems:['HRIS','CRM','ITSM'] },
+    { id:'communication', label:'Communication', affects_systems:['CRM','ITSM'] },
+    { id:'data_change', label:'Data Change', affects_systems:['ERP','CRM','HRIS'] }
+  ],
+
+  ACTOR_ROLES: [
+    { id:'employee', label:'Employee', can_initiate:['request','event'], can_approve:[] },
+    { id:'manager', label:'Manager', can_initiate:['request','approval'], can_approve:['request','approval'] },
+    { id:'hr', label:'Human Resources', can_initiate:['event','request'], can_approve:['people_operations'] },
+    { id:'it_ops', label:'IT Operations', can_initiate:['event','request'], can_approve:['access_change','asset_change'] },
+    { id:'finance', label:'Finance', can_initiate:['threshold','schedule','approval'], can_approve:['payment','cost_management'] },
+    { id:'procurement', label:'Procurement', can_initiate:['request','approval'], can_approve:['asset_change','cost_management'] },
+    { id:'legal', label:'Legal', can_initiate:['event','approval'], can_approve:['compliance','risk_compliance'] },
+    { id:'external_vendor', label:'External Vendor', can_initiate:['event'], can_approve:[] },
+    { id:'system_automated', label:'System Automated', can_initiate:['schedule','threshold','event'], can_approve:[] }
+  ],
+
+  SYSTEM_REGISTRY: [
+    { id:'HRIS', name:'HRIS', domain:'hr', owner_role:'hr' },
+    { id:'ERP', name:'ERP', domain:'finance', owner_role:'finance' },
+    { id:'SAP', name:'SAP', domain:'finance', owner_role:'finance' },
+    { id:'MDM', name:'MDM', domain:'it', owner_role:'it_ops' },
+    { id:'AD', name:'Active Directory', domain:'it', owner_role:'it_ops' },
+    { id:'ITSM', name:'IT Service Management', domain:'it', owner_role:'it_ops' },
+    { id:'CRM', name:'CRM', domain:'sales', owner_role:'manager' },
+    { id:'LMS', name:'Learning Management System', domain:'hr', owner_role:'hr' },
+    { id:'CompliancePortal', name:'Compliance Portal', domain:'legal', owner_role:'legal' },
+    { id:'DocuSign', name:'DocuSign', domain:'legal', owner_role:'legal' },
+    { id:'Payroll', name:'Payroll', domain:'finance', owner_role:'finance' },
+    { id:'Banking', name:'Banking', domain:'finance', owner_role:'finance' }
+  ]
+};
+
+const PROCESS_FINGERPRINTS = {
+  'laptop-lifecycle': {
+    trigger_type:'request',
+    trigger_domain:'operations',
+    primary_actor:'employee',
+    outcome_type:'asset_change',
+    systems_touched:['ITSM','SAP','ERP','MDM'],
+    spine_connection:'cost_management',
+    reversibility:'conditional',
+    sla_class:'5_day'
+  },
+  'equipment-return': {
+    trigger_type:'event',
+    trigger_domain:'operations',
+    primary_actor:'it_ops',
+    outcome_type:'asset_change',
+    systems_touched:['ITSM','MDM'],
+    spine_connection:'cost_management',
+    reversibility:'conditional',
+    sla_class:'5_day'
+  },
+  'employee-onboarding': {
+    trigger_type:'event',
+    trigger_domain:'hr',
+    primary_actor:'hr',
+    outcome_type:'status_change',
+    systems_touched:['HRIS','DocuSign','AD','MDM','LMS'],
+    spine_connection:'people_operations',
+    reversibility:'conditional',
+    sla_class:'20_day'
+  },
+  'employee-offboarding': {
+    trigger_type:'event',
+    trigger_domain:'hr',
+    primary_actor:'hr',
+    outcome_type:'access_change',
+    systems_touched:['HRIS','AD','MDM','Payroll','ITSM'],
+    spine_connection:'people_operations',
+    reversibility:'irreversible',
+    sla_class:'5_day'
+  },
+  'vendor-onboarding': {
+    trigger_type:'request',
+    trigger_domain:'finance',
+    primary_actor:'procurement',
+    outcome_type:'compliance',
+    systems_touched:['CompliancePortal','DocuSign','ERP','SAP'],
+    spine_connection:'risk_compliance',
+    reversibility:'conditional',
+    sla_class:'20_day'
+  },
+  'monthly-billing': {
+    trigger_type:'schedule',
+    trigger_domain:'finance',
+    primary_actor:'finance',
+    outcome_type:'payment',
+    systems_touched:['ERP','SAP','Banking','CRM'],
+    spine_connection:'revenue_protection',
+    reversibility:'conditional',
+    sla_class:'30_day'
+  },
+  'purchase-request': {
+    trigger_type:'request',
+    trigger_domain:'procurement',
+    primary_actor:'employee',
+    outcome_type:'asset_change',
+    systems_touched:['ERP','SAP','ITSM'],
+    spine_connection:'cost_management',
+    reversibility:'conditional',
+    sla_class:'5_day'
+  }
+};
+
+function applyProcessGenome() {
+  if (typeof PROCESSES === 'undefined') return;
+
+  PROCESSES.forEach(process => {
+    const fallback = {
+      trigger_type:'request',
+      trigger_domain:process.domain || 'operations',
+      primary_actor:'system_automated',
+      outcome_type:'status_change',
+      systems_touched:[],
+      spine_connection:'risk_compliance',
+      reversibility:'conditional',
+      sla_class:'5_day'
+    };
+
+    const assigned = PROCESS_FINGERPRINTS[process.id] || fallback;
+
+    process.fingerprint = function() {
+      return { ...assigned };
+    };
+
+    Object.assign(process, process.fingerprint());
+  });
+}
+
+
+applyProcessGenome();
+
+/* ═══════════════════════════════
+   PROCESS CLASSIFIER ENGINE
+   Pure JS · No external libraries
+   ═══════════════════════════════ */
+
+class ProcessClassifier {
+  constructor(genome, processes) {
+    this.genome = genome;
+    this.processes = processes || [];
+  }
+
+  classify(userInput) {
+    const text = String(userInput || '').toLowerCase();
+
+    const intent = {
+      raw_input: userInput,
+      action: this.detectAction(text),
+      object: this.detectObject(text),
+      amount: this.detectAmount(text),
+      region: this.detectRegion(text),
+      urgency: this.detectUrgency(text),
+      domain: this.detectDomain(text),
+      trigger_type: this.detectTriggerType(text),
+      outcome_type: this.detectOutcomeType(text),
+      primary_actor: this.detectActor(text),
+      systems_touched: this.detectSystems(text)
+    };
+
+    const candidateProcesses = this.matchProcesses(intent);
+    const topScore = candidateProcesses.length ? candidateProcesses[0].score : 0;
+    const decisionType = this.getDecisionType(topScore);
+
+    return {
+      intent,
+      candidateProcesses,
+      confidence: topScore,
+      decisionType
+    };
+  }
+
+  matchProcesses(intent) {
+    return this.processes
+      .map(process => {
+        const fp = typeof process.fingerprint === 'function' ? process.fingerprint() : process;
+        let score = 0;
+        const reasons = [];
+
+        if (intent.domain && intent.domain === fp.trigger_domain) {
+          score += 30;
+          reasons.push('domain match');
+        }
+
+        if (intent.outcome_type && intent.outcome_type === fp.outcome_type) {
+          score += 25;
+          reasons.push('outcome_type match');
+        }
+
+        if (intent.trigger_type && intent.trigger_type === fp.trigger_type) {
+          score += 20;
+          reasons.push('trigger_type match');
+        }
+
+        const systemsOverlap = this.overlap(intent.systems_touched || [], fp.systems_touched || []);
+        if (systemsOverlap.length) {
+          score += Math.min(15, systemsOverlap.length * 5);
+          reasons.push('systems overlap: ' + systemsOverlap.join(', '));
+        }
+
+        if (intent.primary_actor && intent.primary_actor === fp.primary_actor) {
+          score += 10;
+          reasons.push('actor match');
+        }
+
+        return {
+          processId: process.id,
+          processName: process.name,
+          tier: process.tier || 1,
+          score,
+          matchReasons: reasons,
+          fingerprint: fp
+        };
+      })
+      .sort((a, b) => b.score - a.score);
+  }
+
+  getDecisionType(topScore) {
+    if (topScore > 85) return 'REUSE';
+    if (topScore >= 60) return 'FORK';
+    return 'CREATE';
+  }
+
+  buildDraftProcess(intent) {
+    const domain = intent.domain || 'operations';
+    const outcome = intent.outcome_type || 'status_change';
+    const trigger = intent.trigger_type || 'request';
+
+    return {
+      id: 'draft-' + Date.now(),
+      domain,
+      name: this.titleCase((intent.action || 'new') + ' ' + (intent.object || 'process')),
+      description: 'T3 draft process generated from classifier. Requires process architect review.',
+      owner: 'Process Architect Review',
+      status: 'draft',
+      tier: 3,
+      reviewed: false,
+      sla: this.slaLabel(intent.urgency),
+      stages: ['intake', 'review', 'approval', 'execution', 'closure'],
+      trigger_type: trigger,
+      trigger_domain: domain,
+      primary_actor: intent.primary_actor || 'employee',
+      outcome_type: outcome,
+      systems_touched: intent.systems_touched || [],
+      spine_connection: this.inferSpine(domain, outcome),
+      reversibility: this.inferReversibility(outcome),
+      sla_class: this.inferSlaClass(intent.urgency),
+      fingerprint: function() {
+        return {
+          trigger_type: this.trigger_type,
+          trigger_domain: this.trigger_domain,
+          primary_actor: this.primary_actor,
+          outcome_type: this.outcome_type,
+          systems_touched: this.systems_touched,
+          spine_connection: this.spine_connection,
+          reversibility: this.reversibility,
+          sla_class: this.sla_class
+        };
+      }
+    };
+  }
+
+  detectAction(text) {
+    const map = {
+      offboard: ['offboard', 'terminate', 'departure', 'remove', 'revoke'],
+      onboard: ['onboard', 'hire', 'new hire', 'start employee'],
+      purchase: ['purchase', 'buy', 'bought', 'expense', 'reimburse'],
+      collect: ['collect', 'payment', 'paid', 'unpaid', 'invoice'],
+      approve: ['approve', 'approval', 'authorize'],
+      review: ['review', 'validate', 'check']
+    };
+
+    return this.detectFromMap(text, map) || 'request';
+  }
+
+  detectObject(text) {
+    const map = {
+      employee: ['employee', 'person', 'resource', 'contractor', 'hire'],
+      laptop: ['laptop', 'mac', 'macbook', 'computer', 'hardware'],
+      invoice: ['invoice', 'payment', 'bill'],
+      vendor: ['vendor', 'supplier'],
+      access: ['access', 'account', 'password', 'permission'],
+      contract: ['contract', 'sow', 'agreement']
+    };
+
+    return this.detectFromMap(text, map) || 'case';
+  }
+
+  detectDomain(text) {
+    const map = {
+      hr: ['employee', 'offboard', 'onboard', 'hire', 'termination', 'contractor'],
+      operations: ['equipment', 'asset', 'return', 'delivery'],
+      procurement: ['laptop', 'mac', 'purchase', 'vendor', 'supplier', 'hardware'],
+      finance: ['invoice', 'payment', 'paid', 'expense', 'reimburse', '$', 'usd'],
+      legal: ['contract', 'legal', 'compliance', 'docusign']
+    };
+
+    return this.detectFromMap(text, map) || 'operations';
+  }
+
+  detectTriggerType(text) {
+    if (this.hasAny(text, ['every', 'monthly', 'weekly', 'daily', 'schedule'])) return 'schedule';
+    if (this.hasAny(text, ['overdue', 'threshold', 'more than', 'past due'])) return 'threshold';
+    if (this.hasAny(text, ['approve', 'approval', 'authorize'])) return 'approval';
+    if (this.hasAny(text, ['happened', 'left', 'terminated', 'arrived', 'received'])) return 'event';
+    return 'request';
+  }
+
+  detectOutcomeType(text) {
+    if (this.hasAny(text, ['laptop', 'mac', 'hardware', 'asset', 'equipment'])) return 'asset_change';
+    if (this.hasAny(text, ['access', 'account', 'ad', 'mdm', 'revoke', 'remove'])) return 'access_change';
+    if (this.hasAny(text, ['invoice', 'payment', 'paid', 'expense', '$', 'usd'])) return 'payment';
+    if (this.hasAny(text, ['compliance', 'legal', 'audit'])) return 'compliance';
+    if (this.hasAny(text, ['status', 'employee', 'offboard', 'onboard'])) return 'status_change';
+    return 'status_change';
+  }
+
+  detectActor(text) {
+    if (this.hasAny(text, ['manager'])) return 'manager';
+    if (this.hasAny(text, ['hr', 'employee', 'offboard', 'onboard'])) return 'hr';
+    if (this.hasAny(text, ['it', 'access', 'ad', 'mdm'])) return 'it_ops';
+    if (this.hasAny(text, ['finance', 'invoice', 'payment', 'expense'])) return 'finance';
+    if (this.hasAny(text, ['vendor', 'supplier', 'purchase', 'laptop'])) return 'procurement';
+    return 'employee';
+  }
+
+  detectSystems(text) {
+    const systems = [];
+    const registry = this.genome.SYSTEM_REGISTRY || [];
+
+    const alias = {
+      HRIS: ['hris', 'employee', 'hr'],
+      ERP: ['erp', 'invoice', 'expense', 'payment'],
+      SAP: ['sap', 'po', 'purchase'],
+      MDM: ['mdm', 'laptop', 'mac', 'device'],
+      AD: ['ad', 'active directory', 'access', 'account'],
+      ITSM: ['itsm', 'ticket', 'service desk'],
+      CRM: ['crm', 'client', 'salesforce'],
+      LMS: ['lms', 'training'],
+      CompliancePortal: ['compliance', 'kyc'],
+      DocuSign: ['docusign', 'contract'],
+      Payroll: ['payroll', 'salary', 'final pay'],
+      Banking: ['banking', 'bank', 'payment']
+    };
+
+    registry.forEach(sys => {
+      if (this.hasAny(text, alias[sys.id] || [sys.id.toLowerCase(), sys.name.toLowerCase()])) {
+        systems.push(sys.id);
+      }
+    });
+
+    return [...new Set(systems)];
+  }
+
+  detectAmount(text) {
+    const match = text.match(/\$?\s?(\d+(?:\.\d+)?)\s?(k|usd)?/i);
+    if (!match) return null;
+
+    let amount = parseFloat(match[1]);
+    if (match[2] && match[2].toLowerCase() === 'k') amount *= 1000;
+    return amount;
+  }
+
+  detectRegion(text) {
+    const regions = ['latam', 'usa', 'us', 'mexico', 'colombia', 'peru', 'argentina', 'miami'];
+    return regions.find(r => text.includes(r)) || null;
+  }
+
+  detectUrgency(text) {
+    if (this.hasAny(text, ['urgent', 'now', 'immediately', 'critical', 'same day'])) return 'critical';
+    if (this.hasAny(text, ['soon', 'this week', 'high'])) return 'high';
+    if (this.hasAny(text, ['monthly', 'later'])) return 'normal';
+    return 'normal';
+  }
+
+  detectFromMap(text, map) {
+    let best = null;
+    let bestScore = 0;
+
+    Object.entries(map).forEach(([key, words]) => {
+      const score = words.reduce((acc, word) => acc + (text.includes(word) ? 1 : 0), 0);
+      if (score > bestScore) {
+        best = key;
+        bestScore = score;
+      }
+    });
+
+    return best;
+  }
+
+  hasAny(text, words) {
+    return words.some(w => text.includes(w));
+  }
+
+  overlap(a, b) {
+    return a.filter(x => b.includes(x));
+  }
+
+  inferSpine(domain, outcome) {
+    if (domain === 'finance' && outcome === 'payment') return 'revenue_protection';
+    if (domain === 'procurement' || outcome === 'asset_change') return 'cost_management';
+    if (domain === 'hr') return 'people_operations';
+    if (outcome === 'compliance') return 'risk_compliance';
+    return 'risk_compliance';
+  }
+
+  inferReversibility(outcome) {
+    if (outcome === 'access_change' || outcome === 'payment') return 'irreversible';
+    if (outcome === 'asset_change') return 'conditional';
+    return 'reversible';
+  }
+
+  inferSlaClass(urgency) {
+    if (urgency === 'critical') return 'same_day';
+    if (urgency === 'high') return '3_day';
+    return '5_day';
+  }
+
+  slaLabel(urgency) {
+    const cls = this.inferSlaClass(urgency);
+    const map = {
+      same_day: 'Same day',
+      '3_day': '3 business days',
+      '5_day': '5 business days'
+    };
+    return map[cls] || '5 business days';
+  }
+
+  titleCase(str) {
+    return String(str || '')
+      .replace(/[-_]/g, ' ')
+      .replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+  }
+}
+
+function applyProcessTiers() {
+  if (typeof PROCESSES === 'undefined') return;
+  PROCESSES.forEach(process => {
+    if (!process.tier) process.tier = 1;
+    if (process.reviewed === undefined) process.reviewed = true;
+  });
+}
+
+applyProcessTiers();
+
+const processClassifier = new ProcessClassifier(PROCESS_GENOME, PROCESSES);
+
+console.log('Classifier Test 1:', processClassifier.classify('we need to offboard an employee'));
+console.log('Classifier Test 2:', processClassifier.classify('$4k laptop for new hire LATAM'));
+
+
+const STAGES = {
+  'req':              { name:'Request',       icon:'📋', status:'done',    cases:0, owner:'Employee / Manager', system:'ITSM Portal', evidence:'Submitted request form with ticket number', nextAction:'Manager reviews and approves within 1 business day.', tasks:['submit-laptop-req','manager-notify-laptop'] },
+  'approval':         { name:'Approval',      icon:'✓',  status:'done',    cases:0, owner:'Direct Manager',     system:'ITSM Portal', evidence:'Approval record with manager name + timestamp', nextAction:'IT Procurement receives approved ticket to begin purchasing.', tasks:['approve-laptop-req','check-budget'] },
+  'procurement':      { name:'Procurement',   icon:'🛒', status:'active',  cases:3, owner:'IT Procurement',     system:'ERP / SAP', evidence:'Purchase order number linked in ITSM ticket', nextAction:'Issue PO to preferred supplier and get delivery confirmation.', tasks:['issue-po','vendor-confirm'] },
+  'setup':            { name:'Setup',         icon:'⚙',  status:'pending', cases:0, owner:'IT Operations',     system:'MDM / Jamf', evidence:'Device serial number logged; enrolled and compliant in MDM', nextAction:'Image device, enroll in MDM, install required applications.', tasks:['image-device','enroll-mdm','install-apps'] },
+  'delivery':         { name:'Delivery',      icon:'📦', status:'pending', cases:0, owner:'IT Operations',     system:'ITSM + Shipping', evidence:'Shipping tracking number + asset tag in ITSM', nextAction:'Generate shipping label, log asset, notify employee.', tasks:['gen-shipping-label','log-asset','notify-employee'] },
+  'in-use':           { name:'In Use',        icon:'💻', status:'pending', cases:0, owner:'Employee',          system:'ITSM Portal', evidence:'Employee acceptance form signed in ITSM', nextAction:'Employee confirms receipt and signs asset form.', tasks:['employee-accept'] },
+  'return':           { name:'Return',        icon:'↩',  status:'pending', cases:0, owner:'IT Operations',     system:'ITSM', evidence:'Device returned + ITSM asset record closed', nextAction:'Collect device and close asset record in ITSM.', tasks:['collect-device','close-asset'] },
+  'initiation':       { name:'Initiation',    icon:'📋', status:'done',    cases:0, owner:'HR / Manager',      system:'ITSM', evidence:'Return ticket opened in ITSM', nextAction:'HR opens equipment return ticket and assigns to IT.', tasks:['open-return-ticket'] },
+  'pickup':           { name:'Pickup',        icon:'🚚', status:'active',  cases:2, owner:'IT Operations',     system:'ITSM + Logistics', evidence:'Pickup confirmation with photo of equipment', nextAction:'Schedule and complete equipment pickup.', tasks:['schedule-pickup','confirm-pickup'] },
+  'assessment':       { name:'Assessment',    icon:'🔍', status:'pending', cases:0, owner:'IT Operations',     system:'ITSM', evidence:'Asset condition report in ITSM', nextAction:'Assess condition and document in ITSM.', tasks:['assess-condition','log-condition'] },
+  'decommission':     { name:'Decommission',  icon:'🗑', status:'pending', cases:0, owner:'IT Operations',     system:'MDM + ITSM', evidence:'Device wiped and unenrolled from MDM', nextAction:'Wipe device, unenroll from MDM, update asset register.', tasks:['wipe-device','unenroll-mdm'] },
+  'closed-eq':        { name:'Closed',        icon:'✓',  status:'pending', cases:0, owner:'IT Operations',     system:'ITSM', evidence:'ITSM ticket closed', nextAction:'Close ITSM ticket.', tasks:[] },
+  'offer':            { name:'Offer',         icon:'📄', status:'done',    cases:0, owner:'HR',                system:'HRIS', evidence:'Signed offer letter in HRIS', nextAction:'HR confirms acceptance and opens onboarding ticket.', tasks:['confirm-acceptance'] },
+  'documents':        { name:'Documents',     icon:'📂', status:'done',    cases:0, owner:'HR',                system:'HRIS + DocuSign', evidence:'All legal documents signed and filed', nextAction:'Collect ID, contracts, tax forms via DocuSign.', tasks:['collect-id','collect-contracts'] },
+  'it-setup':         { name:'IT Setup',      icon:'⚙',  status:'active',  cases:2, owner:'IT Operations',    system:'MDM + AD + ITSM', evidence:'AD account + MDM enrollment confirmed', nextAction:'Create AD account, enroll laptop, provision apps.', tasks:['create-ad','enroll-laptop','provision-apps'] },
+  'orientation':      { name:'Orientation',   icon:'🎯', status:'pending', cases:0, owner:'HR',               system:'HRIS', evidence:'Orientation checklist completed and signed', nextAction:'Schedule and run new hire orientation day.', tasks:['schedule-orientation','run-orientation'] },
+  'training':         { name:'Training',      icon:'📚', status:'pending', cases:0, owner:'HR / Manager',     system:'LMS', evidence:'All assigned training modules completed in LMS', nextAction:'Assign and monitor mandatory training completion.', tasks:['assign-training','monitor-completion'] },
+  'review':           { name:'Review',        icon:'◎',  status:'pending', cases:0, owner:'Manager',           system:'HRIS', evidence:'30-day review form completed', nextAction:'Manager completes 30-day review form in HRIS.', tasks:['complete-30day-review'] },
+  'active-emp':       { name:'Active',        icon:'✅', status:'pending', cases:0, owner:'HR',                system:'HRIS', evidence:'Employee marked active in all systems', nextAction:'Mark employee fully active in HRIS and all systems.', tasks:[] },
+  'notice':           { name:'Notice',        icon:'📋', status:'done',    cases:0, owner:'HR / Manager',      system:'HRIS', evidence:'Resignation / termination letter received', nextAction:'HR logs notice in HRIS and triggers offboarding.', tasks:['log-notice','trigger-offboarding'] },
+  'hr-exit':          { name:'HR Exit',       icon:'◐',  status:'active',  cases:1, owner:'HR',               system:'HRIS', evidence:'Exit interview completed; final day confirmed', nextAction:'Complete exit interview and confirm final day.', tasks:['exit-interview','confirm-final-day'] },
+  'it-revoke':        { name:'IT Revoke',     icon:'🔒', status:'blocked', cases:1, owner:'IT Operations',    system:'AD + MDM + All Systems', evidence:'All access revoked — AD disabled, MDM unenrolled', nextAction:'Revoke all IT access on or before final day.', tasks:['revoke-ad','revoke-mdm','revoke-saas'] },
+  'equipment-ret':    { name:'Equip. Return', icon:'📦', status:'pending', cases:0, owner:'IT Operations',    system:'ITSM + Logistics', evidence:'All equipment collected and logged', nextAction:'Collect all company equipment from employee.', tasks:['collect-equipment'] },
+  'final-pay':        { name:'Final Pay',     icon:'💰', status:'pending', cases:0, owner:'Finance',           system:'Payroll', evidence:'Final paycheck issued and confirmed', nextAction:'Finance processes final paycheck + accrued leave.', tasks:['process-final-pay'] },
+  'closed-off':       { name:'Closed',        icon:'✓',  status:'pending', cases:0, owner:'HR',               system:'HRIS', evidence:'All offboarding tasks complete; ticket closed', nextAction:'Close offboarding ticket in HRIS.', tasks:[] },
+  'vendor-req':       { name:'Request',       icon:'📋', status:'done',    cases:0, owner:'Procurement',      system:'ERP', evidence:'Vendor registration form submitted', nextAction:'Procurement reviews and initiates due diligence.', tasks:['submit-vendor-form'] },
+  'due-diligence':    { name:'Due Diligence', icon:'🔍', status:'active',  cases:2, owner:'Finance / Legal',  system:'Compliance Portal', evidence:'KYC, NIT, insurance all verified', nextAction:'Complete KYC and compliance document review.', tasks:['review-kyc','check-nit','verify-insurance'] },
+  'legal-review':     { name:'Legal Review',  icon:'⚖',  status:'pending', cases:0, owner:'Legal',            system:'Contract Portal', evidence:'Legal sign-off on vendor agreement', nextAction:'Legal reviews and approves vendor contract terms.', tasks:['review-contract'] },
+  'erp-setup':        { name:'ERP Setup',     icon:'⚙',  status:'pending', cases:0, owner:'Finance / IT',    system:'SAP / ERP', evidence:'Vendor record active in ERP with all bank details', nextAction:'Create vendor record in ERP with payment details.', tasks:['create-vendor-erp'] },
+  'vendor-active':    { name:'Active',        icon:'✅', status:'pending', cases:0, owner:'Finance',           system:'ERP', evidence:'First PO issued successfully', nextAction:'Issue first PO and confirm vendor is operational.', tasks:[] },
+  'invoice-gen':      { name:'Generate',      icon:'📄', status:'active',  cases:4, owner:'Finance',          system:'ERP / SAP', evidence:'Invoice number + PDF in ERP', nextAction:'Confirm invoice matches contract before batch finalisation.', tasks:['generate-invoice','verify-amount'] },
+  'invoice-review':   { name:'Review',        icon:'🔍', status:'active',  cases:2, owner:'Finance Analyst',  system:'ERP', evidence:'Review notes in ERP; no discrepancies', nextAction:'Finance analyst reviews and signs off.', tasks:['review-invoice','sign-off-invoice'] },
+  'approval-fin':     { name:'Approval',      icon:'✓',  status:'pending', cases:0, owner:'Finance Manager',  system:'ERP', evidence:'Finance Manager approval in ERP', nextAction:'Finance Manager approves batch for sending.', tasks:['approve-invoice-batch'] },
+  'payment':          { name:'Payment',       icon:'💰', status:'active',  cases:1, owner:'Finance',           system:'Banking + ERP', evidence:'Payment received and reconciled', nextAction:'Monitor and chase overdue payments.', tasks:['chase-payment','log-receipt'] },
+  'reconcile':        { name:'Reconcile',     icon:'◎',  status:'pending', cases:0, owner:'Finance',          system:'ERP', evidence:'All payments matched and reconciled in ERP', nextAction:'Reconcile all received payments against invoices.', tasks:['reconcile-payments'] },
+  'pr-submit':        { name:'PR Submit',     icon:'📋', status:'done',    cases:0, owner:'Requester',        system:'ERP', evidence:'PR number assigned in ERP', nextAction:'Procurement team reviews and routes for approval.', tasks:['submit-pr'] },
+  'pr-approval':      { name:'Approval',      icon:'✓',  status:'active',  cases:3, owner:'Manager + Finance',system:'ERP', evidence:'Both manager and Finance approval in ERP', nextAction:'Manager and Finance countersign within 24h.', tasks:['manager-approve-pr','finance-approve-pr'] },
+  'po-issuance':      { name:'PO Issue',      icon:'📤', status:'active',  cases:1, owner:'Procurement',      system:'SAP / ERP', evidence:'Official PO issued and emailed to vendor', nextAction:'Issue PO in SAP and send to vendor.', tasks:['issue-official-po','email-vendor'] },
+  'vendor-delivery':  { name:'Delivery',      icon:'🚚', status:'pending', cases:0, owner:'Vendor',            system:'Shipping Portal', evidence:'Delivery confirmation + tracking number', nextAction:'Vendor confirms delivery date and tracking.', tasks:['confirm-delivery'] },
+  'goods-received':   { name:'Received',      icon:'📦', status:'pending', cases:0, owner:'Warehouse/IT',     system:'ERP + ITSM', evidence:'GRN signed and assets logged in ERP', nextAction:'Log received goods and close PO in ERP.', tasks:['log-grn','close-po'] },
+};
+
+const TASKS = {
+  'issue-po':            { name:'Issue PO in SAP',               owner:'IT Procurement', system:'SAP / ERP',     status:'active',  steps:'1. Open SAP MM. 2. Create PO (T-code ME21N). 3. Reference ITSM ticket. 4. Select preferred vendor. 5. Set delivery date + 5 days. 6. Save and get PO number.', whoNotify:'IT Operations + Employee', evidence:'Screenshot of PO confirmation with PO number', next:'IT Ops begins laptop setup upon delivery confirmation.' },
+  'vendor-confirm':      { name:'Vendor Delivery Confirmation',   owner:'IT Procurement', system:'Email + SAP',   status:'pending', steps:'1. Email vendor with PO number. 2. Request delivery confirmation within 24h. 3. Log expected delivery date in ITSM. 4. Notify IT Ops and employee.', whoNotify:'IT Operations, Employee', evidence:'Email confirmation from vendor logged in ITSM ticket', next:'IT Ops prepares for device setup upon delivery.' },
+  'gen-shipping-label':  { name:'Generate Shipping Label',        owner:'IT Operations',  system:'Shipping Portal', status:'pending', steps:'1. Open Shipping Portal. 2. Enter employee address from HRIS. 3. Select expedited delivery. 4. Generate label. 5. Attach to package.', whoNotify:'Employee via ITSM', evidence:'Tracking number + shipping label in ITSM ticket', next:'Employee notified to expect delivery.' },
+  'revoke-ad':           { name:'Revoke AD Access',               owner:'IT Operations',  system:'Active Directory', status:'blocked', steps:'1. Open Active Directory Users and Computers. 2. Find user account. 3. Disable account. 4. Remove from all distribution groups. 5. Log action in ITSM with timestamp.', whoNotify:'IT Manager, HR, Security', evidence:'Screenshot of disabled AD account + ITSM log entry', next:'Proceed to MDM unenrollment and SaaS revocation.' },
+  'revoke-mdm':          { name:'Unenroll Device from MDM',       owner:'IT Operations',  system:'MDM / Jamf',    status:'pending', steps:'1. Open Jamf Pro. 2. Find device by serial number. 3. Send remote wipe command. 4. Confirm wipe completed. 5. Remove device from Jamf.', whoNotify:'IT Manager', evidence:'Jamf confirmation of device wipe and unenrollment', next:'Proceed to SaaS access revocation.' },
+  'chase-payment':       { name:'Chase Overdue Payment',          owner:'Finance',        system:'Banking / ERP', status:'active',  steps:'1. Open ERP invoice record. 2. Generate formal overdue notice. 3. Email to AUNA Finance Team. 4. CC Account Manager. 5. Log chase in ERP with date.', whoNotify:'Account Manager, Finance Manager', evidence:'Email sent with read receipt + ERP log', next:'If no response in 5 days, escalate to legal.' },
+  'finance-approve-pr':  { name:'Finance PR Countersignature',    owner:'Finance',        system:'ERP',           status:'active',  steps:'1. Open ERP → Purchase Requests. 2. Find PR by reference number. 3. Review amount and vendor. 4. Click Approve. 5. Add your digital signature.', whoNotify:'Procurement + Requester', evidence:'ERP approval record with Finance signature + timestamp', next:'Procurement issues PO to vendor.' },
+  'review-kyc':          { name:'KYC Document Review',            owner:'Finance / Legal', system:'Compliance Portal', status:'active', steps:'1. Open Compliance Portal. 2. Find vendor registration. 3. Download KYC documents. 4. Verify against checklist: NIT, bank cert, insurance. 5. Flag any expired docs.', whoNotify:'Vendor if docs needed, Legal', evidence:'Compliance Portal — KYC Verified status', next:'If all clear, proceed to Legal Review.' },
+};
+
+const CASE_ROSTER = {
+  'procurement': [
+    { id:'cr-1', name:'Alex Tran',      meta:'Laptop Lifecycle · IT',    days:2, sla:'ok',      initials:'AT', detail:{ id:'procurement', title:'Alex Tran — Laptop Procurement', owner:'IT Procurement', status:'Active', rawStatus:'active', process:'Laptop Lifecycle → Procurement', system:'SAP / ERP', priority:'Normal · 2 days in stage', description:'PO being issued for Alex Tran\'s onboarding laptop. Dell XPS 15. Vendor confirmed 5-day delivery.', nextAction:'Issue official PO in SAP and email vendor confirmation.' }},
+    { id:'cr-2', name:'Sam Okafor',     meta:'Laptop Lifecycle · IT',    days:5, sla:'warn',    initials:'SO', detail:{ id:'procurement', title:'Sam Okafor — Laptop Procurement', owner:'IT Procurement', status:'Watch', rawStatus:'warn', process:'Laptop Lifecycle → Procurement', system:'SAP / ERP', priority:'High · 5 days in stage · SLA approaching', description:'PO stalled — preferred vendor out of stock. Alternative being sourced. New hire start date in 3 days.', blocker:'Primary vendor (Dell) out of stock. Procurement sourcing MacBook Pro as alternative — awaiting manager approval.', nextAction:'Get manager approval on MacBook alternative today and issue PO immediately.', suggestedMessage:'Hi [Manager], Dell XPS out of stock for Sam Okafor. Proposing MacBook Pro 14" at same budget. Can you approve today? Start date is in 3 days.' }},
+    { id:'cr-3', name:'Rosa Lima',      meta:'Laptop Lifecycle · IT',    days:1, sla:'ok',      initials:'RL', detail:{ id:'procurement', title:'Rosa Lima — Laptop Procurement', owner:'IT Procurement', status:'Active', rawStatus:'active', process:'Laptop Lifecycle → Procurement', system:'SAP / ERP', priority:'Normal · 1 day', description:'PO submitted today. Vendor confirmed 5-day delivery window. On track.', nextAction:'Monitor delivery confirmation from vendor.' }},
+  ],
+  'it-revoke': [
+    { id:'cr-4', name:'Sergio Vega',    meta:'Employee Offboarding · IT', days:3, sla:'overdue', initials:'SV', detail:{ id:'it-revoke', title:'Sergio Vega — IT Access Revocation', owner:'IT Operations', status:'Blocked', rawStatus:'blocked', process:'Employee Offboarding → IT Revoke', system:'AD + MDM + All Systems', priority:'Critical · 3 days past deadline · Security risk', description:'Sergio Vega\'s last day was 3 days ago. AD account is still active. Security policy requires same-day revocation.', blocker:'AD account still active 3 days post-departure. This is a compliance and security violation requiring immediate escalation.', nextAction:'Revoke AD access NOW. Escalate to IT Manager immediately.', suggestedMessage:'ESCALATION: Sergio Vega\'s AD account has not been revoked 3 days after departure. Please authorise emergency revocation immediately. Security risk active.' }},
+  ],
+  'due-diligence': [
+    { id:'cr-5', name:'ACME Corp',      meta:'Vendor Onboarding · Finance', days:12, sla:'overdue', initials:'AC', detail:{ id:'due-diligence', title:'ACME Corp — Vendor Due Diligence', owner:'Finance / Legal', status:'Overdue', rawStatus:'blocked', process:'Vendor Onboarding → Due Diligence', system:'Compliance Portal', priority:'High · 12 days in stage · SLA breached', description:'ACME Corp vendor registration stalled — NIT (tax ID) document expired. Finance sent 3 reminders over 12 days with no response. Procurement blocked on 2 POs.', blocker:'Expired NIT document. ACME has not responded to compliance requests in 12 days.', nextAction:'Issue final notice to ACME: submit updated NIT within 48h or registration will be cancelled.', suggestedMessage:'Dear ACME, this is a final reminder: your NIT document (expired March 2026) must be resubmitted by May 2 to proceed with vendor registration. Failure to comply will result in cancellation.' }},
+    { id:'cr-6', name:'Softtek Inc',    meta:'Vendor Onboarding · Finance', days:3, sla:'ok',      initials:'SI', detail:{ id:'due-diligence', title:'Softtek Inc — Vendor Due Diligence', owner:'Finance / Legal', status:'Active', rawStatus:'active', process:'Vendor Onboarding → Due Diligence', system:'Compliance Portal', priority:'Normal · 3 days', description:'KYC documents received and under review. All docs appear current. On track.', nextAction:'Complete KYC review and forward to Legal Review.' }},
+  ],
+  'payment': [
+    { id:'cr-7', name:'AUNA — INV-0038', meta:'Billing Cycle · Finance', days:15, sla:'overdue', initials:'AU', detail:{ id:'payment', title:'AUNA INV-0038 — Payment Overdue', owner:'Finance', status:'Overdue', rawStatus:'blocked', process:'Monthly Billing → Payment', system:'Banking / ERP', priority:'Critical · 15 days overdue · €18,400', description:'INV-0038 issued to AUNA Group on Apr 14 for €18,400. Payment due Apr 19. Now 15 days overdue with no payment received.', blocker:'No payment received despite reminders on Apr 22 and Apr 26.', nextAction:'Escalate to Account Manager. Issue formal overdue notice with 5-day payment ultimatum.', suggestedMessage:'Dear AUNA Finance Team, INV-0038 (€18,400) issued April 14 remains unpaid as of today. Please arrange payment within 5 business days to avoid late fees per contract clause 8.2.' }},
+  ],
+  'pr-approval': [
+    { id:'cr-8', name:'Monitor x4 — IT',  meta:'Purchase Request · IT',   days:2, sla:'warn',    initials:'MO', detail:{ id:'pr-approval', title:'Monitor x4 — IT Purchase Approval', owner:'Manager + Finance', status:'Watch', rawStatus:'warn', process:'Purchase Request → Approval', system:'ERP', priority:'High · €2,800 · 2 days pending', description:'4 monitors for the Bogotá IT team. Manager approved Day 1. Finance has not yet acted — SLA is today.', blocker:'Finance countersignature missing — blocking new hire desk setup for 2 employees.', nextAction:'Remind Finance to approve before EOD.', suggestedMessage:'Hi Francisco, the monitor purchase PR (REF-2026-0048, €2,800) is awaiting your approval in ERP. New hire desk setups depend on this. Can you approve today?' }},
+    { id:'cr-9', name:'Ergonomic Chairs x8', meta:'Purchase Request · HR', days:1, sla:'ok',     initials:'EC', detail:{ title:'Ergonomic Chairs x8 — PR Approval', owner:'Manager + Finance', status:'Active', rawStatus:'active', process:'Purchase Request → Approval', system:'ERP', priority:'Normal · €3,600', description:'8 ergonomic chairs for Santo Domingo office. Both manager and Finance to approve within today.', nextAction:'Both approvals to be completed today.' }},
+  ],
+  'po-issuance': [
+    { id:'cr-10', name:'Laptop x3 — IT Batch', meta:'Laptop Lifecycle · IT', days:2, sla:'ok',   initials:'LB', detail:{ title:'Laptop x3 — PO Issuance', owner:'Procurement', status:'Active', rawStatus:'active', process:'Laptop Lifecycle → PO Issuance', system:'ERP / SAP', priority:'High · 2 days · New hire dependency', description:'PO being issued for 3 laptops (Dell XPS 15) for Q2 new hires. Vendor confirmed 5-day delivery.', nextAction:'Issue PO in SAP and email vendor confirmation.' }},
+  ],
+};
+
+/* ─── CEO DATA ─── */
+const CEO_DATA = {
+  kpis: [
+    { id:'rev',  label:'Revenue Today',  value:'€247K', delta:'↑ 12% vs yesterday', trend:'up',   detail:{ title:'Revenue Today', owner:'Finance', status:'Active', description:'Total revenue recognized today across all active billing cycles.', nextAction:'Review any pending invoice approvals to ensure nothing is blocked.' }},
+    { id:'cases',label:'Open Cases',     value:'34',    delta:'All processes',       trend:'',     detail:{ title:'Open Cases', owner:'All Domains', status:'Active', description:'34 active cases running across all company processes today.', nextAction:'Focus on 7 blocked cases — these are creating bottlenecks.' }},
+    { id:'sla',  label:'SLA Compliance', value:'87%',   delta:'↓ 4% vs last week',  trend:'down',  detail:{ title:'SLA Compliance', owner:'All Process Owners', status:'Watch', description:'87% of cases are within SLA. Target is 95%.', nextAction:'Resolve the 5 overdue cases to recover SLA score this week.' }},
+    { id:'block',label:'Blocked Tasks',  value:'7',     delta:'Need action now',     trend:'down',  detail:{ title:'Blocked Tasks', owner:'Process Owners', status:'Blocked', rawStatus:'blocked', description:'7 tasks are blocked across Operations, Finance and IT, preventing downstream work.', nextAction:'Sergio Vega AD revocation and AUNA payment are the two critical ones to unblock today.' }},
+    { id:'cli',  label:'Clients at Risk',value:'3',     delta:'Of 12 active',        trend:'down',  detail:{ title:'Clients at Risk', owner:'Account Management', status:'Watch', rawStatus:'warn', description:'AUNA Group, ACME Corp, and Grupo Pichincha flagged for SLA or payment risk.', nextAction:'Account Manager to contact AUNA Group today regarding the overdue payment.' }},
+  ],
+  pipeline: [
+    { stage:'Lead',     count:12, label:'prospects' },
+    { stage:'Proposal', count:8,  label:'in progress' },
+    { stage:'Negotiation', count:5, label:'active' },
+    { stage:'Contract', count:3,  label:'signing' },
+    { stage:'Delivery', count:18, label:'active' },
+    { stage:'Invoice',  count:11, label:'sent' },
+    { stage:'Payment',  count:4,  label:'overdue' },
+  ],
+  alerts: [
+    { id:'a1', level:'critical', title:'Sergio Vega AD access not revoked — Day 3', desc:'Security violation · IT Operations', detail:{ title:'AD Access Not Revoked — Sergio Vega', owner:'IT Operations', status:'Blocked', rawStatus:'blocked', priority:'Critical · Security risk', description:'Former employee Sergio Vega still has active AD account 3 days after departure. Security policy requires same-day revocation.', blocker:'IT Operations has not completed the AD revocation task. Escalation required.', nextAction:'IT Manager must authorise emergency revocation immediately.', suggestedMessage:'ESCALATION: Sergio Vega AD account active 3 days post-departure. Immediate revocation required. Please escalate to IT Manager now.' }},
+    { id:'a2', level:'critical', title:'AUNA Group payment 15 days overdue — €18,400', desc:'Finance · Billing', detail:{ title:'AUNA Group — Payment Overdue', owner:'Finance', status:'Overdue', rawStatus:'blocked', priority:'Critical · €18,400 at risk', description:'Invoice INV-0038 for AUNA Group is 15 days past due.', blocker:'No response to two payment reminders.', nextAction:'Issue formal overdue notice with 5-day ultimatum.', suggestedMessage:'Dear AUNA Finance Team, INV-0038 (€18,400) issued April 14 remains unpaid. Please arrange payment within 5 business days per contract clause 8.2.' }},
+    { id:'a3', level:'warn',     title:'ACME Corp vendor stuck 12 days — NIT expired', desc:'Finance · Vendor Onboarding', detail:{ title:'ACME Corp — Due Diligence Stalled', owner:'Finance / Legal', status:'Watch', rawStatus:'warn', priority:'High · Blocking 2 POs', description:'ACME Corp vendor registration stalled on expired NIT document for 12 days.', nextAction:'Issue final notice — 48 hours to submit or cancel registration.' }},
+    { id:'a4', level:'warn',     title:'Sam Okafor laptop sourcing — start date in 3 days', desc:'IT Operations · Laptop Lifecycle', detail:{ title:'Sam Okafor — Laptop Sourcing Risk', owner:'IT Procurement', status:'Watch', rawStatus:'warn', priority:'High · New hire at risk', description:'Primary vendor out of stock. Alternative sourcing in progress. New hire starts in 3 days.', nextAction:'Manager to approve MacBook alternative today.' }},
+    { id:'a5', level:'info',     title:'Monitor PR approval SLA expires today', desc:'Procurement · Purchase Request', detail:{ title:'Monitor x4 IT — PR Approval SLA', owner:'Finance', status:'Watch', rawStatus:'warn', priority:'Medium · SLA expires today', description:'Finance countersignature for monitor PR (€2,800) due today. 2 new hires blocked.', nextAction:'Finance to approve PR before EOD.' }},
+  ],
+  cases: [
+    { id:'cc-1', title:'Alex Tran — Laptop Procurement',   stage:'Procurement', owner:'IT Procurement', sla:'On Track',  status:'active', detail:{ title:'Alex Tran — Laptop Procurement', owner:'IT Procurement', status:'Active', rawStatus:'active', process:'Laptop Lifecycle', priority:'Normal', description:'PO being issued. 5-day delivery window confirmed with vendor.', nextAction:'Issue PO in SAP today.' }},
+    { id:'cc-2', title:'Sergio Vega — IT Offboarding',     stage:'IT Revoke',   owner:'IT Operations',  sla:'Overdue',   status:'blocked', detail:{ title:'Sergio Vega — IT Offboarding', owner:'IT Operations', status:'Blocked', rawStatus:'blocked', process:'Employee Offboarding', priority:'Critical · 3 days overdue', description:'AD account not revoked. Security violation.', blocker:'AD account active 3 days post-departure.', nextAction:'Revoke AD access immediately and escalate.', suggestedMessage:'ESCALATION: Sergio Vega AD account active 3 days post-departure. Emergency revocation required.' }},
+    { id:'cc-3', title:'AUNA Group — Invoice Payment',     stage:'Payment',     owner:'Finance',         sla:'15d Overdue',status:'blocked', detail:{ title:'AUNA Group — INV-0038', owner:'Finance', status:'Overdue', rawStatus:'blocked', process:'Monthly Billing', priority:'Critical · €18,400', description:'Invoice 15 days overdue. Two reminders sent.', blocker:'No payment received. Client not responding.', nextAction:'Escalate to Account Manager and send formal notice.' }},
+    { id:'cc-4', title:'ACME Corp — Vendor Registration',  stage:'Due Diligence',owner:'Finance/Legal',  sla:'12d Stalled', status:'warn', detail:{ title:'ACME Corp — Vendor Due Diligence', owner:'Finance / Legal', status:'Watch', rawStatus:'warn', process:'Vendor Onboarding', priority:'High · Blocking 2 POs', description:'NIT expired. No response in 12 days.', nextAction:'Final notice — 48 hours to comply.' }},
+    { id:'cc-5', title:'Sam Okafor — Laptop (Sourcing)',   stage:'Procurement', owner:'IT Procurement',  sla:'At Risk',   status:'warn', detail:{ title:'Sam Okafor — Laptop Sourcing', owner:'IT Procurement', status:'Watch', rawStatus:'warn', process:'Laptop Lifecycle', priority:'High · Start date in 3 days', description:'Primary vendor out of stock. Sourcing MacBook alternative.', nextAction:'Get manager approval today.' }},
+  ],
+};
+
+/* ─── AREA DATA ─── */
+const AREA_DATA = {
+  hr: {
+    title:'HR Area View', sub:'Human Resources · Manager control panel',
+    kpis:[
+      { id:'members', label:'Team Members', value:'8',  delta:'2 at capacity', trend:'', detail:{ title:'HR Team', description:'8 HR team members. Maria Chen and Leo Reyes at capacity this week.', nextAction:'Review workload distribution for Maria and Leo.' }},
+      { id:'cases',   label:'Active Cases', value:'14', delta:'Across HR processes', trend:'', detail:{ title:'HR Active Cases', description:'14 open cases across onboarding, offboarding and compliance processes.', nextAction:'Prioritize the 2 blocked offboarding cases.' }},
+      { id:'sla',     label:'SLA at Risk',  value:'3',  delta:'Due within 24h', trend:'down', detail:{ title:'HR SLA Risk', description:'3 HR cases approaching SLA breach within 24 hours.', nextAction:'Maria to complete Sergio Vega offboarding and Alex Torres onboarding review today.' }},
+      { id:'blocked', label:'Blocked',      value:'2',  delta:'Immediate action', trend:'down', detail:{ title:'HR Blocked Cases', description:'Sergio Vega offboarding (IT revoke) and ACME vendor stalled.', nextAction:'Escalate both today.' }},
+    ],
+    team:[
+      { name:'Maria Chen',   role:'HR Manager',    tasks:8, sla:'at-risk', cases:5, detail:{ title:'Maria Chen — HR Manager', owner:'Maria Chen', status:'Watch', rawStatus:'warn', process:'HR', system:'HRIS', priority:'8 tasks · 5 cases · SLA risk', description:'Maria is handling Sergio Vega offboarding (critical) and 2 new hire onboardings this week. At capacity.', nextAction:'Prioritise Sergio Vega offboarding — it\'s overdue and a security risk.' }},
+      { name:'Leo Reyes',    role:'HR Coordinator', tasks:6, sla:'warn',    cases:4, detail:{ title:'Leo Reyes — HR Coordinator', owner:'Leo Reyes', status:'Watch', rawStatus:'warn', process:'HR', priority:'6 tasks · 4 cases · watch', description:'Leo managing 3 onboarding cases and 1 vendor due diligence support. Watch SLA on ACME Corp.', nextAction:'Follow up on ACME Corp vendor registration — 12 days stalled.' }},
+      { name:'Ana Torres',   role:'HR Specialist',  tasks:4, sla:'ok',      cases:3, detail:{ title:'Ana Torres — HR Specialist', owner:'Ana Torres', status:'Active', rawStatus:'active', process:'HR', priority:'4 tasks · on track', description:'Ana managing 3 onboarding cases. All on track. No blockers.', nextAction:'Complete Alex Tran onboarding orientation by Friday.' }},
+      { name:'James Park',   role:'HR Analyst',     tasks:2, sla:'ok',      cases:2, detail:{ title:'James Park — HR Analyst', owner:'James Park', status:'Active', rawStatus:'active', process:'HR', priority:'2 tasks · on track', description:'James handling 2 training assignments and LMS monitoring. On track.', nextAction:'Confirm training completion for Rosa Lima by EOW.' }},
+    ],
+    processes:[
+      { name:'Employee Onboarding',    cases:5, status:'active' },
+      { name:'Employee Offboarding',   cases:2, status:'blocked' },
+      { name:'Compliance Reviews',     cases:4, status:'active' },
+      { name:'Training Assignments',   cases:3, status:'active' },
+    ],
+  },
+  operations: {
+    title:'Operations Area View', sub:'IT Operations · Infrastructure control panel',
+    kpis:[
+      { id:'open',    label:'Open Tickets',  value:'18', delta:'Across IT processes', trend:'', detail:{ title:'IT Open Tickets', description:'18 open IT tickets across laptop lifecycle, equipment return, and access management.', nextAction:'Prioritize the blocked access revocation case.' }},
+      { id:'sla',     label:'SLA Compliance',value:'82%',delta:'↓ 6% vs last week', trend:'down', detail:{ title:'IT SLA', description:'SLA has dropped 6% — primarily due to the Sergio Vega AD revocation miss.', nextAction:'Resolve all overdue access revocations to restore SLA.' }},
+      { id:'assets',  label:'Assets Active', value:'247',delta:'12 in transit',      trend:'up', detail:{ title:'IT Assets', description:'247 active assets tracked in MDM. 12 in transit or pending delivery.', nextAction:'Log all received assets from last week\'s deliveries.' }},
+      { id:'incidents',label:'Incidents',    value:'2',  delta:'Both SLA breaches',  trend:'down', detail:{ title:'IT Incidents', description:'2 active incidents — both related to SLA breaches on access management.', nextAction:'Escalate Sergio Vega AD revocation to IT Manager.' }},
+    ],
+    team:[
+      { name:'Jordan Davis',  role:'IT Ops Lead',    tasks:7, sla:'at-risk', cases:4, detail:{ title:'Jordan Davis — IT Ops Lead', owner:'Jordan Davis', status:'Watch', rawStatus:'warn', description:'Jordan handling AD revocation (overdue) and 2 laptop deployments. The blocked access revocation needs immediate action.', nextAction:'Complete Sergio Vega AD revocation NOW.' }},
+      { name:'Chris Wei',     role:'IT Technician',  tasks:5, sla:'ok',      cases:3, detail:{ title:'Chris Wei — IT Technician', owner:'Chris Wei', status:'Active', rawStatus:'active', description:'Chris managing equipment returns and MDM enrollments. All on track.', nextAction:'Complete equipment assessment for the 2 returned laptops.' }},
+      { name:'Priya Nair',    role:'IT Procurement', tasks:4, sla:'warn',    cases:2, detail:{ title:'Priya Nair — IT Procurement', owner:'Priya Nair', status:'Watch', rawStatus:'warn', description:'Priya managing laptop procurement. Sam Okafor case is at risk — vendor out of stock.', nextAction:'Get manager approval on MacBook alternative for Sam Okafor today.' }},
+    ],
+    processes:[
+      { name:'Laptop Lifecycle',   cases:8, status:'active' },
+      { name:'Equipment Return',   cases:3, status:'active' },
+      { name:'Access Management',  cases:1, status:'blocked' },
+      { name:'MDM Compliance',     cases:6, status:'active' },
+    ],
+  },
+  finance: {
+    title:'Finance Area View', sub:'Finance · Revenue control panel',
+    kpis:[
+      { id:'rev',   label:'Revenue MTD',    value:'€2.1M', delta:'↑ 8% vs last month', trend:'up', detail:{ title:'Revenue MTD', description:'€2.1M revenue month-to-date. On track vs Q2 target.', nextAction:'Resolve AUNA Group payment to recover €18,400.' }},
+      { id:'over',  label:'Overdue',        value:'€18.4K',delta:'1 invoice · AUNA',   trend:'down', detail:{ title:'Overdue Payments', description:'One invoice overdue: AUNA INV-0038 for €18,400 — 15 days past due.', nextAction:'Formal overdue notice with 5-day ultimatum today.' }},
+      { id:'inv',   label:'Invoices Active', value:'11',   delta:'April billing cycle', trend:'', detail:{ title:'April Invoices', description:'11 invoices in the April billing cycle across all clients.', nextAction:'Complete review and approval of remaining invoices today.' }},
+      { id:'vend',  label:'Vendors Pending', value:'4',   delta:'In due diligence',     trend:'', detail:{ title:'Pending Vendors', description:'4 vendor registrations in due diligence. ACME Corp is critical (12 days stalled).', nextAction:'Final notice to ACME — 48 hours to submit updated NIT.' }},
+    ],
+    team:[
+      { name:'Maria Chen',   role:'Finance Manager',  tasks:6, sla:'warn',    cases:4, detail:{ title:'Maria Chen — Finance Manager', owner:'Maria Chen', status:'Watch', rawStatus:'warn', description:'Maria managing AUNA payment escalation and April billing cycle approvals.', nextAction:'Approve Monitor x4 PR and sign off on AUNA formal notice today.' }},
+      { name:'Francisco Vega',role:'Finance Analyst',  tasks:4, sla:'ok',      cases:3, detail:{ title:'Francisco Vega — Finance Analyst', owner:'Francisco Vega', status:'Active', rawStatus:'active', description:'Francisco reviewing invoices for April billing cycle. On track.', nextAction:'Complete invoice review for Pichincha INV-0038 today.' }},
+      { name:'Sara Kim',     role:'Accounts Receivable',tasks:3,sla:'at-risk', cases:2, detail:{ title:'Sara Kim — AR Specialist', owner:'Sara Kim', status:'Watch', rawStatus:'warn', description:'Sara managing overdue payments. AUNA case is critical — 15 days overdue.', nextAction:'Send AUNA formal overdue notice with 5-day ultimatum.' }},
+    ],
+    processes:[
+      { name:'Monthly Billing Cycle', cases:6, status:'active' },
+      { name:'Vendor Onboarding',     cases:4, status:'warn' },
+      { name:'Expense Management',    cases:2, status:'active' },
+      { name:'Budget Reviews',        cases:1, status:'active' },
+    ],
+  },
+  procurement: {
+    title:'Procurement Area View', sub:'Procurement · Purchase pipeline control panel',
+    kpis:[
+      { id:'prs',   label:'Active PRs',    value:'5',   delta:'In approval pipeline', trend:'', detail:{ title:'Active Purchase Requests', description:'5 PRs in the approval pipeline. Monitor x4 is SLA critical.', nextAction:'Finance to approve Monitor x4 PR today.' }},
+      { id:'pos',   label:'Open POs',      value:'3',   delta:'With vendors',         trend:'', detail:{ title:'Open Purchase Orders', description:'3 POs issued to vendors awaiting delivery confirmation.', nextAction:'Confirm Dell delivery for Laptop x3 batch.' }},
+      { id:'value', label:'Spend MTD',     value:'€32K',delta:'Q2 on budget',         trend:'up', detail:{ title:'Spend MTD', description:'€32K procurement spend month-to-date. Within Q2 budget allocation.', nextAction:'Review remaining Q2 budget before any new PRs above €5K.' }},
+      { id:'vend',  label:'Vendor Issues', value:'1',   delta:'ACME Corp NIT expired', trend:'down', detail:{ title:'Vendor Issues', description:'ACME Corp vendor registration blocked — expired NIT. 2 POs cannot be issued until resolved.', nextAction:'Finance to issue final notice to ACME today.' }},
+    ],
+    team:[
+      { name:'Priya Nair',    role:'Procurement Lead',  tasks:5, sla:'warn',    cases:3, detail:{ title:'Priya Nair — Procurement Lead', owner:'Priya Nair', status:'Watch', rawStatus:'warn', description:'Priya managing laptop sourcing (Sam Okafor at risk) and Monitor x4 PR.', nextAction:'MacBook alternative approval for Sam Okafor today.' }},
+      { name:'Carlos Ruiz',   role:'Purchasing Officer', tasks:4, sla:'ok',      cases:2, detail:{ title:'Carlos Ruiz — Purchasing Officer', owner:'Carlos Ruiz', status:'Active', rawStatus:'active', description:'Carlos managing office supplies and ergonomic chair PRs. On track.', nextAction:'Issue PO for ergonomic chairs once both approvals received.' }},
+    ],
+    processes:[
+      { name:'Purchase Request Pipeline', cases:5, status:'active' },
+      { name:'Vendor Management',         cases:1, status:'blocked' },
+      { name:'Contract Renewals',         cases:2, status:'active' },
+    ],
+  },
+};
+
+/* ─── USER DATA ─── */
+const USER_TASKS_ALL = [
+  { id:'ut-1', taskId:'issue-po',          name:'Issue PO in SAP — Laptop x3 batch', process:'Laptop Lifecycle', stage:'Procurement',  system:'SAP / ERP',        status:'active',  priority:'High',   sla:'Due today',    dueDay:0 },
+  { id:'ut-2', taskId:'revoke-ad',         name:'Revoke Sergio Vega AD access',       process:'Employee Offboarding',stage:'IT Revoke', system:'Active Directory',  status:'overdue', priority:'Critical',sla:'Overdue 3d',  dueDay:-3 },
+  { id:'ut-3', taskId:'gen-shipping-label',name:'Generate shipping label — Alex Tran',process:'Laptop Lifecycle', stage:'Delivery',     system:'Shipping Portal',  status:'pending', priority:'Normal', sla:'Due tomorrow', dueDay:1 },
+  { id:'ut-4', taskId:'vendor-confirm',    name:'Confirm vendor delivery — Rosa Lima',process:'Laptop Lifecycle', stage:'Procurement',  system:'Email + SAP',      status:'pending', priority:'Normal', sla:'Due this week', dueDay:2 },
+  { id:'ut-5', taskId:'enroll-mdm',        name:'MDM enroll — Sam Okafor MacBook',    process:'Laptop Lifecycle', stage:'Setup',        system:'MDM / Jamf',       status:'pending', priority:'High',   sla:'Due this week', dueDay:3 },
+];
+const USER_TASKS_DONE = [
+  { id:'ud-1', name:'AD account created — Alex Tran',  process:'Employee Onboarding', stage:'IT Setup',    system:'Active Directory', status:'done', sla:'Done' },
+  { id:'ud-2', name:'Laptop enrolled in Jamf — Rosa Lima', process:'Laptop Lifecycle', stage:'Setup',      system:'MDM / Jamf',       status:'done', sla:'Done' },
+  { id:'ud-3', name:'Asset tag logged — Laptop #LAP-2044', process:'Laptop Lifecycle', stage:'Delivery',   system:'ITSM',             status:'done', sla:'Done' },
+  { id:'ud-4', name:'ITSM ticket closed — Equipment Return Chris Park', process:'Equipment Return', stage:'Closed', system:'ITSM', status:'done', sla:'Done' },
+  { id:'ud-5', name:'MDM compliance check — All devices', process:'MDM Compliance', stage:'Review',       system:'MDM / Jamf',       status:'done', sla:'Done' },
+];
+const USER_APPROVALS = [
+  { id:'ua-1', title:'Approve MacBook Pro alternative — Sam Okafor', process:'Laptop Lifecycle', sla:'Due NOW', detail:{ title:'Approve MacBook Alternative — Sam Okafor', owner:'Jordan Davis (you)', status:'Watch', rawStatus:'warn', priority:'Critical · New hire in 3 days', description:'Primary vendor (Dell) is out of stock. IT Procurement is proposing a MacBook Pro 14" at the same budget. Your approval is needed today to unblock sourcing.', nextAction:'Approve the MacBook alternative in ITSM and notify IT Procurement.' }},
+];
+let userTab = 'all';
+
+function switchUserTab(tab) {
+  userTab = tab;
+  document.querySelectorAll('.vtab').forEach(e=>e.classList.remove('active'));
+  document.getElementById('utab-'+tab).classList.add('active');
+  renderUser();
+  resetPanel();
+}
+
+/* Calendar data */
+function getCalDays() {
+  const today = new Date();
+  const dow = today.getDay() || 7; // 1=Mon..7=Sun
+  const days = [];
+  for (let i = 1-dow; i <= 7-dow; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    days.push({ date:d, isToday:i===0 });
+  }
+  return days;
+}
+const DAYS_ABBR = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const TASK_DUE_OFFSETS = { 0:[{c:'var(--danger)'},{c:'var(--accent)'}], 1:[{c:'var(--accent3)'}], 2:[{c:'var(--accent3)'}], 3:[{c:'var(--accent)'}] };
+
+/* ═══════════════════════════════
+   RENDER FUNCTIONS
+   ═══════════════════════════════ */
+
+/* ─── CEO VIEW ─── */
+function renderCEO() {
+  const C = document.getElementById('ceo-body');
+  let h = '';
+  // KPIs
+  h += '<div class="kpi-row">';
+  CEO_DATA.kpis.forEach(k=>{
+    const v = `<div class="kpi-value" style="color:${k.trend==='down'?'var(--danger)':k.trend==='up'?'var(--accent3)':'var(--text)'}">${k.value}</div>`;
+    h += `<div class="kpi-card" onclick="pickCeoKPI(this,'${k.id}')">${v}<div class="kpi-label">${k.label}</div><div class="kpi-delta ${k.trend}">${k.delta}</div></div>`;
+  });
+  h += '</div>';
+  // Pipeline
+  h += `<div class="section"><div class="sec-hdr"><span class="sec-title">Revenue Spine — Lead → Payment</span></div><div class="pipeline">`;
+  CEO_DATA.pipeline.forEach((p,i)=>{
+    h += `<div class="pipe-st" onclick="pickPipe(this,'${p.stage}')"><div class="pipe-st-name">${p.stage}</div><div class="pipe-st-count">${p.count}</div><div class="pipe-st-lbl">${p.label}</div></div>`;
+    if(i<CEO_DATA.pipeline.length-1) h += '<div class="pipe-arrow">›</div>';
+  });
+  h += '</div></div>';
+  // Two-col
+  h += '<div class="two-col">';
+  // Alerts
+  h += `<div class="section"><div class="sec-hdr"><span class="sec-title">Critical Alerts</span><span class="sec-count">${CEO_DATA.alerts.length}</span></div>`;
+  CEO_DATA.alerts.forEach(a=>{
+    const c = a.level==='critical'?'var(--danger)':a.level==='warn'?'var(--accent4)':'var(--accent)';
+    h += `<div class="alert-li" onclick="pickAlert(this,'${a.id}')"><div class="alert-dot" style="background:${c}"></div><div class="li-body"><div class="li-name">${a.title}</div><div class="li-sub">${a.desc}</div></div></div>`;
+  });
+  h += '</div>';
+  // Cases
+  h += `<div class="section"><div class="sec-hdr"><span class="sec-title">Running Cases</span><span class="sec-count">${CEO_DATA.cases.length} active</span></div>`;
+  CEO_DATA.cases.forEach(c=>{
+    h += `<div class="li" onclick="pickCeoCase(this,'${c.id}')"><div class="li-body"><div class="li-name">${c.title}</div><div class="li-sub">${c.stage} · ${c.owner} · SLA: ${c.sla}</div></div><span class="st ${stCls(c.status)}">${stLbl(c.status)}</span></div>`;
+  });
+  h += '</div></div>';
+  C.innerHTML = h;
+}
+function pickCeoKPI(el,id)  { sel(el,'kpi-card'); renderPanel(CEO_DATA.kpis.find(k=>k.id===id)?.detail); }
+function pickAlert(el,id)   { sel(el,'alert-li'); renderPanel(CEO_DATA.alerts.find(a=>a.id===id)?.detail); }
+function pickCeoCase(el,id) { sel(el,'li');       renderPanel(CEO_DATA.cases.find(c=>c.id===id)?.detail); }
+function pickPipe(el,stage) {
+  sel(el,'pipe-st');
+  const p = CEO_DATA.pipeline.find(x=>x.stage===stage);
+  renderPanel({ title:`Revenue Spine — ${stage}`, owner:'Finance', description:`${p.count} ${p.label} at the ${stage} stage of the revenue pipeline.`, nextAction:`Review ${stage} stage for any stalled or overdue items.` });
+}
+
+/* ─── AREA VIEW ─── */
+let currentArea = 'hr';
+function renderAreaChips() {
+  const bar = document.getElementById('area-domain-bar');
+  bar.innerHTML = DOMAINS.map(d=>{
+    const active = d.id === currentArea;
+    const style  = active ? `background:${d.color}20;border-color:${d.color};color:${d.color}` : '';
+    return `<button class="domain-chip${active?' active':''}" style="${style}" onclick="switchArea('${d.id}')">${d.icon} ${d.name}</button>`;
+  }).join('');
+}
+function switchArea(a) { currentArea=a; renderAreaChips(); renderArea(); resetPanel(); }
+function renderArea() {
+  const data = AREA_DATA[currentArea];
+  document.getElementById('area-title').textContent = data.title;
+  document.getElementById('area-sub').textContent   = data.sub;
+  const C = document.getElementById('area-body');
+  let h = '';
+  // KPIs
+  h += '<div class="kpi-row">';
+  data.kpis.forEach(k=>{
+    h += `<div class="kpi-card" onclick="pickAreaKPI(this,'${k.id}')"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div><div class="kpi-delta ${k.trend||''}">${k.delta}</div></div>`;
+  });
+  h += '</div>';
+  // Team table
+  h += `<div class="section"><div class="sec-hdr"><span class="sec-title">Team Workload</span><span class="sec-count">Click a row for detail</span></div><table class="dtable"><thead><tr><th>Name</th><th>Role</th><th>Tasks</th><th>SLA</th><th>Cases</th></tr></thead><tbody>`;
+  data.team.forEach((m,i)=>{
+    const lbl = m.sla==='at-risk'?'At Risk':m.sla==='warn'?'Watch':'On Track';
+    const cls = m.sla==='at-risk'?'st-blocked':m.sla==='warn'?'st-warn':'st-active';
+    h += `<tr class="row" onclick="pickAreaTeam(this,${i})"><td><strong>${m.name}</strong></td><td style="color:var(--text2)">${m.role}</td><td>${m.tasks}</td><td><span class="st ${cls}">${lbl}</span></td><td>${m.cases}</td></tr>`;
+  });
+  h += '</tbody></table></div>';
+  // Process list
+  h += `<div class="section"><div class="sec-hdr"><span class="sec-title">Cases by Process</span></div>`;
+  data.processes.forEach((p,i)=>{
+    h += `<div class="li" onclick="pickAreaProc(this,${i})"><div class="li-body"><div class="li-name">${p.name} <span class="tier-badge">T${p.tier || 1}</span></div><div class="li-sub">${p.cases} active cases</div></div><span class="st ${stCls(p.status)}">${stLbl(p.status)}</span></div>`;
+  });
+  h += '</div>';
+  C.innerHTML = h;
+}
+function pickAreaKPI(el,id)  { sel(el,'kpi-card'); renderPanel(AREA_DATA[currentArea].kpis.find(k=>k.id===id)?.detail); }
+function pickAreaTeam(el,i)  { sel(el,'row');       renderPanel(AREA_DATA[currentArea].team[i]?.detail); }
+function pickAreaProc(el,i)  {
+  sel(el,'li');
+  const p = AREA_DATA[currentArea].processes[i];
+  renderPanel({ title:p.name, owner:AREA_DATA[currentArea].title, status:stLbl(p.status), description:`${p.cases} active cases in ${p.name}.`, nextAction:`Review all active ${p.name} cases and resolve any blockers.` });
+}
+
+/* ─── USER VIEW ─── */
+function renderUser() {
+  const C = document.getElementById('user-body');
+  let h = '';
+
+  if (userTab === 'all' || userTab === 'attention') {
+    // Calendar
+    h += '<div class="cal-strip">';
+    h += '<div class="cal-hdr"><span class="cal-hdr-lbl">This Week</span></div>';
+    h += '<div class="cal-days">';
+    const days = getCalDays();
+    days.forEach((d,i)=>{
+      const dots = TASK_DUE_OFFSETS[i] || [];
+      const dotHtml = dots.map(dt=>`<div class="cal-dot" style="background:${dt.c}"></div>`).join('');
+      h += `<div class="cal-day${d.isToday?' today':''}">
+        <div class="cal-day-name">${DAYS_ABBR[i]}</div>
+        <div class="cal-day-num">${d.date.getDate()}</div>
+        <div class="cal-dots">${dotHtml}</div>
+      </div>`;
+    });
+    h += '</div></div>';
+  }
+
+  if (userTab === 'all') {
+    // KPIs
+    h += '<div class="kpi-row">';
+    const att = USER_TASKS_ALL.filter(t=>t.status==='overdue'||t.status==='blocked').length;
+    h += kpiBox('Total Tasks', USER_TASKS_ALL.length, 'All processes');
+    h += kpiBox('In Progress', USER_TASKS_ALL.filter(t=>t.status==='active').length, 'Active now');
+    h += kpiBox('Needs Attention', att, 'Overdue/blocked', att>0?'var(--danger)':'');
+    h += kpiBox('Completed', USER_TASKS_DONE.length, 'This week', 'var(--accent3)');
+    h += '</div>';
+    // Approvals
+    if (USER_APPROVALS.length) {
+      h += `<div class="section"><div class="sec-hdr"><span class="sec-title">Pending Approvals</span><span class="badge badge-warn">${USER_APPROVALS.length} waiting</span></div>`;
+      USER_APPROVALS.forEach(a=>{
+        h += `<div class="li" onclick="pickUserApproval(this,'${a.id}')"><div class="li-icon" style="background:rgba(251,146,60,.12);color:var(--accent4)">✓</div><div class="li-body"><div class="li-name">${a.title}</div><div class="li-sub">${a.process} · SLA: ${a.sla}</div></div><span class="st st-warn">Pending</span></div>`;
+      });
+      h += '</div>';
+    }
+    // All tasks
+    h += taskList('My Tasks', USER_TASKS_ALL);
+  }
+
+  if (userTab === 'attention') {
+    const att = USER_TASKS_ALL.filter(t=>t.status==='overdue'||t.status==='blocked');
+    h += att.length
+      ? taskList('Needs Your Attention', att)
+      : `<div class="section" style="padding:28px;text-align:center;color:var(--text3)">✓ No overdue or blocked tasks — great work!</div>`;
+  }
+
+  if (userTab === 'done') {
+    h += taskList('Completed This Week', USER_TASKS_DONE, true);
+  }
+
+  // Update tab counts
+  const att = USER_TASKS_ALL.filter(t=>t.status==='overdue'||t.status==='blocked').length;
+  document.getElementById('utab-count-all').textContent       = USER_TASKS_ALL.length;
+  document.getElementById('utab-count-attention').textContent = att;
+  document.getElementById('utab-count-done').textContent      = USER_TASKS_DONE.length;
+
+  C.innerHTML = h;
+}
+
+function kpiBox(label, value, delta, color='') {
+  return `<div class="kpi-card"><div class="kpi-label">${label}</div><div class="kpi-value"${color?` style="color:${color}"`:''}>${value}</div><div class="kpi-delta">${delta}</div></div>`;
+}
+function taskList(title, tasks, done=false) {
+  let h = `<div class="section"><div class="sec-hdr"><span class="sec-title">${title}</span><span class="sec-count">${tasks.length}</span></div>`;
+  tasks.forEach(t=>{
+    const ico   = t.status==='overdue'?'⚠':t.status==='done'?'✓':t.status==='active'?'›':'○';
+    const icoBg = t.status==='overdue'?'rgba(248,113,113,.12)':t.status==='done'?'var(--border)':t.status==='active'?'rgba(79,156,249,.12)':'var(--border)';
+    const icoC  = t.status==='overdue'?'var(--danger)':t.status==='done'?'var(--text3)':t.status==='active'?'var(--accent)':'var(--text3)';
+    const slaCl = t.status==='overdue'?'color:var(--danger)':'color:var(--text3)';
+    h += `<div class="li${done?' done-row':''}" onclick="pickUserTask(this,'${t.id}')">
+      <div class="li-icon" style="background:${icoBg};color:${icoC}">${ico}</div>
+      <div class="li-body"><div class="li-name">${t.name}</div><div class="li-sub">${t.process} · ${t.stage} · ${t.system}</div></div>
+      <div style="text-align:right;flex-shrink:0">
+        <span class="st ${stCls(t.status)}" style="font-size:9px">${stLbl(t.status)}</span>
+        <div style="font-size:9px;margin-top:2px;${slaCl}">${t.sla}</div>
+      </div>
+    </div>`;
+  });
+  h += '</div>';
+  return h;
+}
+
+function pickUserApproval(el,id) {
+  sel(el,'li');
+  renderPanel(USER_APPROVALS.find(a=>a.id===id)?.detail);
+}
+function pickUserTask(el,id) {
+  sel(el,'li');
+  const all = [...USER_TASKS_ALL, ...USER_TASKS_DONE];
+  const t = all.find(x=>x.id===id);
+  if (!t) return;
+  const task = TASKS[t.taskId];
+  if (task) {
+    const d = {
+      title:task.name, owner:task.owner, status:t.status==='overdue'?'Blocked':t.status==='done'?'Done':'Active',
+      rawStatus:t.status==='overdue'?'blocked':t.status,
+      process:t.process, system:task.system, priority:`${t.priority} · ${t.sla}`,
+      description:`${t.stage} stage of ${t.process}.`, nextAction:task.next,
+      whoNotify:task.whoNotify, steps:task.steps, evidence:task.evidence
+    };
+    renderPanel(d, t.taskId);
+    // Inject steps into info tab
+    const info = document.getElementById('pcon-info');
+    if (task.steps) info.innerHTML += `<div class="d-sep"></div><div class="d-row"><div class="d-lbl">Steps</div><div class="d-val" style="line-height:1.7;color:var(--text2)">${task.steps.replace(/\d\./g,'<br>$&')}</div></div>`;
+    if (task.whoNotify) info.innerHTML += `<div class="d-row"><div class="d-lbl">Who to Notify</div><div class="d-val">${task.whoNotify}</div></div>`;
+    if (task.evidence) info.innerHTML += `<div class="d-row"><div class="d-lbl">Evidence Required</div><div class="d-val" style="color:var(--accent2)">${task.evidence}</div></div>`;
+  } else {
+    renderPanel({ title:t.name, owner:'Jordan Davis (you)', status:stLbl(t.status), process:t.process, system:t.system, priority:`${t.priority} · ${t.sla}`, description:`Task in ${t.stage} stage of ${t.process}.` });
+  }
+}
+
+/* ─── FLOW VIEW ─── */
+let flowState = { domain:null, processId:null, stageId:null };
+
+function renderFlowDomains() {
+  document.getElementById('flow-domain-nav').innerHTML = DOMAINS.map(d=>{
+    const active = flowState.domain===d.id;
+    const style  = active ? `background:${d.color}20;border-color:${d.color};color:${d.color}` : '';
+    return `<button class="domain-chip${active?' active':''}" style="${style}" onclick="pickFlowDomain('${d.id}')">${d.icon} ${d.name}</button>`;
+  }).join('');
+}
+
+function updateBC() {
+  const bc = document.getElementById('flow-bc');
+  const {domain, processId, stageId} = flowState;
+  if (!domain) { bc.classList.remove('show'); return; }
+  bc.classList.add('show');
+  const dom  = DOMAINS.find(x=>x.id===domain);
+  const proc = PROCESSES.find(x=>x.id===processId);
+  const stg  = stageId ? STAGES[stageId] : null;
+  let h = `<span class="bc-link" onclick="pickFlowDomain('${domain}')">Flow</span>
+           <span style="color:var(--text3)"> › </span>
+           <span class="bc-link" onclick="pickFlowDomain('${domain}')">${dom?.name||domain}</span>`;
+  if (proc) h += `<span style="color:var(--text3)"> › </span><span class="bc-link" onclick="pickProcess('${proc.id}')">${proc.name}</span>`;
+  if (stg)  h += `<span style="color:var(--text3)"> › </span><span class="bc-cur">${stg.name}</span>`;
+  bc.innerHTML = h;
+}
+
+function pickFlowDomain(id) {
+  flowState = { domain:id, processId:null, stageId:null };
+  renderFlowDomains();
+  updateBC();
+  const procs = PROCESSES.filter(p=>p.domain===id);
+  let h = '<div style="padding:14px 20px;display:flex;flex-direction:column;gap:6px;">';
+  procs.forEach(p=>{
+    h += `<div class="task-card" onclick="pickProcess('${p.id}')">
+      <div class="tc-body"><div class="tc-name">${p.name} <span class="tier-badge">T${p.tier || 1}</span></div><div class="tc-meta">${p.owner} · ${p.activeCases} active cases · SLA: ${p.sla}</div></div>
+      <span class="st ${stCls(p.status)}">${stLbl(p.status)}</span>
+    </div>`;
+  });
+  h += '</div>';
+  document.getElementById('flow-body').innerHTML = h;
+  resetPanel();
+}
+
+function pickProcess(id) {
+  flowState.processId = id; flowState.stageId = null;
+  updateBC();
+  const proc = PROCESSES.find(p=>p.id===id);
+  renderPanel({
+    title:proc.name, owner:proc.owner, status:stLbl(proc.status), rawStatus:proc.status,
+    description:proc.description,
+    process:DOMAINS.find(d=>d.id===proc.domain)?.name,
+    priority:`SLA: ${proc.sla}`,
+    nextAction:`${proc.activeCases} active cases. Click a stage to see tasks, owners, evidence and actions.`,
+  });
+  renderStages(proc);
+}
+
+function renderStages(proc) {
+  let h = '<div id="stages-row">';
+  proc.stages.forEach((sid,i)=>{
+    const s = STAGES[sid];
+    if (!s) return;
+    const isSel = flowState.stageId===sid;
+    const badge = s.cases>0 ? `<span class="stage-badge${s.status==='blocked'?' blocked':''}">${s.cases}</span>` : '';
+    h += `<div class="stage-node${isSel?' sel':''}" onclick="pickStage('${sid}','${proc.id}')">
+      <div class="stage-circle-wrap"><div class="stage-circle ${s.status}">${s.icon}</div>${badge}</div>
+      <div class="stage-name">${s.name}</div>
+    </div>`;
+    if (i<proc.stages.length-1) h += `<div class="stage-conn${s.status==='done'?' done':''}"></div>`;
+  });
+  h += '</div>';
+
+  if (flowState.stageId) {
+    const s     = STAGES[flowState.stageId];
+    const sidx  = proc.stages.indexOf(flowState.stageId);
+    const dept  = proc.depts?.[sidx] || s.owner;
+
+    // Tasks in this stage
+    h += '<div class="task-list"><div class="task-lbl">Tasks in this Stage</div>';
+    (s.tasks||[]).forEach(tid=>{
+      const t = TASKS[tid];
+      if (!t) return;
+      h += `<div class="task-card" onclick="pickFlowTask('${tid}')">
+        <div class="tc-body"><div class="tc-name">${t.name}</div><div class="tc-meta">${t.owner} · ${t.system}</div></div>
+        <span class="st ${stCls(t.status)}">${stLbl(t.status)}</span>
+      </div>`;
+    });
+    if (!s.tasks?.length) h += '<div style="padding:8px 0;font-size:11px;color:var(--text3)">No tasks defined yet for this stage.</div>';
+    h += '</div>';
+
+    // Dept ownership
+    h += `<div class="dept-strip">
+      <div class="dept-strip-lbl">Department Ownership</div>
+      <div class="dept-chips">
+        <div class="dept-chip primary">${dept} <span style="font-size:9px;opacity:.7">· Primary</span></div>`;
+    if (s.system) h += `<div class="dept-chip">${s.system}</div>`;
+    h += `</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:7px;line-height:1.5">Evidence: <span style="color:var(--text2)">${s.evidence||'—'}</span></div>
+    </div>`;
+
+    // Case roster
+    const roster = CASE_ROSTER[flowState.stageId] || [];
+    if (roster.length) {
+      h += `<div class="case-roster"><div class="case-roster-lbl">Active Cases <span style="opacity:.6">${roster.length}</span></div>`;
+      roster.forEach(c=>{
+        const daysTxt = c.days===1?'1 day':`${c.days} days`;
+        const slaLabel = c.sla==='overdue'?'Overdue':c.sla==='warn'?'At risk':'On track';
+        h += `<div class="case-row" id="cr-row-${c.id}" onclick="pickFlowCase('${c.id}')">
+          <div class="case-av ${c.sla}">${c.initials}</div>
+          <div class="case-body"><div class="case-name">${c.name}</div><div class="case-meta">${c.meta}</div></div>
+          <div class="case-right">
+            <div class="case-days ${c.sla}">${daysTxt}</div>
+            <span class="st ${c.sla==='overdue'?'st-blocked':c.sla==='warn'?'st-warn':'st-active'}" style="font-size:9px">${slaLabel}</span>
+          </div>
+        </div>`;
+      });
+      h += '</div>';
+    }
+  }
+
+  document.getElementById('flow-body').innerHTML = h;
+}
+
+function pickStage(sid, procId) {
+  flowState.stageId = sid;
+  updateBC();
+  const s    = STAGES[sid];
+  const proc = PROCESSES.find(p=>p.id===procId);
+  renderPanel({
+    title:`Stage: ${s.name}`, owner:s.owner, status:stLbl(s.status), rawStatus:s.status,
+    process:proc?.name, system:s.system, evidence:s.evidence,
+    nextAction:s.nextAction,
+    description:`${s.tasks?.length||0} tasks in this stage. Click a task for step-by-step action guide.`,
+  }, sid);
+  renderStages(proc);
+}
+
+function pickFlowTask(tid) {
+  const t = TASKS[tid];
+  if (!t) return;
+  document.querySelectorAll('.task-card.sel').forEach(e=>e.classList.remove('sel'));
+  event.currentTarget.classList.add('sel');
+  const d = {
+    title:t.name, owner:t.owner, status:stLbl(t.status), rawStatus:t.status,
+    system:t.system, evidence:t.evidence,
+    description:`Assigned to: ${t.owner}. System: ${t.system}.`,
+    nextAction:t.next,
+  };
+  renderPanel(d, tid);
+  // Add steps to info
+  const info = document.getElementById('pcon-info');
+  if (t.steps) info.innerHTML += `<div class="d-sep"></div><div class="d-row"><div class="d-lbl">Steps</div><div class="d-val" style="line-height:1.7;color:var(--text2)">${t.steps.replace(/\d\./g,'<br>$&')}</div></div>`;
+  if (t.whoNotify) info.innerHTML += `<div class="d-row"><div class="d-lbl">Who to Notify</div><div class="d-val">${t.whoNotify}</div></div>`;
+  if (t.evidence)  info.innerHTML += `<div class="d-row"><div class="d-lbl">Evidence Required</div><div class="d-val" style="color:var(--accent2)">${t.evidence}</div></div>`;
+}
+
+function pickFlowCase(id) {
+  document.querySelectorAll('.case-row.sel').forEach(e=>e.classList.remove('sel'));
+  document.querySelectorAll('.task-card.sel').forEach(e=>e.classList.remove('sel'));
+  const row = document.getElementById('cr-row-'+id);
+  if (row) row.classList.add('sel');
+  let found = null;
+  for (const sid of Object.keys(CASE_ROSTER)) {
+    const c = CASE_ROSTER[sid].find(x=>x.id===id);
+    if (c) { found=c; break; }
+  }
+  if (found) renderPanel(found.detail, found.id);
+}
+
+/* ═══════════════════════════════
+   INIT
+   ═══════════════════════════════ */
+renderCEO();
+renderAreaChips();
+renderArea();
+renderUser();
+renderFlowDomains();
+
+document.getElementById('flow-body').innerHTML = `
+  <div style="padding:48px 20px;text-align:center;color:var(--text3)">
+    <div style="font-size:26px;margin-bottom:12px;opacity:.2">⬡</div>
+    <div style="font-size:12px;line-height:1.7">Select a domain above to explore<br>processes, stages, tasks and ownership.</div>
+  </div>`;
+</script>
+</body>
+</html>
