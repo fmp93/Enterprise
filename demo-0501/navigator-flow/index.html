@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Navigator Flow | Enterprise OS</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f6f8;
+      color: #101828;
+    }
+
+    .app {
+      min-height: 100vh;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -0.04em;
+    }
+
+    .brand p {
+      margin: 6px 0 0;
+      color: #667085;
+      font-size: 14px;
+    }
+
+    .status-pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #ecfdf3;
+      color: #027a48;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid #abefc6;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .tab {
+      border: 1px solid #d0d5dd;
+      background: white;
+      border-radius: 18px;
+      padding: 18px;
+      cursor: pointer;
+      text-align: left;
+      transition: 0.2s ease;
+    }
+
+    .tab:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(16, 24, 40, 0.08);
+    }
+
+    .tab.active {
+      background: #101828;
+      color: white;
+      border-color: #101828;
+    }
+
+    .tab strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .tab span {
+      font-size: 13px;
+      color: #667085;
+    }
+
+    .tab.active span {
+      color: #d0d5dd;
+    }
+
+    .panel {
+      display: none;
+      background: white;
+      border: 1px solid #eaecf0;
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(16, 24, 40, 0.06);
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: -0.03em;
+    }
+
+    .panel-header p {
+      margin: 8px 0 0;
+      color: #667085;
+      max-width: 720px;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      border: 1px solid #eaecf0;
+      border-radius: 20px;
+      padding: 20px;
+      background: #fcfcfd;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+
+    .metric {
+      font-size: 34px;
+      font-weight: 750;
+      letter-spacing: -0.05em;
+      margin: 10px 0;
+    }
+
+    .muted {
+      color: #667085;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .flow-placeholder {
+      border: 1px dashed #98a2b3;
+      border-radius: 24px;
+      padding: 24px;
+      background: #f9fafb;
+    }
+
+    .flow-chain {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .node {
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: white;
+      border: 1px solid #d0d5dd;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .arrow {
+      color: #98a2b3;
+    }
+
+
+
+
+
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .ghost-link {
+      text-decoration: none;
+      color: #344054;
+      background: white;
+      border: 1px solid #d0d5dd;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .view-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .view-actions button {
+      border: 1px solid #d0d5dd;
+      background: white;
+      color: #101828;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-family: inherit;
+    }
+
+    .card,
+    .tab,
+    .domain-card,
+    .flow-item,
+    .case-table button,
+    .risk-list button,
+    .task-row,
+    .deep-node,
+    .spine-node {
+      transition: 0.18s ease;
+    }
+
+    .case-table button:hover,
+    .risk-list button:hover,
+    .flow-item:hover,
+    .deep-node:hover,
+    .spine-node:hover,
+    .task-row:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(16, 24, 40, 0.07);
+    }
+
+    .completion-banner {
+      margin-top: 20px;
+      border: 1px solid #abefc6;
+      background: #ecfdf3;
+      color: #027a48;
+      padding: 16px;
+      border-radius: 18px;
+      font-weight: 700;
+      display: none;
+    }
+
+    .completion-banner.active {
+      display: block;
+    }
+
+    .flow-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 18px;
+    }
+
+    .flow-sidebar {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .flow-item {
+      border: 1px solid #d0d5dd;
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .flow-item strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .flow-item span {
+      color: #667085;
+      font-size: 12px;
+    }
+
+    .flow-item.active-flow {
+      background: #101828;
+      color: white;
+      border-color: #101828;
+    }
+
+    .flow-item.active-flow span {
+      color: #d0d5dd;
+    }
+
+    .flow-main {
+      border: 1px solid #eaecf0;
+      border-radius: 24px;
+      padding: 22px;
+      background: #fcfcfd;
+    }
+
+    .breadcrumb {
+      color: #667085;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .flow-title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .flow-title-row h3 {
+      margin: 0 0 6px;
+      font-size: 24px;
+    }
+
+    .flow-title-row p {
+      margin: 0;
+      color: #667085;
+      font-size: 13px;
+    }
+
+    .flow-title-row button {
+      border: 0;
+      background: #101828;
+      color: white;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-family: inherit;
+    }
+
+    .flow-deep-chain {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+    }
+
+    .deep-node {
+      min-height: 74px;
+      border: 1px solid #d0d5dd;
+      background: white;
+      border-radius: 18px;
+      padding: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-family: inherit;
+    }
+
+    .deep-node.done {
+      background: #ecfdf3;
+      border-color: #abefc6;
+      color: #027a48;
+    }
+
+    .deep-node.active {
+      background: #eff8ff;
+      border-color: #b2ddff;
+      color: #175cd3;
+    }
+
+    .deep-node.risk {
+      background: #fffaeb;
+      border-color: #fedf89;
+      color: #b54708;
+    }
+
+    .state-table {
+      display: grid;
+      gap: 8px;
+    }
+
+    .state-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.3fr 1.4fr 0.8fr;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid #eaecf0;
+      border-radius: 14px;
+      background: white;
+      font-size: 13px;
+      align-items: center;
+    }
+
+    .state-row.header {
+      background: #f2f4f7;
+      color: #475467;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .ok {
+      color: #027a48;
+      font-weight: 800;
+    }
+
+    .active-state {
+      color: #175cd3;
+      font-weight: 800;
+    }
+
+    .wait {
+      color: #b54708;
+      font-weight: 800;
+    }
+
+    @media (max-width: 900px) {
+      .flow-layout,
+      .flow-deep-chain,
+      .state-row {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-title-row {
+        flex-direction: column;
+      }
+    }
+
+    .task-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .task-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid #eaecf0;
+      background: #fcfcfd;
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .task-row strong {
+      display: block;
+      margin: 6px 0;
+      font-size: 15px;
+    }
+
+    .task-row p {
+      margin: 0;
+      color: #667085;
+      font-size: 13px;
+    }
+
+    .tag {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #f2f4f7;
+      color: #475467;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .task-row button,
+    .running-case button {
+      border: 0;
+      background: #101828;
+      color: white;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .task-row.completed {
+      opacity: 0.55;
+      background: #f9fafb;
+    }
+
+    .task-row.completed strong {
+      text-decoration: line-through;
+    }
+
+    .running-case {
+      border: 1px solid #eaecf0;
+      background: #fcfcfd;
+      border-radius: 22px;
+      padding: 20px;
+    }
+
+    .case-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .case-header h3 {
+      margin: 0 0 6px;
+    }
+
+    .progress-chain {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .progress-step {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid #d0d5dd;
+      background: white;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .progress-step.done {
+      background: #ecfdf3;
+      border-color: #abefc6;
+      color: #027a48;
+    }
+
+    .progress-step.active {
+      background: #eff8ff;
+      border-color: #b2ddff;
+      color: #175cd3;
+    }
+
+    @media (max-width: 900px) {
+      .task-row,
+      .case-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .progress-chain {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .domain-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .domain-card {
+      border: 1px solid #d0d5dd;
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      transition: 0.2s ease;
+    }
+
+    .domain-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(16, 24, 40, 0.08);
+    }
+
+    .domain-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .domain-card span {
+      color: #667085;
+      font-size: 12px;
+    }
+
+    .domain-card.active-domain {
+      background: #101828;
+      color: white;
+      border-color: #101828;
+    }
+
+    .domain-card.active-domain span {
+      color: #d0d5dd;
+    }
+
+    .domain-detail {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .small-metric {
+      font-size: 22px;
+      letter-spacing: -0.03em;
+    }
+
+    .case-table {
+      display: grid;
+      gap: 10px;
+    }
+
+    .case-table button {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr 1fr;
+      gap: 14px;
+      align-items: center;
+      border: 1px solid #eaecf0;
+      background: #fcfcfd;
+      border-radius: 16px;
+      padding: 16px;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
+    }
+
+    .case-table span {
+      color: #667085;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .case-table strong {
+      font-size: 14px;
+    }
+
+    .case-table em {
+      color: #475467;
+      font-style: normal;
+      font-size: 12px;
+      text-align: right;
+    }
+
+    @media (max-width: 900px) {
+      .domain-grid,
+      .domain-detail,
+      .case-table button {
+        grid-template-columns: 1fr;
+      }
+
+      .case-table em {
+        text-align: left;
+      }
+    }
+
+    .clickable {
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .section-title {
+      margin: 28px 0 12px;
+      font-size: 13px;
+      color: #667085;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .spine {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #f9fafb;
+      border: 1px solid #eaecf0;
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .spine-node {
+      border: 1px solid #d0d5dd;
+      background: white;
+      padding: 12px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    .spine-node.done {
+      background: #ecfdf3;
+      border-color: #abefc6;
+      color: #027a48;
+    }
+
+    .spine-node.active {
+      background: #eff8ff;
+      border-color: #b2ddff;
+      color: #175cd3;
+    }
+
+    .spine-node.risk {
+      background: #fffaeb;
+      border-color: #fedf89;
+      color: #b54708;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .risk-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .risk-list button {
+      border: 1px solid #eaecf0;
+      background: white;
+      border-radius: 14px;
+      padding: 14px;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .risk-list strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .risk-list span {
+      color: #667085;
+      font-size: 12px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(16, 24, 40, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 20;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal {
+      max-width: 620px;
+      width: 100%;
+      background: white;
+      border-radius: 26px;
+      padding: 26px;
+      box-shadow: 0 30px 80px rgba(16, 24, 40, 0.25);
+    }
+
+    .modal h3 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .modal p {
+      margin: 0;
+      color: #667085;
+      line-height: 1.5;
+    }
+
+    .modal button {
+      margin-top: 20px;
+      border: 0;
+      background: #101828;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .tabs, .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar, .panel-header {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Navigator Flow</h1>
+        <p>Enterprise OS sandbox for role dashboards and deep process navigation.</p>
+      </div>
+      <div class="top-actions">
+        <a href="/Enterprise/" class="ghost-link">Landing</a>
+        <a href="/Enterprise/demo/" class="ghost-link">Main Demo</a>
+        <div class="status-pill">Sandbox active</div>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-view="ceo">
+        <strong>CEO View</strong>
+        <span>Executive health, risks and decisions.</span>
+      </button>
+
+      <button class="tab" data-view="domain">
+        <strong>Domain View</strong>
+        <span>Area performance and live cases.</span>
+      </button>
+
+      <button class="tab" data-view="user">
+        <strong>User View</strong>
+        <span>Tasks, approvals and running work.</span>
+      </button>
+
+      <button class="tab" data-view="flow">
+        <strong>Flow</strong>
+        <span>Process navigator and taxonomy logic.</span>
+      </button>
+    </nav>
+
+    <main>
+      <section class="panel active" id="ceo">
+        <div class="panel-header">
+          <div>
+            <h2>CEO Dashboard</h2>
+            <p>Executive command view for company health, revenue movement, operational risks, pending decisions and cross-domain bottlenecks.</p>
+          </div>
+          <div class="view-actions">
+            <button onclick="switchView('domain')">Open Domains</button>
+            <button onclick="switchView('flow')">Open Flow</button>
+          </div>
+        </div>
+
+        <div class="grid">
+          <button class="card clickable" onclick="openDetail('Company Health', 'Overall operational health based on Revenue Spine, Delivery, Finance, HR and IT readiness.')">
+            <h3>Company Health</h3>
+            <div class="metric">82%</div>
+            <p class="muted">Stable, but Finance and IT have active bottlenecks affecting speed.</p>
+          </button>
+
+          <button class="card clickable" onclick="openDetail('Executive Decisions', 'Decisions waiting for CEO or leadership approval: pricing, hiring, budget, escalations and project risks.')">
+            <h3>Executive Decisions</h3>
+            <div class="metric">7</div>
+            <p class="muted">Pending approvals that may delay revenue, delivery or internal execution.</p>
+          </button>
+
+          <button class="card clickable" onclick="openDetail('Critical Bottlenecks', 'Cross-domain blockers that need escalation because ownership or SLA is unclear.')">
+            <h3>Critical Bottlenecks</h3>
+            <div class="metric">3</div>
+            <p class="muted">Main blockers detected across Finance, Delivery and IT Operations.</p>
+          </button>
+        </div>
+
+        <div class="section-title">Revenue Spine</div>
+
+        <div class="spine">
+          <button class="spine-node done" onclick="openDetail('Lead', 'Lead identified in Salesforce. Owner: Sales.')">Lead</button>
+          <span>→</span>
+          <button class="spine-node done" onclick="openDetail('Qualified', 'Lead qualified. Owner: Account Manager.')">Qualified</button>
+          <span>→</span>
+          <button class="spine-node active" onclick="openDetail('Technical Validation', 'Technical validation in progress. Owners: Presales + DevOps + AWS Program Manager.')">Technical Validation</button>
+          <span>→</span>
+          <button class="spine-node risk" onclick="openDetail('Business Validation', 'Commercial approval waiting. Risk: unclear pricing and margin assumptions.')">Business Validation</button>
+          <span>→</span>
+          <button class="spine-node" onclick="openDetail('Closed Won', 'Contract not signed yet. Pending DocuSign and delivery handoff.')">Closed Won</button>
+          <span>→</span>
+          <button class="spine-node" onclick="openDetail('Delivery', 'Delivery starts after SOW-to-Delivery handoff.')">Delivery</button>
+          <span>→</span>
+          <button class="spine-node" onclick="openDetail('Payment', 'Payment tracked by Finance through invoice and AR process.')">Payment</button>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <h3>Top Risks</h3>
+            <div class="risk-list">
+              <button onclick="openDetail('Finance Risk', 'Booked vs billed gap detected. Owner: Finance. Action: validate invoice status and expected payment date.')">
+                <strong>Booked vs Billed gap</strong>
+                <span>Finance · High</span>
+              </button>
+              <button onclick="openDetail('Delivery Risk', 'Project handoff missing technical readiness checklist. Owner: Delivery Manager.')">
+                <strong>Delivery handoff incomplete</strong>
+                <span>Delivery · Medium</span>
+              </button>
+              <button onclick="openDetail('IT Risk', 'Manual software installs need to move to Intune-based controlled deployment. Owner: IT.')">
+                <strong>Software control not standardized</strong>
+                <span>IT · Medium</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>CEO Action Queue</h3>
+            <div class="risk-list">
+              <button onclick="openDetail('Approve Hiring', 'Approve new technical role before client delivery begins.')">
+                <strong>Approve hiring request</strong>
+                <span>HR · Due today</span>
+              </button>
+              <button onclick="openDetail('Approve Budget', 'Approve budget for project tools and client environment readiness.')">
+                <strong>Approve delivery budget</strong>
+                <span>Finance · Due this week</span>
+              </button>
+              <button onclick="openDetail('Resolve Ownership', 'Assign final owner for cross-area operating issue.')">
+                <strong>Resolve ownership conflict</strong>
+                <span>Ops · Escalated</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="domain">
+        <div class="panel-header">
+          <div>
+            <h2>Domain Dashboard</h2>
+            <p>Area-level command view. Each domain shows active processes, owners, live cases, risk level and what needs attention.</p>
+          </div>
+          <div class="view-actions">
+            <button onclick="switchView('user')">Open User Work</button>
+            <button onclick="switchView('flow')">Open Flow</button>
+          </div>
+        </div>
+
+        <div class="domain-grid">
+          <button class="domain-card active-domain" onclick="selectDomain('HR', '14 active cases', 'Onboarding, offboarding, hiring, employee management and certifications.', 'Valentina / HR Lead', 'Medium')">
+            <strong>HR</strong>
+            <span>14 active cases</span>
+          </button>
+
+          <button class="domain-card" onclick="selectDomain('Finance', '9 active cases', 'Billing, accounts receivable, booked vs billed, margin tracking and forecasting.', 'Azul / Finance', 'High')">
+            <strong>Finance</strong>
+            <span>9 active cases</span>
+          </button>
+
+          <button class="domain-card" onclick="selectDomain('IT Operations', '22 active cases', 'User/account management, access, applications, devices, software and Intune deployment.', 'IT Admin', 'Medium')">
+            <strong>IT Operations</strong>
+            <span>22 active cases</span>
+          </button>
+
+          <button class="domain-card" onclick="selectDomain('Sales', '11 active cases', 'Opportunities, qualification, commercial validation, pricing and closed-won movement.', 'Account Manager', 'Medium')">
+            <strong>Sales</strong>
+            <span>11 active cases</span>
+          </button>
+
+          <button class="domain-card" onclick="selectDomain('Delivery', '18 active cases', 'SOW-to-delivery handoff, project setup, staffing, execution and client status.', 'Delivery Manager', 'High')">
+            <strong>Delivery</strong>
+            <span>18 active cases</span>
+          </button>
+        </div>
+
+        <div class="domain-detail">
+          <div class="card">
+            <h3 id="domainTitle">HR</h3>
+            <div class="metric" id="domainMetric">14 active cases</div>
+            <p class="muted" id="domainDescription">Onboarding, offboarding, hiring, employee management and certifications.</p>
+          </div>
+
+          <div class="card">
+            <h3>Owner</h3>
+            <div class="metric small-metric" id="domainOwner">Valentina / HR Lead</div>
+            <p class="muted">Responsible for domain health, process movement and escalations.</p>
+          </div>
+
+          <div class="card">
+            <h3>Risk Level</h3>
+            <div class="metric small-metric" id="domainRisk">Medium</div>
+            <p class="muted">Calculated from delays, missing ownership, SLA breaches and blocked states.</p>
+          </div>
+        </div>
+
+        <div class="section-title">Live Domain Cases</div>
+
+        <div class="case-table">
+          <button onclick="openDetail('Onboarding Case', 'New employee onboarding is in account creation state. Owner: HR + IT. Next action: confirm required applications.')">
+            <span>HR · Onboarding</span>
+            <strong>New employee setup</strong>
+            <em>State: Account creation</em>
+          </button>
+
+          <button onclick="openDetail('Finance Case', 'Invoice is created but not validated. Owner: Finance. Next action: compare booked vs billed and approve sending.')">
+            <span>Finance · Billing</span>
+            <strong>Invoice validation pending</strong>
+            <em>State: Waiting validation</em>
+          </button>
+
+          <button onclick="openDetail('IT Case', 'Software installation request should move through Intune instead of manual install. Owner: IT.')">
+            <span>IT · Applications & Software</span>
+            <strong>Controlled software deployment</strong>
+            <em>State: Reviewing</em>
+          </button>
+
+          <button onclick="openDetail('Delivery Case', 'Closed won opportunity needs delivery handoff checklist before project activation.')">
+            <span>Delivery · Project Setup</span>
+            <strong>SOW-to-delivery handoff</strong>
+            <em>State: Blocked</em>
+          </button>
+        </div>
+      </section>
+
+      <section class="panel" id="user">
+        <div class="panel-header">
+          <div>
+            <h2>User Dashboard</h2>
+            <p>Personal execution view. The user only sees what needs action: tasks, approvals, running cases and next steps.</p>
+          </div>
+          <div class="view-actions">
+            <button onclick="switchView('ceo')">CEO Summary</button>
+            <button onclick="switchView('flow')">Open Flow</button>
+          </div>
+        </div>
+
+        <div class="grid">
+          <button class="card clickable" onclick="openDetail('My Tasks', 'Tasks assigned to this user across HR, IT, Finance, Sales and Delivery.')">
+            <h3>My Tasks</h3>
+            <div class="metric">5</div>
+            <p class="muted">Work items waiting for direct user action.</p>
+          </button>
+
+          <button class="card clickable" onclick="openDetail('My Approvals', 'Approval requests waiting for accept, reject or request changes.')">
+            <h3>My Approvals</h3>
+            <div class="metric">2</div>
+            <p class="muted">Approvals blocking process movement.</p>
+          </button>
+
+          <button class="card clickable" onclick="openDetail('Running Cases', 'Processes where this user is owner, participant or approver.')">
+            <h3>Running Cases</h3>
+            <div class="metric">4</div>
+            <p class="muted">Live workflows currently moving.</p>
+          </button>
+        </div>
+
+        <div class="section-title">Today’s Execution Queue</div>
+
+        <div class="task-list">
+          <div class="task-row">
+            <div>
+              <span class="tag">IT · User / Account Management</span>
+              <strong>Create Microsoft 365 account for new hire</strong>
+              <p>State: Waiting for IT execution · Owner: IT Admin</p>
+            </div>
+            <button onclick="markDone(this)">Mark done</button>
+          </div>
+
+          <div class="task-row">
+            <div>
+              <span class="tag">HR · Onboarding</span>
+              <strong>Validate employee personal information</strong>
+              <p>State: Pending HR validation · Owner: HR</p>
+            </div>
+            <button onclick="markDone(this)">Mark done</button>
+          </div>
+
+          <div class="task-row">
+            <div>
+              <span class="tag">Finance · Billing</span>
+              <strong>Approve invoice before sending</strong>
+              <p>State: Waiting approval · Owner: Finance Lead</p>
+            </div>
+            <button onclick="markDone(this)">Mark done</button>
+          </div>
+
+          <div class="task-row">
+            <div>
+              <span class="tag">Delivery · Handoff</span>
+              <strong>Confirm project kickoff readiness</strong>
+              <p>State: Blocked until checklist is complete · Owner: Delivery Manager</p>
+            </div>
+            <button onclick="markDone(this)">Mark done</button>
+          </div>
+        </div>
+
+        <div class="section-title">Running Process Example</div>
+
+        <div class="running-case">
+          <div class="case-header">
+            <div>
+              <h3>New Employee Onboarding</h3>
+              <p class="muted">The user sees only the active path, not the full technical state machine.</p>
+            </div>
+            <button onclick="switchView('flow')">Open in Flow</button>
+          </div>
+
+          <div class="progress-chain">
+            <div class="progress-step done">Request received</div>
+            <div class="progress-step done">HR validated</div>
+            <div class="progress-step active">IT accounts</div>
+            <div class="progress-step">Apps assigned</div>
+            <div class="progress-step">Completed</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="flow">
+        <div class="panel-header">
+          <div>
+            <h2>Flow Navigator</h2>
+            <p>The deep process navigator. This is where taxonomy, ownership, subprocesses, states, tasks and completion logic live.</p>
+          </div>
+          <div class="view-actions">
+            <button onclick="switchView('ceo')">CEO View</button>
+            <button onclick="switchView('domain')">Domain View</button>
+          </div>
+        </div>
+
+        <div class="flow-layout">
+          <aside class="flow-sidebar">
+            <button class="flow-item active-flow" onclick="loadFlow('HR', 'Onboarding', 'New Employee Onboarding', 'HR → Onboarding → Pre-boarding → Account Setup → App Access → Completed')">
+              <strong>HR</strong>
+              <span>Onboarding</span>
+            </button>
+
+            <button class="flow-item" onclick="loadFlow('Finance', 'Billing', 'Invoice Creation & Validation', 'Finance → Billing → Invoice Creation → Validation → Sending → AR Tracking')">
+              <strong>Finance</strong>
+              <span>Billing</span>
+            </button>
+
+            <button class="flow-item" onclick="loadFlow('IT Operations', 'Applications & Software', 'Controlled Software Request', 'IT → Applications & Software → Request → Approval → Intune Deployment → Completed')">
+              <strong>IT Operations</strong>
+              <span>Applications & Software</span>
+            </button>
+
+            <button class="flow-item" onclick="loadFlow('Delivery', 'Project Setup', 'SOW-to-Delivery Handoff', 'Delivery → Handoff → Readiness Check → Kickoff → Execution')">
+              <strong>Delivery</strong>
+              <span>Project Setup</span>
+            </button>
+          </aside>
+
+          <section class="flow-main">
+            <div class="breadcrumb" id="flowBreadcrumb">Enterprise OS / HR / Onboarding</div>
+
+            <div class="flow-title-row">
+              <div>
+                <h3 id="flowTitle">New Employee Onboarding</h3>
+                <p id="flowPath">HR → Onboarding → Pre-boarding → Account Setup → App Access → Completed</p>
+              </div>
+              <button onclick="openDetail('Flow Object', 'This process is modeled as an object moving through states. Each state has owners, conditions, actions and tasks.')">Object logic</button>
+            </div>
+
+            <div class="flow-deep-chain">
+              <button class="deep-node done" onclick="openDetail('Previous Process', 'Recruiting & Hiring completed. This triggers onboarding.')">Previous Process</button>
+              <button class="deep-node done" onclick="openDetail('Domain', 'Domain: HR. Responsible for employee lifecycle processes.')">Domain</button>
+              <button class="deep-node active" onclick="openDetail('Main Process', 'Main process: Onboarding. Starts when candidate is accepted or employee record is created.')">Main Process</button>
+              <button class="deep-node" onclick="openDetail('Subprocess', 'Pre-boarding includes documentation, employee data validation and start-date readiness.')">Subprocess</button>
+              <button class="deep-node risk" onclick="openDetail('Task', 'Create accounts. Owner: IT. Condition: employee data and start date confirmed.')">Task</button>
+              <button class="deep-node" onclick="openDetail('Next Process', 'Employee Management starts after onboarding is completed.')">Next Process</button>
+            </div>
+
+            <div class="section-title">State Machine</div>
+
+            <div class="state-table">
+              <div class="state-row header">
+                <span>State</span>
+                <span>Owner</span>
+                <span>Trigger</span>
+                <span>Action</span>
+                <span>Status</span>
+              </div>
+
+              <div class="state-row">
+                <span>Requested</span>
+                <span>HR</span>
+                <span>Candidate accepted</span>
+                <span>Create onboarding case</span>
+                <span class="ok">Done</span>
+              </div>
+
+              <div class="state-row">
+                <span>Validated</span>
+                <span>HR</span>
+                <span>Data complete</span>
+                <span>Confirm employee profile</span>
+                <span class="ok">Done</span>
+              </div>
+
+              <div class="state-row">
+                <span>Account Setup</span>
+                <span>IT</span>
+                <span>HR validation complete</span>
+                <span>Create user/account</span>
+                <span class="active-state">In progress</span>
+              </div>
+
+              <div class="state-row">
+                <span>App Access</span>
+                <span>IT + Manager</span>
+                <span>Account created</span>
+                <span>Assign required apps</span>
+                <span class="wait">Waiting</span>
+              </div>
+
+              <div class="state-row">
+                <span>Completed</span>
+                <span>System</span>
+                <span>All tasks checked</span>
+                <span>Move to Employee Management</span>
+                <span class="wait">Waiting</span>
+              </div>
+            </div>
+
+            <div class="section-title">Tasks to Complete Current State</div>
+
+            <div class="task-list">
+              <div class="task-row">
+                <div>
+                  <span class="tag">Current State · Account Setup</span>
+                  <strong>Create Microsoft 365 account</strong>
+                  <p>Owner: IT Admin · Required before app access.</p>
+                </div>
+                <button onclick="markDone(this)">Mark done</button>
+              </div>
+
+              <div class="task-row">
+                <div>
+                  <span class="tag">Current State · Account Setup</span>
+                  <strong>Assign security group</strong>
+                  <p>Owner: IT Admin · Based on role and department.</p>
+                </div>
+                <button onclick="markDone(this)">Mark done</button>
+              </div>
+
+              <div class="task-row">
+                <div>
+                  <span class="tag">Next State · App Access</span>
+                  <strong>Validate required applications</strong>
+                  <p>Owner: Manager · Required for software provisioning.</p>
+                </div>
+                <button onclick="markDone(this)">Mark done</button>
+              </div>
+            </div>
+
+            <div class="completion-banner" id="completionBanner">
+              Current state completed. Next state can now move forward.
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const view = tab.dataset.view;
+
+        tabs.forEach(t => t.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+
+        tab.classList.add('active');
+        document.getElementById(view).classList.add('active');
+      });
+    });
+
+
+
+
+
+    function switchView(view) {
+      const targetTab = document.querySelector(`.tab[data-view="${view}"]`);
+      if (!targetTab) return;
+
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+
+      targetTab.classList.add('active');
+      document.getElementById(view).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateCompletionBanner() {
+      const banner = document.getElementById('completionBanner');
+      if (!banner) return;
+
+      const flowPanel = document.getElementById('flow');
+      const flowTasks = flowPanel.querySelectorAll('.task-row');
+      const completed = flowPanel.querySelectorAll('.task-row.completed');
+
+      if (flowTasks.length && flowTasks.length === completed.length) {
+        banner.classList.add('active');
+      } else {
+        banner.classList.remove('active');
+      }
+    }
+
+    function loadFlow(domain, process, title, pathText) {
+      document.getElementById('flowBreadcrumb').textContent = 'Enterprise OS / ' + domain + ' / ' + process;
+      document.getElementById('flowTitle').textContent = title;
+      document.getElementById('flowPath').textContent = pathText;
+
+      document.querySelectorAll('.flow-item').forEach(item => {
+        item.classList.remove('active-flow');
+      });
+
+      event.currentTarget.classList.add('active-flow');
+    }
+
+    function markDone(button) {
+      const row = button.closest('.task-row');
+      row.classList.toggle('completed');
+      button.textContent = row.classList.contains('completed') ? 'Completed' : 'Mark done';
+      updateCompletionBanner();
+    }
+
+    function selectDomain(title, metric, description, owner, risk) {
+      document.getElementById('domainTitle').textContent = title;
+      document.getElementById('domainMetric').textContent = metric;
+      document.getElementById('domainDescription').textContent = description;
+      document.getElementById('domainOwner').textContent = owner;
+      document.getElementById('domainRisk').textContent = risk;
+
+      document.querySelectorAll('.domain-card').forEach(card => {
+        card.classList.remove('active-domain');
+      });
+
+      event.currentTarget.classList.add('active-domain');
+    }
+
+    function openDetail(title, text) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalText').textContent = text;
+      document.getElementById('modalBackdrop').classList.add('active');
+    }
+
+    function closeDetail() {
+      document.getElementById('modalBackdrop').classList.remove('active');
+    }
+
+  </script>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <h3 id="modalTitle">Detail</h3>
+      <p id="modalText">Detail text.</p>
+      <button onclick="closeDetail()">Close</button>
+    </div>
+  </div>
+
+</body>
+</html>
