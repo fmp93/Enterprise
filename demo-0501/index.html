@@ -2397,5 +2397,21 @@ if (typeof PROCESSES !== "undefined" && typeof hrProcesses !== "undefined") {
   if (typeof renderFlowView === "function") renderFlowView();
 }
 </script>
+
+<script src="./hr-processes-4-8.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof hrProcesses !== "undefined") {
+    const target = window.PROCESSES || window.processes || window.allProcesses || (typeof PROCESSES !== "undefined" ? PROCESSES : null);
+    if (Array.isArray(target)) {
+      hrProcesses.forEach(p => {
+        p.domain = "hr";
+        if (!target.some(x => x.id === p.id)) target.push(p);
+      });
+    }
+  }
+});
+</script>
+
 </body>
 </html>
