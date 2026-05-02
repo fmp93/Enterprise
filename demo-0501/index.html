@@ -743,6 +743,11 @@ body{font-family:var(--fb);background:var(--c0);color:var(--t1);display:flex;hei
           <div class="sd-item" onclick="openGlobalProcess('laptop','ops');closeSearch()"><span class="sd-icon">◻</span><div><div class="sd-text">Laptop Lifecycle</div><div class="sd-sub">Operations · 7 states</div></div></div>
           <div class="sd-item" onclick="openGlobalProcess('equipment','ops');closeSearch()"><span class="sd-icon">◻</span><div><div class="sd-text">Equipment Return</div><div class="sd-sub">Operations · 5 states</div></div></div>
           <div class="sd-item" onclick="openGlobalProcess('onboarding','hr');closeSearch()"><span class="sd-icon">◻</span><div><div class="sd-text">Employee Onboarding</div><div class="sd-sub">HR · 7 states</div></div></div>
+          <div class="sd-item" onclick="openGlobalProcess('payroll-processing','hr');closeSearch()"><span class="sd-icon">◐</span><div><div class="sd-text">Payroll Processing</div><div class="sd-sub">HR · 6 states</div></div></div>
+          <div class="sd-item" onclick="openGlobalProcess('leave-management','hr');closeSearch()"><span class="sd-icon">◐</span><div><div class="sd-text">Leave Management</div><div class="sd-sub">HR · 6 states</div></div></div>
+          <div class="sd-item" onclick="openGlobalProcess('performance-review','hr');closeSearch()"><span class="sd-icon">◐</span><div><div class="sd-text">Performance Review</div><div class="sd-sub">HR · 7 states</div></div></div>
+          <div class="sd-item" onclick="openGlobalProcess('training-development','hr');closeSearch()"><span class="sd-icon">◐</span><div><div class="sd-text">Training & Development</div><div class="sd-sub">HR · 5 states</div></div></div>
+          <div class="sd-item" onclick="openGlobalProcess('disciplinary-action','hr');closeSearch()"><span class="sd-icon">◐</span><div><div class="sd-text">Disciplinary Action</div><div class="sd-sub">HR · 6 states</div></div></div>
         </div>
         <div class="sd-section" style="border-top:1px solid var(--bdr)">
           <div class="sd-lbl">Tasks &amp; Systems</div>
@@ -1409,7 +1414,1501 @@ const PROCESSES = {
         }
       ]}
     }
+  },
+  'payroll-processing': {
+  name: "Payroll Processing",
+  icon: "◐",
+  iconBg: "rgba(240,82,82,0.12)",
+  domain: "HR",
+  currentStateIdx: 1,
+  states: [
+    {
+      name: "Open",
+      short: "Open",
+      status: "done"
+    },
+    {
+      name: "Collecting",
+      short: "Collecting",
+      status: "active",
+      desc: "Hours, absences, and variables being gathered.",
+      deptTasks: {
+        HR: [
+          {
+            id: "open-cycle",
+            lbl: "Open payroll cycle",
+            sys: "Payroll Software",
+            status: "p"
+          },
+          {
+            id: "collect-variables",
+            lbl: "Collect variable data",
+            sys: "BambooHR / Google Sheets",
+            status: "p"
+          },
+          {
+            id: "submit-data",
+            lbl: "Submit payroll data to accountant",
+            sys: "Email / Shared Drive",
+            status: "p"
+          },
+          {
+            id: "review-approve-payroll",
+            lbl: "Review and approve payroll",
+            sys: "Payroll Software",
+            status: "cond"
+          },
+          {
+            id: "deliver-archive",
+            lbl: "Deliver payslips and archive records",
+            sys: "BambooHR / Email",
+            status: "p"
+          }
+        ],
+        Finance: [
+          {
+            id: "execute-payments",
+            lbl: "Execute bank payments",
+            sys: "Bank Portal",
+            status: "p"
+          }
+        ]
+      },
+      deptInfo: {
+        HR: {
+          systems: [
+            "BambooHR",
+            "Google Sheets",
+            "Payroll Software"
+          ],
+          notify: [
+            "Accountant (Francisco)",
+            "Department Managers"
+          ],
+          after: "Accountant runs payroll calculation and sends draft for review.",
+          policies: [
+            "Payroll Policy",
+            "Overtime Policy",
+            "Bonus Guidelines"
+          ]
+        },
+        Finance: {
+          systems: [
+            "Payroll Software",
+            "Bank Portal",
+            "Accounting System"
+          ],
+          notify: [
+            "HR Manager",
+            "CEO (if total exceeds threshold)"
+          ],
+          after: "Payslips delivered to employees. Cycle marked Archived.",
+          policies: [
+            "Financial Controls Policy",
+            "Tax Compliance Policy"
+          ]
+        }
+      }
+    },
+    {
+      name: "Under Review",
+      short: "Under Review",
+      status: "next"
+    },
+    {
+      name: "Approved",
+      short: "Approved",
+      status: "next"
+    },
+    {
+      name: "Paid",
+      short: "Paid",
+      status: "next"
+    },
+    {
+      name: "Archived",
+      short: "Archived",
+      status: "next"
+    }
+  ],
+  roleTasks: {
+    HR: {
+      1: [
+        {
+          id: "open-cycle",
+          lbl: "Open payroll cycle",
+          sys: "Payroll Software",
+          due: "Day 1 of payroll month",
+          done: false,
+          guide: {
+            steps: [
+              "Log into payroll system and open a new monthly cycle. Set the period dates.",
+              "Where: Payroll Software → New Cycle",
+              "Evidence required: Screenshot of open cycle with correct period dates",
+              "Next: HR begins collecting variable payroll data"
+            ],
+            where: [
+              "Payroll Software → New Cycle"
+            ],
+            notify: [
+              {
+                name: "Finance / Accountant",
+                role: "HR",
+                color: "#F05252"
+              }
+            ],
+            message: "Hi Francisco, payroll cycle for [month] is now open. Please prepare calculation once I submit the data file.",
+            evidence: [
+              "Screenshot of open cycle with correct period dates"
+            ],
+            next: "HR begins collecting variable payroll data"
+          }
+        },
+        {
+          id: "collect-variables",
+          lbl: "Collect variable data",
+          sys: "BambooHR / Google Sheets",
+          due: "Day 3 of payroll month",
+          done: false,
+          guide: {
+            steps: [
+              "Gather overtime hours, absences, bonuses, commissions, new hires, terminations, and salary changes from all departments.",
+              "Where: BambooHR → Reports + Department Manager inputs",
+              "Evidence required: Completed variable data spreadsheet signed off by each manager",
+              "Next: Submit complete data to accountant"
+            ],
+            where: [
+              "BambooHR → Reports + Department Manager inputs"
+            ],
+            notify: [
+              {
+                name: "Department Managers",
+                role: "HR",
+                color: "#F05252"
+              }
+            ],
+            message: "Please confirm your team's overtime and absence data for [month] by [deadline].",
+            evidence: [
+              "Completed variable data spreadsheet signed off by each manager"
+            ],
+            next: "Submit complete data to accountant"
+          }
+        },
+        {
+          id: "submit-data",
+          lbl: "Submit payroll data to accountant",
+          sys: "Email / Shared Drive",
+          due: "Day 5 of payroll month",
+          done: false,
+          guide: {
+            steps: [
+              "Send finalized data file to accountant. Include any special notes on exceptions.",
+              "Where: Email + Google Drive",
+              "Evidence required: Sent email confirmation + file upload timestamp",
+              "Next: Accountant calculates payroll and sends draft for HR approval"
+            ],
+            where: [
+              "Email + Google Drive"
+            ],
+            notify: [
+              {
+                name: "Accountant (Francisco)",
+                role: "HR",
+                color: "#F05252"
+              }
+            ],
+            message: "Hi Francisco, attached is the complete payroll data for [month]. Please flag any questions before running the calculation.",
+            evidence: [
+              "Sent email confirmation + file upload timestamp"
+            ],
+            next: "Accountant calculates payroll and sends draft for HR approval"
+          }
+        },
+        {
+          id: "review-approve-payroll",
+          lbl: "Review and approve payroll",
+          sys: "Payroll Software",
+          due: "Within 24h of receiving draft",
+          done: false,
+          guide: {
+            steps: [
+              "Review the payroll draft produced by the accountant. Verify totals, individual amounts, deductions, and any flagged exceptions. Approve or return for correction.",
+              "Where: Payroll Software → Draft Review",
+              "Evidence required: Signed approval record in system (HITL checkpoint)",
+              "Next: Finance executes bank transfers"
+            ],
+            where: [
+              "Payroll Software → Draft Review"
+            ],
+            notify: [
+              {
+                name: "Accountant (Francisco)",
+                role: "HR",
+                color: "#F05252"
+              }
+            ],
+            message: "Payroll approved for [month]. Please proceed with bank transfers.",
+            evidence: [
+              "Signed approval record in system (HITL checkpoint)"
+            ],
+            next: "Finance executes bank transfers"
+          }
+        },
+        {
+          id: "deliver-archive",
+          lbl: "Deliver payslips and archive records",
+          sys: "BambooHR / Email",
+          due: "Within 2 business days of payment",
+          done: false,
+          guide: {
+            steps: [
+              "Generate and distribute payslips to all employees. Archive payroll records for the closed month.",
+              "Where: BambooHR → Payslip Generator",
+              "Evidence required: Delivery confirmation + archive timestamp",
+              "Next: Cycle marked Archived. Process closed."
+            ],
+            where: [
+              "BambooHR → Payslip Generator"
+            ],
+            notify: [
+              {
+                name: "All employees",
+                role: "HR",
+                color: "#F05252"
+              }
+            ],
+            message: "Your payslip for [month] is now available in BambooHR.",
+            evidence: [
+              "Delivery confirmation + archive timestamp"
+            ],
+            next: "Cycle marked Archived. Process closed."
+          }
+        }
+      ]
+    },
+    Finance: {
+      1: [
+        {
+          id: "execute-payments",
+          lbl: "Execute bank payments",
+          sys: "Bank Portal",
+          due: "Last business day of the month",
+          done: false,
+          guide: {
+            steps: [
+              "Upload payment file to bank portal and execute all employee salary transfers.",
+              "Where: Bank Portal → Batch Payment Upload",
+              "Evidence required: Bank transfer confirmation number",
+              "Next: Payslips generated and sent to employees"
+            ],
+            where: [
+              "Bank Portal → Batch Payment Upload"
+            ],
+            notify: [
+              {
+                name: "HR Manager",
+                role: "Finance",
+                color: "#F05252"
+              }
+            ],
+            message: "Transfers submitted for [month] payroll. Expected settlement: [date].",
+            evidence: [
+              "Bank transfer confirmation number"
+            ],
+            next: "Payslips generated and sent to employees"
+          }
+        }
+      ]
+    }
   }
+},
+  'leave-management': {
+  name: "Leave Management",
+  icon: "◐",
+  iconBg: "rgba(240,82,82,0.12)",
+  domain: "HR",
+  currentStateIdx: 0,
+  states: [
+    {
+      name: "Requested",
+      short: "Requested",
+      status: "active",
+      desc: "Employee submitted a leave request.",
+      deptTasks: {
+        Employee: [
+          {
+            id: "submit-leave-request",
+            lbl: "Submit leave request",
+            sys: "BambooHR",
+            status: "p"
+          }
+        ],
+        Manager: [
+          {
+            id: "approve-reject-leave",
+            lbl: "Approve or reject leave",
+            sys: "BambooHR",
+            status: "cond"
+          },
+          {
+            id: "register-leave",
+            lbl: "Register leave in HR system",
+            sys: "BambooHR / Google Calendar",
+            status: "p"
+          },
+          {
+            id: "confirm-return",
+            lbl: "Confirm employee return",
+            sys: "BambooHR",
+            status: "p"
+          }
+        ],
+        HR: []
+      },
+      deptInfo: {
+        Employee: {
+          systems: [
+            "BambooHR"
+          ],
+          notify: [
+            "Direct Manager"
+          ],
+          after: "Manager receives notification and reviews the request.",
+          policies: [
+            "Leave Policy",
+            "PTO Guidelines"
+          ]
+        },
+        Manager: {
+          systems: [
+            "BambooHR",
+            "Google Calendar"
+          ],
+          notify: [
+            "HR Manager",
+            "Employee"
+          ],
+          after: "HR registers the approved leave and updates calendar.",
+          policies: [
+            "Leave Policy",
+            "Team Coverage Guidelines"
+          ]
+        },
+        HR: {
+          systems: [
+            "BambooHR",
+            "Google Calendar"
+          ],
+          notify: [
+            "Payroll / Accountant (if unpaid leave)"
+          ],
+          after: "Leave marked Active. HR monitors return date.",
+          policies: [
+            "Leave Balance Policy",
+            "Unpaid Leave Guidelines"
+          ]
+        }
+      }
+    },
+    {
+      name: "Pending Approval",
+      short: "Pending Approval",
+      status: "next"
+    },
+    {
+      name: "Approved",
+      short: "Approved",
+      status: "next"
+    },
+    {
+      name: "Rejected",
+      short: "Rejected",
+      status: "next"
+    },
+    {
+      name: "Active",
+      short: "Active",
+      status: "next"
+    },
+    {
+      name: "Returned",
+      short: "Returned",
+      status: "next"
+    }
+  ],
+  roleTasks: {
+    Employee: {
+      0: [
+        {
+          id: "submit-leave-request",
+          lbl: "Submit leave request",
+          sys: "BambooHR",
+          due: "Submit at least 5 business days in advance (except emergencies)",
+          done: false,
+          guide: {
+            steps: [
+              "Log in to BambooHR and submit a leave request. Select leave type, start date, end date, and add any notes.",
+              "Where: BambooHR → Time Off → Request",
+              "Evidence required: BambooHR submission confirmation",
+              "Next: Manager receives notification and has 48h to respond"
+            ],
+            where: [
+              "BambooHR → Time Off → Request"
+            ],
+            notify: [
+              {
+                name: "Direct Manager (automatic from system)",
+                role: "Employee",
+                color: "#F05252"
+              }
+            ],
+            message: "Hi [Manager], I've submitted a leave request for [dates]. Please let me know if you need any handover from my side.",
+            evidence: [
+              "BambooHR submission confirmation"
+            ],
+            next: "Manager receives notification and has 48h to respond"
+          }
+        }
+      ]
+    },
+    Manager: {
+      0: [
+        {
+          id: "approve-reject-leave",
+          lbl: "Approve or reject leave",
+          sys: "BambooHR",
+          due: "Within 48 hours of request submission",
+          done: false,
+          guide: {
+            steps: [
+              "Review the leave request. Check team calendar for conflicts. Approve or reject with a written reason.",
+              "Where: BambooHR → Time Off → Pending Requests",
+              "Evidence required: Approved or rejected status in BambooHR with timestamp",
+              "Next: HR registers the leave and updates the calendar"
+            ],
+            where: [
+              "BambooHR → Time Off → Pending Requests"
+            ],
+            notify: [
+              {
+                name: "Employee + HR Manager",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "Hi [Employee], your leave request for [dates] has been [approved/rejected]. [Reason if rejected].",
+            evidence: [
+              "Approved or rejected status in BambooHR with timestamp"
+            ],
+            next: "HR registers the leave and updates the calendar"
+          }
+        },
+        {
+          id: "register-leave",
+          lbl: "Register leave in HR system",
+          sys: "BambooHR / Google Calendar",
+          due: "Within 24h of manager approval",
+          done: false,
+          guide: {
+            steps: [
+              "Confirm the approved leave is reflected in BambooHR. Update the company-wide calendar. Notify payroll if leave is unpaid.",
+              "Where: BambooHR → Time Off + Google Calendar",
+              "Evidence required: Calendar event created + balance deducted in BambooHR",
+              "Next: Leave goes Active on start date"
+            ],
+            where: [
+              "BambooHR → Time Off + Google Calendar"
+            ],
+            notify: [
+              {
+                name: "Accountant (Francisco) if unpaid leave",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "Leave registered for [Employee] — [dates]. Balance updated.",
+            evidence: [
+              "Calendar event created + balance deducted in BambooHR"
+            ],
+            next: "Leave goes Active on start date"
+          }
+        },
+        {
+          id: "confirm-return",
+          lbl: "Confirm employee return",
+          sys: "BambooHR",
+          due: "Same day as return date",
+          done: false,
+          guide: {
+            steps: [
+              "On the employee's return date, confirm they are back. Mark the leave record as closed in BambooHR.",
+              "Where: BambooHR → Time Off → Active Leaves",
+              "Evidence required: Leave status updated to Returned in BambooHR",
+              "Next: Process closed. No further action."
+            ],
+            where: [
+              "BambooHR → Time Off → Active Leaves"
+            ],
+            notify: [
+              {
+                name: "Manager",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "[Employee] has returned from leave. Record closed.",
+            evidence: [
+              "Leave status updated to Returned in BambooHR"
+            ],
+            next: "Process closed. No further action."
+          }
+        }
+      ]
+    },
+    HR: {
+      0: []
+    }
+  }
+},
+  'performance-review': {
+  name: "Performance Review",
+  icon: "◐",
+  iconBg: "rgba(240,82,82,0.12)",
+  domain: "HR",
+  currentStateIdx: 0,
+  states: [
+    {
+      name: "Not Started",
+      short: "Not Started",
+      status: "active",
+      desc: "Review cycle open but employee not yet started.",
+      deptTasks: {
+        HR: [],
+        Employee: [
+          {
+            id: "complete-self-assessment",
+            lbl: "Complete self-assessment",
+            sys: "BambooHR / Google Docs",
+            status: "p"
+          }
+        ],
+        Manager: [
+          {
+            id: "open-review-cycle",
+            lbl: "Open review cycle",
+            sys: "BambooHR",
+            status: "p"
+          },
+          {
+            id: "complete-manager-review",
+            lbl: "Complete manager review",
+            sys: "BambooHR",
+            status: "p"
+          },
+          {
+            id: "run-calibration",
+            lbl: "Run calibration session",
+            sys: "Google Meet / Google Docs",
+            status: "cond"
+          },
+          {
+            id: "hold-feedback-meeting",
+            lbl: "Hold feedback meeting",
+            sys: "Google Calendar / Google Meet",
+            status: "p"
+          },
+          {
+            id: "document-goals",
+            lbl: "Document goals for next period",
+            sys: "BambooHR / Google Docs",
+            status: "p"
+          }
+        ]
+      },
+      deptInfo: {
+        HR: {
+          systems: [
+            "BambooHR",
+            "Google Docs",
+            "Email"
+          ],
+          notify: [
+            "All employees",
+            "All managers",
+            "CEO / Leadership"
+          ],
+          after: "Cycle closes, results archived, compensation recommendations flagged.",
+          policies: [
+            "Performance Management Policy",
+            "Compensation Review Policy"
+          ]
+        },
+        Employee: {
+          systems: [
+            "BambooHR",
+            "Google Docs"
+          ],
+          notify: [
+            "Direct Manager (automatic on submission)"
+          ],
+          after: "Manager receives self-assessment and begins their review.",
+          policies: [
+            "Performance Management Policy"
+          ]
+        },
+        Manager: {
+          systems: [
+            "BambooHR",
+            "Google Docs",
+            "Calendar"
+          ],
+          notify: [
+            "HR Manager",
+            "Employee"
+          ],
+          after: "Goals documented in system. Record moves to Closed.",
+          policies: [
+            "Feedback Guidelines",
+            "Goal Setting Framework"
+          ]
+        }
+      }
+    },
+    {
+      name: "Self-Assessment",
+      short: "Self-Assessment",
+      status: "next"
+    },
+    {
+      name: "Manager Review",
+      short: "Manager Review",
+      status: "next"
+    },
+    {
+      name: "Calibration",
+      short: "Calibration",
+      status: "next"
+    },
+    {
+      name: "Feedback Delivered",
+      short: "Feedback Delivered",
+      status: "next"
+    },
+    {
+      name: "Goals Set",
+      short: "Goals Set",
+      status: "next"
+    },
+    {
+      name: "Closed",
+      short: "Closed",
+      status: "next"
+    }
+  ],
+  roleTasks: {
+    HR: {
+      0: []
+    },
+    Employee: {
+      0: [
+        {
+          id: "complete-self-assessment",
+          lbl: "Complete self-assessment",
+          sys: "BambooHR / Google Docs",
+          due: "Within 7 days of cycle opening",
+          done: false,
+          guide: {
+            steps: [
+              "Complete the self-assessment form. Reflect on achievements, challenges, and areas for growth. Propose 3–5 goals for the next period.",
+              "Where: BambooHR → Performance → My Review",
+              "Evidence required: Self-assessment submitted and locked in BambooHR",
+              "Next: Manager begins their review"
+            ],
+            where: [
+              "BambooHR → Performance → My Review"
+            ],
+            notify: [
+              {
+                name: "Direct Manager (on submission)",
+                role: "Employee",
+                color: "#F05252"
+              }
+            ],
+            message: "Hi [Manager], I've submitted my self-assessment for this cycle. Happy to discuss before your review.",
+            evidence: [
+              "Self-assessment submitted and locked in BambooHR"
+            ],
+            next: "Manager begins their review"
+          }
+        }
+      ]
+    },
+    Manager: {
+      0: [
+        {
+          id: "open-review-cycle",
+          lbl: "Open review cycle",
+          sys: "BambooHR",
+          due: "Day 1 of review cycle",
+          done: false,
+          guide: {
+            steps: [
+              "Open the performance review cycle in BambooHR. Set start and end dates. Send communication to all employees and managers with instructions and deadline.",
+              "Where: BambooHR → Performance → Cycles",
+              "Evidence required: Cycle opened in system with correct dates and all participants added",
+              "Next: Employees begin self-assessments"
+            ],
+            where: [
+              "BambooHR → Performance → Cycles"
+            ],
+            notify: [
+              {
+                name: "All employees + all managers",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "The [Q/Annual] performance review cycle is now open. Please complete your self-assessment by [date]. Instructions attached.",
+            evidence: [
+              "Cycle opened in system with correct dates and all participants added"
+            ],
+            next: "Employees begin self-assessments"
+          }
+        },
+        {
+          id: "complete-manager-review",
+          lbl: "Complete manager review",
+          sys: "BambooHR",
+          due: "Within 7 days of receiving self-assessment",
+          done: false,
+          guide: {
+            steps: [
+              "Review the employee's self-assessment. Score each competency. Add written comments. Submit to HR for calibration.",
+              "Where: BambooHR → Performance → Team Reviews",
+              "Evidence required: Manager review submitted in BambooHR with scores and comments",
+              "Next: HR schedules calibration session"
+            ],
+            where: [
+              "BambooHR → Performance → Team Reviews"
+            ],
+            notify: [
+              {
+                name: "HR Manager (on submission)",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "Hi [HR], I've submitted my review for [Employee]. Ready for calibration.",
+            evidence: [
+              "Manager review submitted in BambooHR with scores and comments"
+            ],
+            next: "HR schedules calibration session"
+          }
+        },
+        {
+          id: "run-calibration",
+          lbl: "Run calibration session",
+          sys: "Google Meet / Google Docs",
+          due: "Within 5 days of all manager reviews submitted",
+          done: false,
+          guide: {
+            steps: [
+              "Facilitate calibration meeting with department heads and leadership. Align on final ratings, flag outliers, and ensure consistency across the organization.",
+              "Where: Google Meet + calibration spreadsheet",
+              "Evidence required: Calibration spreadsheet with final agreed ratings signed off by HR and leadership (HITL)",
+              "Next: Managers notified of final ratings and instructed to schedule feedback meetings"
+            ],
+            where: [
+              "Google Meet + calibration spreadsheet"
+            ],
+            notify: [
+              {
+                name: "All managers + leadership",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "Calibration session scheduled for [date/time]. Please review your team's draft ratings beforehand.",
+            evidence: [
+              "Calibration spreadsheet with final agreed ratings signed off by HR and leadership (HITL)"
+            ],
+            next: "Managers notified of final ratings and instructed to schedule feedback meetings"
+          }
+        },
+        {
+          id: "hold-feedback-meeting",
+          lbl: "Hold feedback meeting",
+          sys: "Google Calendar / Google Meet",
+          due: "Within 5 days of calibration",
+          done: false,
+          guide: {
+            steps: [
+              "Schedule and hold a 1:1 meeting with the employee. Share final rating, specific feedback, and discuss proposed goals. Be constructive and forward-focused.",
+              "Where: In person or Google Meet",
+              "Evidence required: Meeting confirmed in BambooHR + employee acknowledgement",
+              "Next: Goals documented in system"
+            ],
+            where: [
+              "In person or Google Meet"
+            ],
+            notify: [
+              {
+                name: "HR Manager (confirm meeting held)",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "Hi [HR], feedback meeting with [Employee] held on [date]. Goals being documented now.",
+            evidence: [
+              "Meeting confirmed in BambooHR + employee acknowledgement"
+            ],
+            next: "Goals documented in system"
+          }
+        },
+        {
+          id: "document-goals",
+          lbl: "Document goals for next period",
+          sys: "BambooHR / Google Docs",
+          due: "Within 2 days of feedback meeting",
+          done: false,
+          guide: {
+            steps: [
+              "Record 3–5 agreed SMART goals for the next review period. Both manager and employee confirm in the system.",
+              "Where: BambooHR → Performance → Goals",
+              "Evidence required: Goals visible in BambooHR, confirmed by both manager and employee",
+              "Next: HR closes the review cycle. Record archived."
+            ],
+            where: [
+              "BambooHR → Performance → Goals"
+            ],
+            notify: [
+              {
+                name: "HR Manager",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "Goals documented and confirmed by both parties for [Employee].",
+            evidence: [
+              "Goals visible in BambooHR, confirmed by both manager and employee"
+            ],
+            next: "HR closes the review cycle. Record archived."
+          }
+        }
+      ]
+    }
+  }
+},
+  'training-development': {
+  name: "Training & Development",
+  icon: "◐",
+  iconBg: "rgba(240,82,82,0.12)",
+  domain: "HR",
+  currentStateIdx: 0,
+  states: [
+    {
+      name: "Identified",
+      short: "Identified",
+      status: "active",
+      desc: "Training need raised by employee, manager, or HR.",
+      deptTasks: {
+        Employee: [
+          {
+            id: "submit-training-request",
+            lbl: "Submit training request",
+            sys: "BambooHR / Email",
+            status: "p"
+          },
+          {
+            id: "complete-training",
+            lbl: "Complete training",
+            sys: "LMS",
+            status: "p"
+          }
+        ],
+        Manager: [
+          {
+            id: "approve-training",
+            lbl: "Approve training request",
+            sys: "Email / BambooHR",
+            status: "p"
+          },
+          {
+            id: "enroll-employee",
+            lbl: "Enroll employee in program",
+            sys: "LMS / Provider Portal",
+            status: "p"
+          },
+          {
+            id: "record-certification",
+            lbl: "Record certification",
+            sys: "BambooHR / Google Drive",
+            status: "p"
+          }
+        ],
+        HR: []
+      },
+      deptInfo: {
+        Employee: {
+          systems: [
+            "BambooHR",
+            "LMS",
+            "Email"
+          ],
+          notify: [
+            "Direct Manager"
+          ],
+          after: "Manager approves and HR enrolls the employee.",
+          policies: [
+            "Learning & Development Policy",
+            "Training Budget Policy"
+          ]
+        },
+        Manager: {
+          systems: [
+            "Email",
+            "BambooHR"
+          ],
+          notify: [
+            "HR Manager",
+            "Employee"
+          ],
+          after: "HR proceeds with enrollment and scheduling.",
+          policies: [
+            "Training Approval Guidelines",
+            "Budget Policy"
+          ]
+        },
+        HR: {
+          systems: [
+            "LMS",
+            "BambooHR",
+            "Google Drive"
+          ],
+          notify: [
+            "Employee",
+            "Manager",
+            "Compliance team if required"
+          ],
+          after: "Training record archived. Development log updated.",
+          policies: [
+            "Compliance Training Policy",
+            "Certification Records Policy"
+          ]
+        }
+      }
+    },
+    {
+      name: "Enrolled",
+      short: "Enrolled",
+      status: "next"
+    },
+    {
+      name: "In Progress",
+      short: "In Progress",
+      status: "next"
+    },
+    {
+      name: "Completed",
+      short: "Completed",
+      status: "next"
+    },
+    {
+      name: "Certified",
+      short: "Certified",
+      status: "next"
+    }
+  ],
+  roleTasks: {
+    Employee: {
+      0: [
+        {
+          id: "submit-training-request",
+          lbl: "Submit training request",
+          sys: "BambooHR / Email",
+          due: "No fixed SLA — submit as need arises",
+          done: false,
+          guide: {
+            steps: [
+              "Submit a training request with program name, provider, cost, dates, and how it relates to your role.",
+              "Where: BambooHR → Training → Request OR email to manager",
+              "Evidence required: Training request submitted with program details",
+              "Next: Manager reviews and approves or rejects"
+            ],
+            where: [
+              "BambooHR → Training → Request OR email to manager"
+            ],
+            notify: [
+              {
+                name: "Direct Manager",
+                role: "Employee",
+                color: "#F05252"
+              }
+            ],
+            message: "Hi [Manager], I'd like to request enrollment in [Program Name] offered by [Provider]. Cost: [amount]. Dates: [dates]. It will help me develop [skill]. Please let me know if you approve.",
+            evidence: [
+              "Training request submitted with program details"
+            ],
+            next: "Manager reviews and approves or rejects"
+          }
+        },
+        {
+          id: "complete-training",
+          lbl: "Complete training",
+          sys: "LMS",
+          due: "Per program timeline agreed at enrollment",
+          done: false,
+          guide: {
+            steps: [
+              "Attend and complete all required modules or sessions. Pass any assessments required.",
+              "Where: LMS → My Courses OR external training venue",
+              "Evidence required: LMS completion record OR certificate from provider",
+              "Next: HR records certification in employee file"
+            ],
+            where: [
+              "LMS → My Courses OR external training venue"
+            ],
+            notify: [
+              {
+                name: "HR Manager (on completion)",
+                role: "Employee",
+                color: "#F05252"
+              }
+            ],
+            message: "Hi [HR], I've completed [Program Name]. Certificate attached.",
+            evidence: [
+              "LMS completion record OR certificate from provider"
+            ],
+            next: "HR records certification in employee file"
+          }
+        }
+      ]
+    },
+    Manager: {
+      0: [
+        {
+          id: "approve-training",
+          lbl: "Approve training request",
+          sys: "Email / BambooHR",
+          due: "Within 3 business days of request",
+          done: false,
+          guide: {
+            steps: [
+              "Review the training request. Assess relevance, cost, and timing. Approve or reject with clear feedback.",
+              "Where: BambooHR → Training → Pending Approvals OR email reply",
+              "Evidence required: Approval confirmation in BambooHR or email",
+              "Next: HR enrolls employee and sets up access"
+            ],
+            where: [
+              "BambooHR → Training → Pending Approvals OR email reply"
+            ],
+            notify: [
+              {
+                name: "HR Manager + Employee",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "Hi [HR], [Employee]'s training request for [Program] is approved. Please proceed with enrollment.",
+            evidence: [
+              "Approval confirmation in BambooHR or email"
+            ],
+            next: "HR enrolls employee and sets up access"
+          }
+        },
+        {
+          id: "enroll-employee",
+          lbl: "Enroll employee in program",
+          sys: "LMS / Provider Portal",
+          due: "Within 5 business days of manager approval",
+          done: false,
+          guide: {
+            steps: [
+              "Enroll the employee in the LMS or contact the external provider. Confirm access, dates, and any materials needed.",
+              "Where: LMS Admin → Add Learner OR external provider enrollment portal",
+              "Evidence required: Enrollment confirmation from LMS or provider",
+              "Next: Employee begins training on start date"
+            ],
+            where: [
+              "LMS Admin → Add Learner OR external provider enrollment portal"
+            ],
+            notify: [
+              {
+                name: "Employee",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "Hi [Employee], you're now enrolled in [Program]. Access details: [link/instructions]. Start date: [date].",
+            evidence: [
+              "Enrollment confirmation from LMS or provider"
+            ],
+            next: "Employee begins training on start date"
+          }
+        },
+        {
+          id: "record-certification",
+          lbl: "Record certification",
+          sys: "BambooHR / Google Drive",
+          due: "Within 2 business days of completion",
+          done: false,
+          guide: {
+            steps: [
+              "Upload certificate to employee file in BambooHR. Update training log. Mark record as Certified and closed.",
+              "Where: BambooHR → Employee File → Documents",
+              "Evidence required: Certificate uploaded in BambooHR with date",
+              "Next: Process closed. Training log updated."
+            ],
+            where: [
+              "BambooHR → Employee File → Documents"
+            ],
+            notify: [
+              {
+                name: "Manager",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "Training record for [Employee] — [Program] is now certified and archived.",
+            evidence: [
+              "Certificate uploaded in BambooHR with date"
+            ],
+            next: "Process closed. Training log updated."
+          }
+        }
+      ]
+    },
+    HR: {
+      0: []
+    }
+  }
+},
+  'disciplinary-action': {
+  name: "Disciplinary Action",
+  icon: "◐",
+  iconBg: "rgba(240,82,82,0.12)",
+  domain: "HR",
+  currentStateIdx: 0,
+  states: [
+    {
+      name: "Reported",
+      short: "Reported",
+      status: "active",
+      desc: "Incident formally reported to HR.",
+      deptTasks: {
+        HR: [],
+        Legal: [
+          {
+            id: "legal-review",
+            lbl: "Legal review and recommendation",
+            sys: "Legal Document System / Email",
+            status: "cond"
+          }
+        ],
+        Manager: [
+          {
+            id: "report-incident",
+            lbl: "Report incident to HR",
+            sys: "Email / Internal Form",
+            status: "p"
+          },
+          {
+            id: "open-case",
+            lbl: "Open formal case",
+            sys: "Internal Document System",
+            status: "p"
+          },
+          {
+            id: "conduct-investigation",
+            lbl: "Conduct investigation",
+            sys: "Internal Document System / Email",
+            status: "p"
+          },
+          {
+            id: "issue-warning",
+            lbl: "Issue formal warning",
+            sys: "Internal Document System",
+            status: "p"
+          },
+          {
+            id: "close-and-archive",
+            lbl: "Close case and archive records",
+            sys: "BambooHR / Internal Document System",
+            status: "p"
+          }
+        ]
+      },
+      deptInfo: {
+        HR: {
+          systems: [
+            "Internal Document System",
+            "Email",
+            "BambooHR"
+          ],
+          notify: [
+            "Legal (Enrique) if escalation needed",
+            "CEO if severe",
+            "Involved parties"
+          ],
+          after: "Case resolved with documented outcome. Records archived per retention policy.",
+          policies: [
+            "Disciplinary Policy",
+            "Code of Conduct",
+            "Confidentiality Policy"
+          ]
+        },
+        Legal: {
+          systems: [
+            "Legal Document System",
+            "Email"
+          ],
+          notify: [
+            "HR Manager",
+            "CEO if termination involved"
+          ],
+          after: "HR implements legal recommendation and closes the case.",
+          policies: [
+            "Labor Law Compliance",
+            "Termination Guidelines",
+            "Legal Hold Policy"
+          ]
+        },
+        Manager: {
+          systems: [
+            "Email",
+            "Internal Document System"
+          ],
+          notify: [
+            "HR Manager"
+          ],
+          after: "Manager informed of outcome and next steps for their team.",
+          policies: [
+            "Manager Responsibilities Policy",
+            "Code of Conduct"
+          ]
+        }
+      }
+    },
+    {
+      name: "Under Investigation",
+      short: "Under Investigation",
+      status: "next"
+    },
+    {
+      name: "Warning Issued",
+      short: "Warning Issued",
+      status: "next"
+    },
+    {
+      name: "Legal Review",
+      short: "Legal Review",
+      status: "next"
+    },
+    {
+      name: "Resolved",
+      short: "Resolved",
+      status: "next"
+    },
+    {
+      name: "Archived",
+      short: "Archived",
+      status: "next"
+    }
+  ],
+  roleTasks: {
+    HR: {
+      0: []
+    },
+    Legal: {
+      0: [
+        {
+          id: "legal-review",
+          lbl: "Legal review and recommendation",
+          sys: "Legal Document System / Email",
+          due: "Legal recommendation within 3 business days of escalation",
+          done: false,
+          guide: {
+            steps: [
+              "Review the full case file, investigation findings, and proposed HR action. Assess legal compliance. Provide written recommendation on appropriate course of action.",
+              "Where: Legal Document System + case file review",
+              "Evidence required: Written legal recommendation signed by legal counsel (HITL checkpoint)",
+              "Next: HR implements legal recommendation and moves case to Resolved"
+            ],
+            where: [
+              "Legal Document System + case file review"
+            ],
+            notify: [
+              {
+                name: "HR Manager + CEO (if termination or serious legal risk)",
+                role: "Legal",
+                color: "#F05252"
+              }
+            ],
+            message: "Legal review of case [#ID] complete. Recommendation: [action]. Written guidance attached.",
+            evidence: [
+              "Written legal recommendation signed by legal counsel (HITL checkpoint)"
+            ],
+            next: "HR implements legal recommendation and moves case to Resolved"
+          }
+        }
+      ]
+    },
+    Manager: {
+      0: [
+        {
+          id: "report-incident",
+          lbl: "Report incident to HR",
+          sys: "Email / Internal Form",
+          due: "Report submitted as soon as incident occurs",
+          done: false,
+          guide: {
+            steps: [
+              "Submit a formal incident report to HR describing what happened, when, who was involved, and any witnesses or evidence available.",
+              "Where: Email to HR Manager OR internal incident report form",
+              "Evidence required: Written incident report with date, parties, and description",
+              "Next: HR acknowledges within 24h and opens formal case"
+            ],
+            where: [
+              "Email to HR Manager OR internal incident report form"
+            ],
+            notify: [
+              {
+                name: "HR Manager",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "I'm formally reporting an incident that occurred on [date] involving [party]. Details: [summary]. Please advise on next steps.",
+            evidence: [
+              "Written incident report with date, parties, and description"
+            ],
+            next: "HR acknowledges within 24h and opens formal case"
+          }
+        },
+        {
+          id: "open-case",
+          lbl: "Open formal case",
+          sys: "Internal Document System",
+          due: "Within 24 hours of incident report",
+          done: false,
+          guide: {
+            steps: [
+              "Acknowledge the report. Assign a case number. Notify the involved parties that an investigation is underway. Begin document trail.",
+              "Where: Internal Document System → New Disciplinary Case",
+              "Evidence required: Case file created with case number, date, and parties listed",
+              "Next: HR conducts interviews and gathers evidence"
+            ],
+            where: [
+              "Internal Document System → New Disciplinary Case"
+            ],
+            notify: [
+              {
+                name: "Involved parties + their manager + Legal (Enrique) if severity warrants",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "We have received your report and opened case [#ID]. An investigation is underway. All parties will be contacted individually. This process is strictly confidential.",
+            evidence: [
+              "Case file created with case number, date, and parties listed"
+            ],
+            next: "HR conducts interviews and gathers evidence"
+          }
+        },
+        {
+          id: "conduct-investigation",
+          lbl: "Conduct investigation",
+          sys: "Internal Document System / Email",
+          due: "Investigation completed within 5 business days",
+          done: false,
+          guide: {
+            steps: [
+              "Interview all relevant parties separately. Collect any evidence (emails, logs, witness statements). Document findings objectively. Do not share information between parties during investigation.",
+              "Where: In person or video call + internal document system",
+              "Evidence required: Signed interview notes from each party + evidence inventory",
+              "Next: HR determines appropriate action based on findings"
+            ],
+            where: [
+              "In person or video call + internal document system"
+            ],
+            notify: [
+              {
+                name: "No external parties during investigation",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "We'd like to schedule a confidential interview with you as part of our investigation. This is standard procedure.",
+            evidence: [
+              "Signed interview notes from each party + evidence inventory"
+            ],
+            next: "HR determines appropriate action based on findings"
+          }
+        },
+        {
+          id: "issue-warning",
+          lbl: "Issue formal warning",
+          sys: "Internal Document System",
+          due: "Issued within 2 business days of investigation conclusion",
+          done: false,
+          guide: {
+            steps: [
+              "Draft and issue a formal verbal or written warning letter. Include: nature of the issue, expected behavior change, consequences if behavior continues, and signature from both employee and HR.",
+              "Where: Internal Document System → Warning Letter Template",
+              "Evidence required: Signed warning letter filed in employee record",
+              "Next: Case monitored. If resolved, move to Resolved. If behavior continues, escalate."
+            ],
+            where: [
+              "Internal Document System → Warning Letter Template"
+            ],
+            notify: [
+              {
+                name: "Employee + their Manager + Legal if written warning",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "Following our investigation of case [#ID], we are issuing a formal [verbal/written] warning. Details are outlined in the attached letter.",
+            evidence: [
+              "Signed warning letter filed in employee record"
+            ],
+            next: "Case monitored. If resolved, move to Resolved. If behavior continues, escalate."
+          }
+        },
+        {
+          id: "close-and-archive",
+          lbl: "Close case and archive records",
+          sys: "BambooHR / Internal Document System",
+          due: "Within 2 business days of resolution",
+          done: false,
+          guide: {
+            steps: [
+              "Document the final resolution. File all records (incident report, interview notes, warning letters, legal recommendation) in the employee file and case archive. Update employee record in BambooHR.",
+              "Where: BambooHR → Employee File + Internal Document Archive",
+              "Evidence required: All documents filed. Case marked Archived in system.",
+              "Next: No further action unless behavior recurs."
+            ],
+            where: [
+              "BambooHR → Employee File + Internal Document Archive"
+            ],
+            notify: [
+              {
+                name: "Involved manager",
+                role: "Manager",
+                color: "#F05252"
+              }
+            ],
+            message: "Case [#ID] is now closed and archived. Outcome: [summary]. All records filed per retention policy.",
+            evidence: [
+              "All documents filed. Case marked Archived in system."
+            ],
+            next: "No further action unless behavior recurs."
+          }
+        }
+      ]
+    }
+  }
+}
 };
 
 /* ══════════════════════════════════════
@@ -2264,7 +3763,12 @@ const SIDEBAR_MODES = {
       items:[
         { ico:'◻', label:'Laptop Lifecycle',    action:`openGlobalProcess('laptop');navTo('nav',this)` },
         { ico:'◈', label:'Equipment Return',    action:`openGlobalProcess('equipment');navTo('nav',this)` },
-        { ico:'◐', label:'Employee Onboarding', action:`openGlobalProcess('onboarding');navTo('nav',this)` }
+        { ico:'◐', label:'Employee Onboarding', action:`openGlobalProcess('onboarding');navTo('nav',this)` },
+        { ico:'◐', label:'Payroll Processing', action:`openGlobalProcess('payroll-processing');navTo('nav',this)` },
+        { ico:'◐', label:'Leave Management', action:`openGlobalProcess('leave-management');navTo('nav',this)` },
+        { ico:'◐', label:'Performance Review', action:`openGlobalProcess('performance-review');navTo('nav',this)` },
+        { ico:'◐', label:'Training & Development', action:`openGlobalProcess('training-development');navTo('nav',this)` },
+        { ico:'◐', label:'Disciplinary Action', action:`openGlobalProcess('disciplinary-action');navTo('nav',this)` }
       ]
     },{
       label:'By Domain',
