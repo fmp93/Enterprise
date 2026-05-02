@@ -3148,7 +3148,12 @@ const SIDEBAR_MODES = {
         ]},
         { ico:'◐', label:'HR', children:[
           { label:'Employee Onboarding', action:`openGlobalProcess('onboarding');navTo('nav')` },
-          { label:'Employee Offboarding',action:`showToast('Coming soon','◐')` }
+          { label:'Employee Offboarding',action:`showToast('Coming soon','◐')` },
+          { label:'Payroll Processing', action:`openGlobalProcess('payroll-processing');navTo('nav')` },
+          { label:'Leave Management', action:`openGlobalProcess('leave-management');navTo('nav')` },
+          { label:'Performance Review', action:`openGlobalProcess('performance-review');navTo('nav')` },
+          { label:'Training & Development', action:`openGlobalProcess('training-development');navTo('nav')` },
+          { label:'Disciplinary Action', action:`openGlobalProcess('disciplinary-action');navTo('nav')` }
         ]}
       ]
     }]
