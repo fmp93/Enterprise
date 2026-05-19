@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DFX5 Command Center — V0.2</title>
+<style>
+/* ─── TOKENS ─────────────────────────────────────────────────── */
+:root {
+  --bg:          #08090b;
+  --surface:     #0f1115;
+  --surface2:    #15181f;
+  --surface3:    #1c2030;
+  --border:      #23283a;
+  --border2:     #2e3550;
+  --accent:      #3b82f6;
+  --accent2:     #60a5fa;
+  --accent-dim:  rgba(59,130,246,.12);
+  --green:       #22c55e;
+  --green-dim:   rgba(34,197,94,.12);
+  --amber:       #f59e0b;
+  --amber-dim:   rgba(245,158,11,.12);
+  --red:         #ef4444;
+  --red-dim:     rgba(239,68,68,.12);
+  --purple:      #a78bfa;
+  --purple-dim:  rgba(167,139,250,.12);
+  --cyan:        #22d3ee;
+  --text:        #e2e8f0;
+  --text2:       #94a3b8;
+  --text3:       #64748b;
+  --sidebar-w:   220px;
+  --panel-w:     420px;
+  --topbar-h:    52px;
+  --radius:      10px;
+  --radius-sm:   6px;
+  --font:        'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono:        'SF Mono', 'Fira Code', monospace;
+}
+
+/* ─── RESET ──────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5}
+button{cursor:pointer;border:none;background:none;font-family:inherit;color:inherit}
+ul{list-style:none}
+a{color:inherit;text-decoration:none}
+
+/* ─── LAYOUT SHELL ───────────────────────────────────────────── */
+#shell{
+  display:grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-template-rows: var(--topbar-h) 1fr;
+  height:100vh;
+  transition: grid-template-columns .3s ease;
+}
+
+/* panel open — shrink main column */
+body.panel-open #shell{
+  grid-template-columns: var(--sidebar-w) 1fr var(--panel-w);
+}
+
+/* ─── TOPBAR ─────────────────────────────────────────────────── */
+#topbar{
+  grid-column:1/-1;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:16px;
+  padding:0 20px;
+  z-index:40;
+}
+.topbar-logo{
+  display:flex;align-items:center;gap:8px;
+  font-size:14px;font-weight:700;letter-spacing:.04em;color:var(--text);
+  flex-shrink:0;
+}
+.topbar-logo .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.topbar-search{
+  flex:1;max-width:400px;
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:6px 12px;color:var(--text3);font-size:12px;
+}
+.topbar-search input{background:none;border:none;outline:none;color:var(--text);flex:1;font-size:12px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.status-pill{
+  display:flex;align-items:center;gap:6px;
+  background:var(--green-dim);border:1px solid rgba(34,197,94,.25);
+  border-radius:20px;padding:4px 10px;font-size:11px;color:var(--green);
+}
+.status-pill .pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+
+/* ─── SIDEBAR ────────────────────────────────────────────────── */
+#sidebar{
+  grid-row:2;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  padding:16px 0;
+  overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.nav-section{margin-bottom:20px}
+.nav-label{
+  font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text3);padding:0 16px 8px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 16px;font-size:12.5px;color:var(--text2);
+  cursor:pointer;border-left:2px solid transparent;
+  transition:all .15s;
+  user-select:none;
+}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{
+  background:var(--accent-dim);color:var(--accent2);
+  border-left-color:var(--accent);font-weight:600;
+}
+.nav-icon{width:16px;height:16px;opacity:.7;flex-shrink:0}
+.nav-badge{
+  margin-left:auto;background:var(--red);color:#fff;
+  border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;
+}
+.nav-badge.amber{background:var(--amber)}
+.nav-badge.blue{background:var(--accent)}
+
+.sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border)}
+.sys-indicator{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);margin-bottom:6px}
+.sys-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+
+/* ─── MAIN CONTENT ───────────────────────────────────────────── */
+#main{
+  grid-row:2;
+  overflow-y:auto;
+  background:var(--bg);
+  position:relative;
+}
+.view{display:none;padding:24px;animation:fadein .2s ease}
+.view.active{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ─── VIEW HEADER ────────────────────────────────────────────── */
+.view-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+.view-title{font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--text)}
+.view-sub{font-size:12px;color:var(--text3);margin-top:3px}
+.view-actions{display:flex;gap:8px;align-items:center}
+.btn{
+  padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;
+  transition:all .15s;cursor:pointer;display:flex;align-items:center;gap:6px;
+}
+.btn-ghost{background:var(--surface2);border:1px solid var(--border);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+
+/* ─── SECTION TITLE ──────────────────────────────────────────── */
+.section-title{
+  font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ─── CARDS ──────────────────────────────────────────────────── */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;margin-bottom:16px;
+  transition:border-color .15s;
+}
+.card:hover{border-color:var(--border2)}
+.card.clickable{cursor:pointer}
+.card.clickable:hover{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-dim)}
+
+/* ─── METRIC ROW ─────────────────────────────────────────────── */
+.metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.metric-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;
+}
+.metric-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.metric-value{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.metric-delta{font-size:11px;color:var(--text3);margin-top:3px}
+.metric-delta.up{color:var(--green)}
+.metric-delta.down{color:var(--red)}
+
+/* ─── INTELLIGENCE SNAPSHOT ──────────────────────────────────── */
+.intel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.intel-item{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px;
+  display:flex;gap:10px;align-items:flex-start;
+}
+.intel-icon{
+  width:30px;height:30px;border-radius:var(--radius-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;
+}
+.intel-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px}
+.intel-desc{font-size:11px;color:var(--text3);line-height:1.45}
+
+/* ─── DEMO RUNNING CASE ──────────────────────────────────────── */
+#running-case-card{
+  background:var(--surface);
+  border:1px solid var(--accent);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:16px;
+  cursor:pointer;
+  transition:all .2s;
+  position:relative;
+  overflow:hidden;
+}
+#running-case-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg, var(--accent), var(--purple), var(--cyan));
+}
+#running-case-card:hover{border-color:var(--accent2);box-shadow:0 4px 20px rgba(59,130,246,.15)}
+
+.case-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.case-id{font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--accent2)}
+.case-meta{display:flex;gap:8px;align-items:center}
+.case-badge{
+  font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;
+  text-transform:uppercase;letter-spacing:.05em;
+}
+.badge-live{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.badge-hitl{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
+.badge-agent{background:var(--accent-dim);color:var(--accent2);border:1px solid rgba(59,130,246,.3)}
+.badge-done{background:rgba(100,116,139,.12);color:var(--text3);border:1px solid rgba(100,116,139,.2)}
+
+.case-object-row{
+  display:flex;align-items:center;gap:12px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;
+}
+.case-object-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.case-object-value{font-size:13px;font-weight:600;color:var(--text)}
+.case-state-pill{
+  margin-left:auto;background:var(--amber-dim);color:var(--amber);
+  border:1px solid rgba(245,158,11,.3);border-radius:20px;
+  padding:3px 10px;font-size:11px;font-weight:600;
+}
+
+/* flow strip */
+.case-flow{display:flex;align-items:center;gap:0;overflow-x:auto;padding-bottom:2px;margin-bottom:12px;
+  scrollbar-width:none}
+.case-flow::-webkit-scrollbar{display:none}
+.flow-node{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  flex-shrink:0;cursor:pointer;
+  padding:6px 10px;border-radius:var(--radius-sm);
+  transition:all .2s;position:relative;
+}
+.flow-node:hover{background:var(--surface2)}
+.flow-node-id{
+  font-size:10px;font-weight:700;padding:3px 8px;
+  border-radius:20px;letter-spacing:.04em;white-space:nowrap;
+  transition:all .2s;
+}
+.flow-node-name{font-size:9px;color:var(--text3);white-space:nowrap;max-width:80px;text-align:center;overflow:hidden;text-overflow:ellipsis}
+.flow-node.done .flow-node-id{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.flow-node.active .flow-node-id{background:var(--accent);color:#fff;box-shadow:0 0 12px rgba(59,130,246,.4)}
+.flow-node.future .flow-node-id{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+.flow-node.clickable-node:hover .flow-node-id{transform:translateY(-2px)}
+.flow-arrow{color:var(--text3);font-size:10px;flex-shrink:0;padding:0 2px}
+
+.case-info-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.case-info-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px}
+.case-info-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.case-info-value{font-size:11px;font-weight:600;color:var(--text)}
+
+.case-revenue-note{
+  background:var(--amber-dim);border:1px solid rgba(245,158,11,.2);
+  border-radius:var(--radius-sm);padding:10px 12px;
+  font-size:11px;color:var(--amber);line-height:1.5;
+}
+.case-revenue-note .note-label{font-weight:700;margin-bottom:2px}
+
+/* agent log */
+#agent-log{
+  display:none;
+  background:var(--surface2);border:1px solid var(--green);
+  border-radius:var(--radius-sm);padding:10px 12px;margin-top:10px;
+}
+#agent-log.visible{display:block;animation:fadein .3s ease}
+.agent-log-title{font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.agent-log-item{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.agent-log-item .check{color:var(--green);font-size:13px}
+
+/* click hint */
+.click-hint{
+  position:absolute;bottom:10px;right:12px;
+  font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px;
+  opacity:.7;
+}
+
+/* ─── RIGHT PANEL ────────────────────────────────────────────── */
+#right-panel{
+  grid-row:2;
+  background:var(--surface);
+  border-left:1px solid var(--border);
+  display:none;
+  flex-direction:column;
+  overflow:hidden;
+  animation:slideIn .25s ease;
+}
+body.panel-open #right-panel{display:flex}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+
+.panel-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.panel-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)}
+.panel-close{
+  width:26px;height:26px;border-radius:var(--radius-sm);
+  background:var(--surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text3);font-size:16px;line-height:1;
+  transition:all .15s;
+}
+.panel-close:hover{background:var(--surface3);color:var(--text);border-color:var(--border2)}
+
+.panel-body{flex:1;overflow-y:auto;padding:16px}
+.panel-body::-webkit-scrollbar{width:4px}
+.panel-body::-webkit-scrollbar-track{background:transparent}
+.panel-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* breadcrumb */
+.panel-breadcrumb{
+  display:flex;align-items:center;flex-wrap:wrap;gap:4px;
+  margin-bottom:16px;padding:8px 10px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+}
+.bc-item{font-size:10px;color:var(--text3);transition:color .15s}
+.bc-item.clickable:hover{color:var(--accent2);cursor:pointer}
+.bc-item.current{color:var(--text);font-weight:600}
+.bc-sep{font-size:10px;color:var(--text3);opacity:.5}
+
+/* detail block */
+.detail-header{margin-bottom:16px}
+.detail-type-tag{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--accent-dim);color:var(--accent2);
+  border:1px solid rgba(59,130,246,.3);border-radius:20px;padding:3px 10px;margin-bottom:10px;
+}
+.detail-title{font-size:18px;font-weight:700;letter-spacing:-.02em;color:var(--text);margin-bottom:4px}
+.detail-sub{font-size:12px;color:var(--text3)}
+
+/* field rows */
+.field-group{margin-bottom:16px}
+.field-group-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.field-row{display:flex;gap:12px;margin-bottom:8px;align-items:flex-start}
+.field-label{font-size:11px;color:var(--text3);flex:0 0 110px;padding-top:1px}
+.field-value{font-size:12px;color:var(--text);font-weight:500;flex:1}
+.field-value.mono{font-family:var(--mono);font-size:11px;color:var(--cyan)}
+
+.tag-list{display:flex;flex-wrap:wrap;gap:5px}
+.tag{
+  font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;
+  background:var(--surface2);border:1px solid var(--border);color:var(--text2);
+}
+.tag.green{background:var(--green-dim);color:var(--green);border-color:rgba(34,197,94,.3)}
+.tag.amber{background:var(--amber-dim);color:var(--amber);border-color:rgba(245,158,11,.3)}
+.tag.blue{background:var(--accent-dim);color:var(--accent2);border-color:rgba(59,130,246,.3)}
+.tag.red{background:var(--red-dim);color:var(--red);border-color:rgba(239,68,68,.3)}
+.tag.purple{background:var(--purple-dim);color:var(--purple);border-color:rgba(167,139,250,.3)}
+
+/* SLA bar */
+.sla-bar-wrap{margin-top:4px}
+.sla-bar-track{height:4px;background:var(--surface3);border-radius:2px;overflow:hidden}
+.sla-bar-fill{height:100%;border-radius:2px;background:var(--amber);transition:width .5s ease}
+.sla-bar-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:4px}
+
+/* hitl block */
+.hitl-block{
+  background:var(--amber-dim);border:1px solid rgba(245,158,11,.25);
+  border-radius:var(--radius-sm);padding:12px;margin-bottom:12px;
+}
+.hitl-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.hitl-icon{font-size:16px}
+.hitl-title{font-size:12px;font-weight:700;color:var(--amber)}
+.hitl-desc{font-size:11px;color:var(--text2);line-height:1.5}
+
+/* agent block */
+.agent-block{
+  background:var(--accent-dim);border:1px solid rgba(59,130,246,.2);
+  border-radius:var(--radius-sm);padding:12px;margin-bottom:12px;
+}
+.agent-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.agent-icon{font-size:16px}
+.agent-title{font-size:12px;font-weight:700;color:var(--accent2)}
+.agent-desc{font-size:11px;color:var(--text2);line-height:1.5}
+.agent-actions-list{margin-top:8px}
+.agent-action-item{font-size:11px;color:var(--text2);display:flex;align-items:flex-start;gap:6px;margin-bottom:4px}
+.agent-action-item::before{content:'→';color:var(--accent2);flex-shrink:0}
+
+/* next node */
+.next-node-block{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;transition:all .2s;
+}
+.next-node-block:hover{border-color:var(--accent);background:var(--accent-dim)}
+.next-node-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.next-node-value{font-size:13px;font-weight:700;color:var(--text)}
+.next-node-arrow{font-size:18px;color:var(--accent2)}
+
+/* advance button */
+#advance-btn{
+  width:100%;padding:12px;
+  background:linear-gradient(135deg, var(--accent), #6366f1);
+  color:#fff;font-size:13px;font-weight:700;
+  border-radius:var(--radius);margin-top:16px;
+  transition:all .2s;letter-spacing:.02em;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+#advance-btn:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 4px 16px rgba(59,130,246,.3)}
+#advance-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+#advance-btn.advanced{background:linear-gradient(135deg, var(--green), #16a34a)}
+
+/* panel advance log */
+#panel-agent-log{display:none;margin-top:12px}
+#panel-agent-log.visible{display:block;animation:fadein .3s ease}
+.panel-log-item{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:var(--radius-sm);
+  background:var(--surface2);border:1px solid var(--green);
+  margin-bottom:6px;font-size:11px;color:var(--text);
+  animation:fadein .3s ease;
+}
+.panel-log-item .lcheck{color:var(--green);font-size:14px}
+
+/* ─── EXEC VIEW ──────────────────────────────────────────────── */
+.exec-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ─── BLOCKERS ───────────────────────────────────────────────── */
+.blocker-list{display:flex;flex-direction:column;gap:8px}
+.blocker-item{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:10px 12px;
+  cursor:pointer;transition:all .15s;
+  border-left:3px solid var(--red);
+}
+.blocker-item:hover{border-color:var(--accent);border-left-color:var(--red)}
+.blocker-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px}
+.blocker-meta{font-size:11px;color:var(--text3)}
+
+/* ─── FLOW VIEW ──────────────────────────────────────────────── */
+.flow-view-spine{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;margin-bottom:16px;
+}
+.spine-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.spine-sub{font-size:11px;color:var(--text3);margin-bottom:20px}
+.spine-nodes{display:flex;flex-direction:column;gap:0}
+.spine-node{
+  display:flex;align-items:stretch;cursor:pointer;
+  transition:all .15s;border-radius:var(--radius-sm);
+  overflow:hidden;
+}
+.spine-node:hover .spine-node-inner{background:var(--surface3);border-color:var(--border2)}
+.spine-connector{
+  width:40px;display:flex;flex-direction:column;align-items:center;
+  flex-shrink:0;
+}
+.spine-dot{
+  width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:14px;
+  border:2px solid var(--border2);transition:all .2s;
+}
+.spine-node.done .spine-dot{background:var(--green);border-color:var(--green)}
+.spine-node.active .spine-dot{background:var(--accent);border-color:var(--accent);box-shadow:0 0 8px rgba(59,130,246,.5)}
+.spine-node.future .spine-dot{background:transparent}
+.spine-line{width:2px;flex:1;background:var(--border);margin:0 auto}
+.spine-node:last-child .spine-line{display:none}
+.spine-node-inner{
+  flex:1;margin:4px 0;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:10px 12px;transition:all .15s;
+}
+.spine-node.active .spine-node-inner{border-color:var(--accent);background:var(--accent-dim)}
+.spine-node.done .spine-node-inner{border-color:rgba(34,197,94,.3);background:var(--green-dim)}
+.spine-node-id{font-size:10px;font-weight:700;color:var(--text3);margin-bottom:2px}
+.spine-node.active .spine-node-id{color:var(--accent2)}
+.spine-node.done .spine-node-id{color:var(--green)}
+.spine-node-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+.spine-node-tags{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ─── PROCESS LIBRARY ────────────────────────────────────────── */
+.lib-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.lib-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;cursor:pointer;
+  transition:all .2s;
+}
+.lib-card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(59,130,246,.1)}
+.lib-card-domain{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.lib-card-id{font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:4px}
+.lib-card-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.lib-card-meta{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ─── MANAGER VIEW ───────────────────────────────────────────── */
+.manager-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.task-list{display:flex;flex-direction:column;gap:6px}
+.task-item{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:10px 12px;
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;
+}
+.task-item:hover{border-color:var(--accent2)}
+.task-priority{width:3px;height:32px;border-radius:2px;flex-shrink:0}
+.task-priority.high{background:var(--red)}
+.task-priority.medium{background:var(--amber)}
+.task-priority.low{background:var(--green)}
+.task-info{flex:1}
+.task-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.task-meta{font-size:10px;color:var(--text3)}
+.task-owner{font-size:10px;color:var(--accent2);margin-left:auto;flex-shrink:0}
+
+/* ─── USER VIEW ──────────────────────────────────────────────── */
+.user-queue{display:flex;flex-direction:column;gap:10px}
+.queue-item{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;
+  cursor:pointer;transition:all .2s;
+}
+.queue-item:hover{border-color:var(--accent)}
+.queue-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.queue-title{font-size:13px;font-weight:700;color:var(--text)}
+.queue-body{font-size:11px;color:var(--text3);line-height:1.5}
+
+/* ─── MOBILE ──────────────────────────────────────────────────── */
+@media (max-width:768px){
+  :root{--sidebar-w:0px;--panel-w:100%}
+  #shell{grid-template-columns:1fr!important;grid-template-rows:var(--topbar-h) 1fr}
+  #sidebar{display:none}
+  #main{grid-column:1;overflow-y:auto}
+  body.panel-open #shell{grid-template-columns:1fr!important}
+  #right-panel{
+    position:fixed!important;
+    bottom:0;left:0;right:0;
+    height:85vh;
+    border-left:none;
+    border-top:1px solid var(--border);
+    border-radius:16px 16px 0 0;
+    z-index:100;
+    animation:slideUp .3s ease;
+  }
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+  .panel-topbar{padding-top:20px}
+  .panel-topbar::before{
+    content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);
+    width:40px;height:4px;border-radius:2px;background:var(--border2);
+  }
+  .metric-row{grid-template-columns:1fr 1fr}
+  .intel-grid{grid-template-columns:1fr}
+  .case-info-grid{grid-template-columns:1fr 1fr}
+  .lib-grid{grid-template-columns:1fr 1fr}
+  .manager-grid{grid-template-columns:1fr}
+  .exec-grid{grid-template-columns:1fr}
+  body.panel-open #main{pointer-events:none}
+  /* overlay */
+  body.panel-open::before{
+    content:'';position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;
+  }
+}
+@media (max-width:480px){
+  .metric-row{grid-template-columns:1fr}
+  .lib-grid{grid-template-columns:1fr}
+  .case-flow{gap:0}
+}
+</style>
+</head>
+<body>
+
+<div id="shell">
+
+  <!-- ═══ TOPBAR ══════════════════════════════════════════════ -->
+  <header id="topbar">
+    <div class="topbar-logo">
+      <div class="dot"></div>
+      DFX5 Command Center
+    </div>
+    <div class="topbar-search">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search processes, cases, objects…"/>
+      <span style="font-size:10px;color:var(--border2)">⌘K</span>
+    </div>
+    <div class="topbar-right">
+      <div class="status-pill"><div class="pulse"></div>System Operational</div>
+      <div style="font-size:11px;color:var(--text3)" id="clock"></div>
+      <div class="avatar">FP</div>
+    </div>
+  </header>
+
+  <!-- ═══ SIDEBAR ═════════════════════════════════════════════ -->
+  <nav id="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">Views</div>
+      <div class="nav-item active" data-view="exec" onclick="switchView('exec',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Executive
+        <span class="nav-badge amber">2</span>
+      </div>
+      <div class="nav-item" data-view="manager" onclick="switchView('manager',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Manager
+        <span class="nav-badge">5</span>
+      </div>
+      <div class="nav-item" data-view="user" onclick="switchView('user',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+        My Work
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Process</div>
+      <div class="nav-item" data-view="flow" onclick="switchView('flow',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><rect x="8" y="11" width="3" height="3" rx=".5"/><rect x="13" y="11" width="3" height="3" rx=".5"/><path d="M9.5 14v3"/><path d="M14.5 14v3"/></svg>
+        Flow View
+        <span class="nav-badge blue">7</span>
+      </div>
+      <div class="nav-item" data-view="lib" onclick="switchView('lib',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Process Library
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Intelligence</div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Taxonomy
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-3 3"/></svg>
+        Analytics
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sys-indicator"><div class="sys-dot"></div>Kantata connected</div>
+      <div class="sys-indicator"><div class="sys-dot"></div>Salesforce connected</div>
+      <div class="sys-indicator"><div class="sys-dot"></div>Slack connected</div>
+      <div class="sys-indicator" style="opacity:.5"><div class="sys-dot" style="background:var(--amber)"></div>SharePoint syncing</div>
+    </div>
+  </nav>
+
+  <!-- ═══ MAIN ═════════════════════════════════════════════════ -->
+  <main id="main">
+
+    <!-- ── EXEC VIEW ─────────────────────────────────────────── -->
+    <div id="view-exec" class="view active">
+      <div class="view-header">
+        <div>
+          <div class="view-title">Executive Overview</div>
+          <div class="view-sub">CEO Operating View · Live · <span id="exec-date"></span></div>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-ghost">Export</button>
+          <button class="btn btn-primary">+ New Case</button>
+        </div>
+      </div>
+
+      <!-- metrics -->
+      <div class="metric-row">
+        <div class="metric-card">
+          <div class="metric-label">Revenue Pipeline</div>
+          <div class="metric-value" style="color:var(--accent2)">$4.2M</div>
+          <div class="metric-delta up">↑ 12% vs last month</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Active Cases</div>
+          <div class="metric-value">14</div>
+          <div class="metric-delta">3 need attention</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">HITL Pending</div>
+          <div class="metric-value" style="color:var(--amber)">2</div>
+          <div class="metric-delta down">Blocking $840K</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Agents Active</div>
+          <div class="metric-value" style="color:var(--green)">7</div>
+          <div class="metric-delta up">All operational</div>
+        </div>
+      </div>
+
+      <!-- operating intelligence -->
+      <div class="section-title">Operating Intelligence Snapshot</div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="intel-grid">
+          <div class="intel-item">
+            <div class="intel-icon" style="background:var(--amber-dim)">⚠️</div>
+            <div>
+              <div class="intel-title">Revenue gated at P010</div>
+              <div class="intel-desc">ITAU IVR milestone awaiting Finance + Delivery approval. $420K invoice blocked. SLA: 22h remaining.</div>
+            </div>
+          </div>
+          <div class="intel-item">
+            <div class="intel-icon" style="background:var(--accent-dim)">🔗</div>
+            <div>
+              <div class="intel-title">Kantata dependency risk</div>
+              <div class="intel-desc">4 active processes depend on Kantata milestone data. Any sync delay propagates to billing cycle.</div>
+            </div>
+          </div>
+          <div class="intel-item">
+            <div class="intel-icon" style="background:var(--green-dim)">✅</div>
+            <div>
+              <div class="intel-title">Salesforce pipeline healthy</div>
+              <div class="intel-desc">3 deals at Closed Won stage. Sales-to-delivery handoff agents triggered for 2. On track.</div>
+            </div>
+          </div>
+          <div class="intel-item">
+            <div class="intel-icon" style="background:var(--red-dim)">🚨</div>
+            <div>
+              <div class="intel-title">Payroll SLA at risk</div>
+              <div class="intel-desc">Colombia payroll approval pending Damián sign-off. 6h to SLA breach. Escalation required.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEMO RUNNING CASE -->
+      <div class="section-title">Live Operating Cases</div>
+      <div id="running-case-card" onclick="openPanel('case','itau')" title="Click to view case detail">
+        <div class="case-header">
+          <div>
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Demo Running Case</div>
+            <div class="case-id" id="case-id-display">CO · ITAU · IVR</div>
+          </div>
+          <div class="case-meta">
+            <span class="case-badge badge-live">● Live</span>
+            <span class="case-badge badge-hitl" id="case-hitl-badge">HITL Required</span>
+            <span class="case-badge badge-agent">Agent Active</span>
+          </div>
+        </div>
+
+        <!-- object row -->
+        <div class="case-object-row">
+          <div>
+            <div class="case-object-label">Business Object</div>
+            <div class="case-object-value">Billing Milestone</div>
+          </div>
+          <div style="width:1px;height:32px;background:var(--border)"></div>
+          <div>
+            <div class="case-object-label" id="process-label-small">Current Process</div>
+            <div class="case-object-value" id="current-process-display">P010 Milestone Approval</div>
+          </div>
+          <div class="case-state-pill" id="case-state-pill">Awaiting Approval</div>
+        </div>
+
+        <!-- flow strip -->
+        <div class="case-flow">
+          <div class="flow-node done" title="P009 Delivery Confirmation — completed">
+            <div class="flow-node-id">P009</div>
+            <div class="flow-node-name">Delivery Confirm</div>
+          </div>
+          <div class="flow-arrow">›</div>
+          <div class="flow-node active clickable-node" id="p010-flow-node" onclick="event.stopPropagation();openPanel('process','p010')" title="P010 Milestone Approval — click for detail">
+            <div class="flow-node-id" id="p010-node-id">P010</div>
+            <div class="flow-node-name">Milestone Approval</div>
+          </div>
+          <div class="flow-arrow">›</div>
+          <div class="flow-node future" id="p011-flow-node">
+            <div class="flow-node-id" id="p011-node-id">P011</div>
+            <div class="flow-node-name">Invoice Readiness</div>
+          </div>
+          <div class="flow-arrow">›</div>
+          <div class="flow-node future">
+            <div class="flow-node-id">P012</div>
+            <div class="flow-node-name">Invoice Submit</div>
+          </div>
+          <div class="flow-arrow">›</div>
+          <div class="flow-node future">
+            <div class="flow-node-id">P013</div>
+            <div class="flow-node-name">AR Follow-up</div>
+          </div>
+          <div class="flow-arrow">›</div>
+          <div class="flow-node future">
+            <div class="flow-node-id">P014</div>
+            <div class="flow-node-name">Payment Recon</div>
+          </div>
+          <div class="flow-arrow">›</div>
+          <div class="flow-node future">
+            <div class="flow-node-id">P016</div>
+            <div class="flow-node-name">Margin Review</div>
+          </div>
+          <div class="flow-arrow">›</div>
+          <div class="flow-node future">
+            <div class="flow-node-id">P017</div>
+            <div class="flow-node-name">Forecast Valid.</div>
+          </div>
+        </div>
+
+        <!-- info grid -->
+        <div class="case-info-grid">
+          <div class="case-info-item">
+            <div class="case-info-label">Status</div>
+            <div class="case-info-value" id="case-status-display">Awaiting milestone validation</div>
+          </div>
+          <div class="case-info-item">
+            <div class="case-info-label">Owner</div>
+            <div class="case-info-value">Delivery + Finance</div>
+          </div>
+          <div class="case-info-item">
+            <div class="case-info-label">SLA Remaining</div>
+            <div class="case-info-value" style="color:var(--amber)" id="sla-display">22 hours</div>
+          </div>
+        </div>
+
+        <div class="case-revenue-note" id="case-revenue-note">
+          <div class="note-label">⚡ Revenue Impact</div>
+          Invoice cannot be prepared until milestone approval is confirmed. Cashflow is gated at this node. Next: <strong id="next-node-display">P011 Invoice Readiness Validation</strong>
+        </div>
+
+        <!-- agent log (appears after advance) -->
+        <div id="agent-log">
+          <div class="agent-log-title">⬡ Agent Activity Log</div>
+          <div class="agent-log-item"><span class="check">✓</span> Evidence availability checked in SharePoint</div>
+          <div class="agent-log-item"><span class="check">✓</span> Finance team notified via Slack</div>
+          <div class="agent-log-item"><span class="check">✓</span> Kantata milestone record updated</div>
+          <div class="agent-log-item"><span class="check">✓</span> Case advanced to P011 — Invoice Readiness Validation</div>
+        </div>
+
+        <div class="click-hint">🔍 Click to view full case detail</div>
+      </div>
+
+      <!-- Revenue Command -->
+      <div class="section-title">Revenue Command</div>
+      <div class="exec-grid">
+        <div class="card">
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:12px">Active Revenue Cases</div>
+          <div class="blocker-list">
+            <div class="blocker-item" onclick="openPanel('case','itau')" style="border-left-color:var(--amber)">
+              <div class="blocker-title">CO · ITAU · IVR — P010 Milestone Approval</div>
+              <div class="blocker-meta">$420K · HITL pending · 22h SLA</div>
+            </div>
+            <div class="blocker-item" style="border-left-color:var(--green)">
+              <div class="blocker-title">CO · ECOPETROL · BPM — P012 Invoice Submission</div>
+              <div class="blocker-meta">$310K · Agent handling · On track</div>
+            </div>
+            <div class="blocker-item" style="border-left-color:var(--text3)">
+              <div class="blocker-title">USA · METLIFE · CX — P014 Payment Reconciliation</div>
+              <div class="blocker-meta">$110K · Awaiting bank confirmation</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:12px">Blockers</div>
+          <div class="blocker-list">
+            <div class="blocker-item" onclick="openPanel('process','p010')">
+              <div class="blocker-title">P010 — Finance + Delivery HITL required</div>
+              <div class="blocker-meta">Blocking: ITAU IVR invoice · Impact: $420K</div>
+            </div>
+            <div class="blocker-item">
+              <div class="blocker-title">Payroll CO — Awaiting legal sign-off</div>
+              <div class="blocker-meta">6h to SLA breach · Owner: Damián</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MANAGER VIEW ───────────────────────────────────────── -->
+    <div id="view-manager" class="view">
+      <div class="view-header">
+        <div>
+          <div class="view-title">Manager View</div>
+          <div class="view-sub">Delivery & Finance · Active processes and team tasks</div>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-ghost">My Team</button>
+        </div>
+      </div>
+      <div class="manager-grid">
+        <div>
+          <div class="section-title">Active Process Nodes</div>
+          <div class="card clickable" onclick="openPanel('process','p010')" style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span style="font-size:10px;font-weight:700;color:var(--amber)">P010 · ACTIVE</span>
+              <span class="case-badge badge-hitl">HITL</span>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Milestone Approval</div>
+            <div style="font-size:11px;color:var(--text3)">CO · ITAU · IVR · Finance + Delivery · 22h SLA</div>
+          </div>
+          <div class="card" style="opacity:.6;margin-bottom:8px">
+            <div style="font-size:10px;font-weight:700;color:var(--green);margin-bottom:4px">P012 · IN PROGRESS</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Invoice Submission</div>
+            <div style="font-size:11px;color:var(--text3)">CO · ECOPETROL · BPM · Finance · Agent handling</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">Team Task Queue</div>
+          <div class="task-list">
+            <div class="task-item" onclick="openPanel('task','t042')">
+              <div class="task-priority high"></div>
+              <div class="task-info">
+                <div class="task-name">Validate milestone evidence — ITAU</div>
+                <div class="task-meta">P010 · Kantata · Due: Today</div>
+              </div>
+              <div class="task-owner">Finance</div>
+            </div>
+            <div class="task-item">
+              <div class="task-priority high"></div>
+              <div class="task-info">
+                <div class="task-name">Confirm milestone completion — ITAU</div>
+                <div class="task-meta">P010 · Delivery · Due: Today</div>
+              </div>
+              <div class="task-owner">Delivery</div>
+            </div>
+            <div class="task-item">
+              <div class="task-priority medium"></div>
+              <div class="task-info">
+                <div class="task-name">Prepare invoice package — ECOPETROL</div>
+                <div class="task-meta">P012 · Zoho · Due: Tomorrow</div>
+              </div>
+              <div class="task-owner">Finance</div>
+            </div>
+            <div class="task-item">
+              <div class="task-priority low"></div>
+              <div class="task-info">
+                <div class="task-name">AR follow-up call — METLIFE</div>
+                <div class="task-meta">P013 · Outlook · Due: Fri</div>
+              </div>
+              <div class="task-owner">AR Team</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── USER VIEW ─────────────────────────────────────────── -->
+    <div id="view-user" class="view">
+      <div class="view-header">
+        <div>
+          <div class="view-title">My Work</div>
+          <div class="view-sub">Franco Pérez · Finance Analyst · 2 actions required today</div>
+        </div>
+      </div>
+      <div class="section-title">My Action Queue</div>
+      <div class="user-queue">
+        <div class="queue-item" onclick="openPanel('task','t042')">
+          <div class="queue-header">
+            <div>
+              <div class="queue-title">Validate milestone evidence — CO · ITAU · IVR</div>
+              <div style="margin-top:4px"><span class="case-badge badge-hitl">HITL Required</span> <span style="font-size:11px;color:var(--text3);margin-left:6px">Due today · P010 Milestone Approval</span></div>
+            </div>
+            <span style="font-size:20px">→</span>
+          </div>
+          <div class="queue-body">Finance approval required to unblock invoice. Evidence document uploaded by Delivery. Review in Kantata and confirm milestone validity. SLA: 22 hours remaining.</div>
+        </div>
+        <div class="queue-item">
+          <div class="queue-header">
+            <div>
+              <div class="queue-title">Review payroll approval — Colombia</div>
+              <div style="margin-top:4px"><span class="case-badge badge-hitl">HITL Required</span> <span style="font-size:11px;color:var(--text3);margin-left:6px">Due today · Payroll Process</span></div>
+            </div>
+            <span style="font-size:20px">→</span>
+          </div>
+          <div class="queue-body">Payroll approval pending legal sign-off. 6h to SLA breach. Contact Damián for confirmation.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FLOW VIEW ─────────────────────────────────────────── -->
+    <div id="view-flow" class="view">
+      <div class="view-header">
+        <div>
+          <div class="view-title">Flow View</div>
+          <div class="view-sub">Revenue Spine · CO · ITAU · IVR · 7 process nodes</div>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-ghost">All Spines</button>
+        </div>
+      </div>
+      <div class="flow-view-spine">
+        <div class="spine-title">Revenue Spine — ITAU IVR</div>
+        <div class="spine-sub">Click any node to view process detail in the right panel</div>
+        <div class="spine-nodes" id="spine-nodes">
+          <!-- built by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROCESS LIBRARY ───────────────────────────────────── -->
+    <div id="view-lib" class="view">
+      <div class="view-header">
+        <div>
+          <div class="view-title">Process Library</div>
+          <div class="view-sub">Click any process card to open its full operational detail</div>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-ghost">Filter</button>
+        </div>
+      </div>
+      <div class="lib-grid" id="lib-grid">
+        <!-- built by JS -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══ RIGHT PANEL ══════════════════════════════════════════ -->
+  <aside id="right-panel">
+    <div class="panel-topbar">
+      <span class="panel-label" id="panel-type-label">Detail</span>
+      <button class="panel-close" onclick="closePanel()" title="Close panel">✕</button>
+    </div>
+    <div class="panel-body" id="panel-body">
+      <!-- content injected by JS -->
+    </div>
+  </aside>
+
+</div><!-- /shell -->
+
+<script>
+/* ─── DATA ───────────────────────────────────────────────────── */
+const processes = {
+  p010: {
+    id:'P010', name:'Milestone Approval',
+    domain:'Finance / Delivery', spine:'Revenue',
+    area:'Billing',
+    trigger:'Delivery team uploads milestone evidence to SharePoint',
+    inputs:['Evidence document (SharePoint)','Kantata milestone record','SOW terms & acceptance criteria','Delivery confirmation sign-off'],
+    activities:['Validate evidence completeness','Confirm milestone against SOW','Finance review and approval','Billing readiness declaration'],
+    systems:['Kantata','SharePoint','Slack','Zoho'],
+    sla_hours:48, sla_remaining:22,
+    owner:'Delivery + Finance',
+    output:'Approved milestone unlocks P011 Invoice Readiness Validation',
+    hitl:true,
+    hitl_approvers:['Finance Lead','Delivery Lead'],
+    hitl_reason:'Invoice cannot be prepared without validated milestone. Both Delivery and Finance must confirm before billing can proceed.',
+    agent_capability:'Check evidence completeness in SharePoint, cross-validate against Kantata milestone, notify owners via Slack, prepare next-node handoff package',
+    agent_actions:['Fetch evidence document from SharePoint','Cross-check milestone ID in Kantata API','Validate required fields against SOW','Notify Finance Lead via Slack','Update Kantata status to "Pending Approval"','Queue P011 readiness check'],
+    next:'P011', prev:'P009',
+    risks:['Evidence incomplete — blocks billing','SLA breach if HITL not resolved in 22h','Kantata sync delay propagates downstream']
+  },
+  p011:{
+    id:'P011', name:'Invoice Readiness Validation',
+    domain:'Finance', spine:'Revenue', area:'Billing',
+    trigger:'P010 Milestone Approval completed and approved',
+    inputs:['Approved milestone record','Zoho billing template','Contract billing schedule'],
+    activities:['Validate invoice data completeness','Confirm billing schedule alignment','Prepare invoice package'],
+    systems:['Zoho','Kantata','SharePoint'],
+    sla_hours:24, sla_remaining:null,
+    owner:'Finance',
+    output:'Invoice package ready for submission → unlocks P012',
+    hitl:false,
+    agent_capability:'Auto-populate invoice from Kantata data, validate billing schedule, flag discrepancies for review',
+    agent_actions:['Pull milestone data from Kantata','Populate Zoho invoice template','Validate against billing schedule','Flag any amount discrepancies'],
+    next:'P012', prev:'P010',
+    risks:['Billing schedule mismatch','Zoho template not updated']
+  }
+};
+
+const caseData = {
+  itau:{
+    id:'CO · ITAU · IVR',
+    object:'Billing Milestone',
+    currentState:'Awaiting Approval',
+    process:'P010',
+    owner:'Delivery + Finance',
+    sla:'48 hours',
+    sla_remaining:'22 hours',
+    systems:['Kantata','SharePoint','Slack','Zoho'],
+    hitl:'Finance + Delivery approval required',
+    agentCapability:'Validate evidence completeness and notify owners',
+    nextNode:'P011 Invoice Readiness Validation',
+    revenueImpact:'Invoice cannot be prepared until milestone approval is confirmed. Cashflow is gated at this node. $420K blocked.'
+  }
+};
+
+const taskData = {
+  t042:{
+    id:'T-042',
+    name:'Validate milestone evidence',
+    process:'P010 Milestone Approval',
+    assignee:'Finance Analyst',
+    due:'Today — by 17:00',
+    system:'Kantata + SharePoint',
+    input:'Evidence document uploaded by Delivery',
+    output:'Validation confirmation + Finance approval',
+    status:'Pending',
+    hitl:true,
+    instructions:'Open SharePoint folder for ITAU IVR. Verify evidence document against SOW acceptance criteria. If complete, approve in Kantata and confirm in Slack #itau-delivery channel.'
+  }
+};
+
+const spineNodes = [
+  {id:'P009',name:'Delivery Confirmation',state:'done',owner:'Delivery',systems:['Kantata','Slack'],hitl:false},
+  {id:'P010',name:'Milestone Approval',state:'active',owner:'Delivery + Finance',systems:['Kantata','SharePoint','Slack'],hitl:true,key:'p010'},
+  {id:'P011',name:'Invoice Readiness Validation',state:'future',owner:'Finance',systems:['Zoho','Kantata'],hitl:false,key:'p011'},
+  {id:'P012',name:'Invoice Submission',state:'future',owner:'Finance',systems:['Zoho','Outlook'],hitl:false},
+  {id:'P013',name:'AR Follow-up',state:'future',owner:'AR Team',systems:['Outlook','Salesforce'],hitl:false},
+  {id:'P014',name:'Payment Reconciliation',state:'future',owner:'Finance',systems:['Zoho','Bank'],hitl:false},
+  {id:'P016',name:'Margin Review',state:'future',owner:'Finance + CEO',systems:['Kantata','Excel'],hitl:true},
+  {id:'P017',name:'Forecast Quality Validation',state:'future',owner:'Finance + CEO',systems:['Kantata','Excel'],hitl:false},
+];
+
+const libProcesses = [
+  {id:'P010',name:'Milestone Approval',domain:'Finance / Delivery',systems:['Kantata','Slack'],hitl:true,key:'p010'},
+  {id:'P011',name:'Invoice Readiness',domain:'Finance',systems:['Zoho','Kantata'],hitl:false,key:'p011'},
+  {id:'P012',name:'Invoice Submission',domain:'Finance',systems:['Zoho','Outlook'],hitl:false},
+  {id:'P013',name:'AR Follow-up',domain:'Finance / AR',systems:['Outlook','Salesforce'],hitl:false},
+  {id:'P014',name:'Payment Reconciliation',domain:'Finance',systems:['Zoho'],hitl:false},
+  {id:'P016',name:'Margin Review',domain:'Finance / CEO',systems:['Kantata'],hitl:true},
+  {id:'P017',name:'Forecast Validation',domain:'Finance / CEO',systems:['Kantata'],hitl:false},
+  {id:'E001',name:'Employee Onboarding',domain:'HR',systems:['BambooHR','Slack'],hitl:true},
+  {id:'E002',name:'Offboarding',domain:'HR',systems:['BambooHR','IT'],hitl:true},
+  {id:'S001',name:'Sales-to-Delivery Handoff',domain:'Sales / Delivery',systems:['Salesforce','Kantata'],hitl:false},
+  {id:'PO001',name:'Purchase Order Approval',domain:'Finance / Legal',systems:['SharePoint','Zoho'],hitl:true},
+  {id:'L001',name:'Laptop Lifecycle',domain:'IT',systems:['SharePoint'],hitl:false},
+];
+
+/* ─── ADVANCED STATE ─────────────────────────────────────────── */
+let caseAdvanced = false;
+
+/* ─── VIEW SWITCHING ─────────────────────────────────────────── */
+function switchView(view, el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  if(el) el.classList.add('active');
+  closePanel();
+}
+
+/* ─── PANEL CONTROL ──────────────────────────────────────────── */
+function openPanel(type, id){
+  document.body.classList.add('panel-open');
+  const typeLabel = {case:'Live Case',process:'Process Card',task:'Task Card',hitl:'HITL Approval',agent:'Agent Action'};
+  document.getElementById('panel-type-label').textContent = typeLabel[type] || 'Detail';
+  const body = document.getElementById('panel-body');
+  if(type==='case') body.innerHTML = buildCasePanel(caseData[id]);
+  else if(type==='process') body.innerHTML = buildProcessPanel(processes[id]);
+  else if(type==='task') body.innerHTML = buildTaskPanel(taskData[id]);
+  else body.innerHTML='<div style="color:var(--text3);font-size:12px;padding:20px">Detail coming soon.</div>';
+}
+
+function closePanel(){
+  document.body.classList.remove('panel-open');
+}
+
+/* click outside on mobile overlay */
+document.addEventListener('click', function(e){
+  if(window.innerWidth<=768 && document.body.classList.contains('panel-open')){
+    const panel = document.getElementById('right-panel');
+    if(!panel.contains(e.target) && !e.target.closest('#running-case-card') && !e.target.closest('.flow-node') && !e.target.closest('.blocker-item') && !e.target.closest('.card') && !e.target.closest('.task-item') && !e.target.closest('.queue-item') && !e.target.closest('.lib-card') && !e.target.closest('.spine-node')){
+      closePanel();
+    }
+  }
+});
+
+/* ─── CASE PANEL ─────────────────────────────────────────────── */
+function buildCasePanel(c){
+  const stateColor = caseAdvanced ? 'var(--accent2)' : 'var(--amber)';
+  const currentState = caseAdvanced ? 'Invoice Readiness Validation' : c.currentState;
+  const currentProcess = caseAdvanced ? 'P011' : c.process;
+  return `
+  <div class="panel-breadcrumb">
+    <span class="bc-item clickable">Enterprise OS</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-item clickable">Revenue Spine</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-item clickable">Finance</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-item clickable">Billing</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-item current">${currentProcess} Live Case</span>
+  </div>
+
+  <div class="detail-header">
+    <div class="detail-type-tag">⬡ Live Business Case</div>
+    <div class="detail-title">${c.id}</div>
+    <div class="detail-sub">Active · Revenue Spine · Colombia Operations</div>
+  </div>
+
+  <div class="field-group">
+    <div class="field-group-title">Object & State</div>
+    <div class="field-row"><span class="field-label">Business Object</span><span class="field-value">${c.object}</span></div>
+    <div class="field-row"><span class="field-label">Current State</span>
+      <span class="field-value"><span style="color:${stateColor};font-weight:700">${currentState}</span></span>
+    </div>
+    <div class="field-row"><span class="field-label">Current Process</span>
+      <span class="field-value"><span class="field-value mono">${currentProcess}</span> ${caseAdvanced ? 'Invoice Readiness Validation' : 'Milestone Approval'}</span>
+    </div>
+  </div>
+
+  <div class="field-group">
+    <div class="field-group-title">Ownership & SLA</div>
+    <div class="field-row"><span class="field-label">Owner</span><span class="field-value">${c.owner}</span></div>
+    <div class="field-row"><span class="field-label">SLA</span><span class="field-value">${c.sla}</span></div>
+    <div class="field-row"><span class="field-label">SLA Remaining</span>
+      <span class="field-value" style="color:var(--amber)">${c.sla_remaining}</span>
+    </div>
+    <div class="sla-bar-wrap">
+      <div class="sla-bar-track"><div class="sla-bar-fill" style="width:${(22/48)*100}%"></div></div>
+      <div class="sla-bar-labels"><span>22h remaining</span><span>48h total</span></div>
+    </div>
+  </div>
+
+  <div class="field-group">
+    <div class="field-group-title">Systems</div>
+    <div class="tag-list">
+      ${c.systems.map(s=>`<span class="tag blue">${s}</span>`).join('')}
+    </div>
+  </div>
+
+  <div class="hitl-block">
+    <div class="hitl-header"><span class="hitl-icon">👤</span><span class="hitl-title">HITL Required</span></div>
+    <div class="hitl-desc">${c.hitl}</div>
+  </div>
+
+  <div class="agent-block">
+    <div class="agent-header"><span class="agent-icon">⬡</span><span class="agent-title">Agent Capability</span></div>
+    <div class="agent-desc">${c.agentCapability}</div>
+  </div>
+
+  <div class="field-group">
+    <div class="field-group-title">Revenue Impact</div>
+    <div style="font-size:11px;color:var(--text2);line-height:1.6;background:var(--amber-dim);border:1px solid rgba(245,158,11,.2);border-radius:var(--radius-sm);padding:10px 12px">${c.revenueImpact}</div>
+  </div>
+
+  <div class="next-node-block" onclick="openPanel('process','p010')">
+    <div>
+      <div class="next-node-label">Next Process Node</div>
+      <div class="next-node-value">${c.nextNode}</div>
+    </div>
+    <div class="next-node-arrow">›</div>
+  </div>
+
+  <button id="advance-btn" onclick="advanceCase()" ${caseAdvanced ? 'disabled class="advanced"' : ''}>
+    ${caseAdvanced ? '✓ Case Advanced to P011' : '⬡ Advance Case to P011'}
+  </button>
+
+  <div id="panel-agent-log" class="${caseAdvanced ? 'visible' : ''}">
+    ${caseAdvanced ? buildAgentLog() : ''}
+  </div>`;
+}
+
+function buildAgentLog(){
+  const items = [
+    'Evidence availability checked in SharePoint',
+    'Finance team notified via Slack #itau-delivery',
+    'Kantata milestone record updated to "Approved"',
+    'Case advanced to P011 — Invoice Readiness Validation'
+  ];
+  return items.map((t,i)=>`<div class="panel-log-item" style="animation-delay:${i*0.1}s"><span class="lcheck">✓</span>${t}</div>`).join('');
+}
+
+/* ─── ADVANCE CASE ───────────────────────────────────────────── */
+function advanceCase(){
+  caseAdvanced = true;
+
+  // update case card in exec view
+  document.getElementById('case-state-pill').textContent = 'Invoice Readiness';
+  document.getElementById('case-state-pill').style.background = 'var(--accent-dim)';
+  document.getElementById('case-state-pill').style.color = 'var(--accent2)';
+  document.getElementById('current-process-display').textContent = 'P011 Invoice Readiness Validation';
+  document.getElementById('case-status-display').textContent = 'Invoice readiness validation in progress';
+  document.getElementById('next-node-display').textContent = 'P012 Invoice Submission';
+  document.getElementById('sla-display').textContent = '24 hours';
+  document.getElementById('case-hitl-badge').style.display = 'none';
+
+  // update flow nodes
+  const p010Node = document.getElementById('p010-flow-node');
+  p010Node.className = 'flow-node done';
+  document.getElementById('p010-node-id').textContent = 'P010 ✓';
+
+  const p011Node = document.getElementById('p011-flow-node');
+  p011Node.className = 'flow-node active clickable-node';
+  p011Node.onclick = function(e){ e.stopPropagation(); openPanel('process','p011'); };
+
+  // show agent log on card
+  const log = document.getElementById('agent-log');
+  log.classList.add('visible');
+
+  // update panel button
+  const btn = document.getElementById('advance-btn');
+  if(btn){
+    btn.textContent = '✓ Case Advanced to P011';
+    btn.classList.add('advanced');
+    btn.disabled = true;
+  }
+
+  // show panel log
+  const pLog = document.getElementById('panel-agent-log');
+  if(pLog){
+    pLog.classList.add('visible');
+    pLog.innerHTML = buildAgentLog();
+  }
+
+  // update panel state display
+  const stateSpans = document.querySelectorAll('.detail-header .detail-sub');
+  // also refresh the panel to show updated state
+  setTimeout(()=>{ openPanel('case','itau'); },600);
+}
+
+/* ─── PROCESS PANEL ──────────────────────────────────────────── */
+function buildProcessPanel(p){
+  if(!p) return '<div style="color:var(--text3);padding:20px;font-size:12px">Process detail coming soon.</div>';
+  const slaFill = p.sla_remaining ? (p.sla_remaining/p.sla_hours)*100 : 0;
+  const slaColor = slaFill < 40 ? 'var(--red)' : slaFill < 60 ? 'var(--amber)' : 'var(--green)';
+  return `
+  <div class="panel-breadcrumb">
+    <span class="bc-item clickable">Enterprise OS</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-item clickable">Revenue Spine</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-item clickable">${p.domain}</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-item clickable">${p.area}</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-item current">${p.id} ${p.name}</span>
+  </div>
+
+  <div class="detail-header">
+    <div class="detail-type-tag">📋 Process Card</div>
+    <div class="detail-title">${p.id} — ${p.name}</div>
+    <div class="detail-sub">${p.domain} · ${p.spine} Spine</div>
+  </div>
+
+  <div class="field-group">
+    <div class="field-group-title">Classification</div>
+    <div class="field-row"><span class="field-label">Domain</span><span class="field-value">${p.domain}</span></div>
+    <div class="field-row"><span class="field-label">Spine</span><span class="field-value">${p.spine}</span></div>
+    <div class="field-row"><span class="field-label">Area</span><span class="field-value">${p.area}</span></div>
+    <div class="field-row"><span class="field-label">Process ID</span><span class="field-value mono">${p.id}</span></div>
+    ${p.prev?`<div class="field-row"><span class="field-label">Previous Node</span><span class="field-value mono">${p.prev}</span></div>`:''}
+    ${p.next?`<div class="field-row"><span class="field-label">Next Node</span><span class="field-value mono">${p.next}</span></div>`:''}
+  </div>
+
+  <div class="field-group">
+    <div class="field-group-title">Trigger & Inputs</div>
+    <div class="field-row"><span class="field-label">Trigger</span><span class="field-value">${p.trigger}</span></div>
+    <div style="margin-top:6px">
+      <div style="font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Required Inputs</div>
+      ${p.inputs.map(i=>`<div style="font-size:11px;color:var(--text2);display:flex;gap:6px;margin-bottom:4px"><span style="color:var(--accent2)">→</span>${i}</div>`).join('')}
+    </div>
+  </div>
+
+  <div class="field-group">
+    <div class="field-group-title">Activities</div>
+    ${p.activities.map((a,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px">
+      <div style="width:20px;height:20px;border-radius:50%;background:var(--accent-dim);border:1px solid rgba(59,130,246,.3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--accent2);flex-shrink:0">${i+1}</div>
+      <span style="font-size:11px;color:var(--text)">${a}</span>
+    </div>`).join('')}
+  </div>
+
+  <div class="field-group">
+    <div class="field-group-title">Ownership & SLA</div>
+    <div class="field-row"><span class="field-label">Owner</span><span class="field-value">${p.owner}</span></div>
+    <div class="field-row"><span class="field-label">SLA</span><span class="field-value">${p.sla_hours} hours</span></div>
+    ${p.sla_remaining?`
+    <div class="sla-bar-wrap">
+      <div class="sla-bar-track"><div class="sla-bar-fill" style="width:${slaFill}%;background:${slaColor}"></div></div>
+      <div class="sla-bar-labels"><span style="color:${slaColor}">${p.sla_remaining}h remaining</span><span>${p.sla_hours}h total</span></div>
+    </div>`:''}
+  </div>
+
+  <div class="field-group">
+    <div class="field-group-title">Systems</div>
+    <div class="tag-list">${p.systems.map(s=>`<span class="tag blue">${s}</span>`).join('')}</div>
+  </div>
+
+  <div class="field-group">
+    <div class="field-group-title">Output</div>
+    <div style="background:var(--green-dim);border:1px solid rgba(34,197,94,.2);border-radius:var(--radius-sm);padding:10px 12px;font-size:11px;color:var(--text2)">${p.output}</div>
+  </div>
+
+  ${p.hitl?`
+  <div class="hitl-block">
+    <div class="hitl-header"><span class="hitl-icon">👤</span><span class="hitl-title">HITL Required</span></div>
+    <div class="hitl-desc">${p.hitl_reason}</div>
+    <div style="margin-top:8px">
+      <div style="font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Approvers</div>
+      <div class="tag-list">${p.hitl_approvers.map(a=>`<span class="tag amber">${a}</span>`).join('')}</div>
+    </div>
+  </div>`:'<div style="background:var(--green-dim);border:1px solid rgba(34,197,94,.2);border-radius:var(--radius-sm);padding:10px 12px;font-size:11px;color:var(--green);margin-bottom:12px">✓ No human approval required — Agent can execute autonomously</div>'}
+
+  <div class="agent-block">
+    <div class="agent-header"><span class="agent-icon">⬡</span><span class="agent-title">Agent Capability</span></div>
+    <div class="agent-desc">${p.agent_capability}</div>
+    <div class="agent-actions-list">
+      ${p.agent_actions.map(a=>`<div class="agent-action-item">${a}</div>`).join('')}
+    </div>
+  </div>
+
+  ${p.risks?`
+  <div class="field-group">
+    <div class="field-group-title">Risks & Dependencies</div>
+    ${p.risks.map(r=>`<div style="display:flex;gap:8px;font-size:11px;color:var(--text2);margin-bottom:6px;align-items:flex-start"><span style="color:var(--red);flex-shrink:0">⚠</span>${r}</div>`).join('')}
+  </div>`:''}
+
+  ${p.next?`
+  <div class="next-node-block" onclick="openPanel('process','${p.next.toLowerCase()}')">
+    <div>
+      <div class="next-node-label">Next Process Node</div>
+      <div class="next-node-value">${p.next} ${processes[p.next.toLowerCase()]?'— '+processes[p.next.toLowerCase()].name:''}</div>
+    </div>
+    <div class="next-node-arrow">›</div>
+  </div>`:''}
+  `;
+}
+
+/* ─── TASK PANEL ─────────────────────────────────────────────── */
+function buildTaskPanel(t){
+  if(!t) return '<div style="color:var(--text3);padding:20px;font-size:12px">Task not found.</div>';
+  return `
+  <div class="panel-breadcrumb">
+    <span class="bc-item clickable">Enterprise OS</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-item clickable">Revenue Spine</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-item current">${t.id} — ${t.name}</span>
+  </div>
+  <div class="detail-header">
+    <div class="detail-type-tag">✓ Task Card</div>
+    <div class="detail-title">${t.name}</div>
+    <div class="detail-sub">${t.process} · ${t.assignee}</div>
+  </div>
+  <div class="field-group">
+    <div class="field-group-title">Assignment</div>
+    <div class="field-row"><span class="field-label">Task ID</span><span class="field-value mono">${t.id}</span></div>
+    <div class="field-row"><span class="field-label">Assignee Role</span><span class="field-value">${t.assignee}</span></div>
+    <div class="field-row"><span class="field-label">Due</span><span class="field-value" style="color:var(--red)">${t.due}</span></div>
+    <div class="field-row"><span class="field-label">System</span><span class="field-value">${t.system}</span></div>
+    <div class="field-row"><span class="field-label">Status</span><span class="field-value"><span class="tag amber">${t.status}</span></span></div>
+  </div>
+  <div class="field-group">
+    <div class="field-group-title">Input / Output</div>
+    <div class="field-row"><span class="field-label">Input</span><span class="field-value">${t.input}</span></div>
+    <div class="field-row"><span class="field-label">Output</span><span class="field-value">${t.output}</span></div>
+  </div>
+  ${t.hitl?`<div class="hitl-block"><div class="hitl-header"><span class="hitl-icon">👤</span><span class="hitl-title">Human Approval Required</span></div><div class="hitl-desc">This task is a HITL node. Your decision unlocks the next process step and unblocks billing.</div></div>`:''}
+  <div class="field-group">
+    <div class="field-group-title">Instructions</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:11px;color:var(--text2);line-height:1.7">${t.instructions}</div>
+  </div>
+  <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:13px;border-radius:var(--radius)" onclick="alert('Approval action — connect to backend in Phase 5')">Approve Milestone →</button>
+  `;
+}
+
+/* ─── BUILD SPINE NODES ──────────────────────────────────────── */
+function buildSpine(){
+  const container = document.getElementById('spine-nodes');
+  if(!container) return;
+  container.innerHTML = spineNodes.map(n=>`
+    <div class="spine-node ${n.state} ${n.key?'':'cursor-default'}" onclick="${n.key?`openPanel('process','${n.key}')`:''}" style="${n.key?'':'opacity:.7'}">
+      <div class="spine-connector">
+        <div class="spine-dot"></div>
+        <div class="spine-line"></div>
+      </div>
+      <div class="spine-node-inner">
+        <div class="spine-node-id">${n.id}</div>
+        <div class="spine-node-name">${n.name}</div>
+        <div class="spine-node-tags">
+          ${n.hitl?'<span class="tag amber">HITL</span>':'<span class="tag">Automated</span>'}
+          ${n.systems.map(s=>`<span class="tag">${s}</span>`).join('')}
+          <span class="tag" style="color:var(--text3)">${n.owner}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ─── BUILD LIBRARY ──────────────────────────────────────────── */
+function buildLibrary(){
+  const container = document.getElementById('lib-grid');
+  if(!container) return;
+  container.innerHTML = libProcesses.map(p=>`
+    <div class="lib-card" onclick="${p.key?`openPanel('process','${p.key}')`:''}">
+      <div class="lib-card-domain">${p.domain}</div>
+      <div class="lib-card-id">${p.id}</div>
+      <div class="lib-card-name">${p.name}</div>
+      <div class="lib-card-meta">
+        ${p.hitl?'<span class="tag amber">HITL</span>':'<span class="tag green">Automated</span>'}
+        ${p.systems.slice(0,2).map(s=>`<span class="tag">${s}</span>`).join('')}
+        ${p.key?'<span class="tag blue">Detail →</span>':''}
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ─── CLOCK ──────────────────────────────────────────────────── */
+function updateClock(){
+  const now = new Date();
+  const ts = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+  const el = document.getElementById('clock');
+  if(el) el.textContent = ts;
+  const d = document.getElementById('exec-date');
+  if(d) d.textContent = now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+}
+
+/* ─── INIT ───────────────────────────────────────────────────── */
+buildSpine();
+buildLibrary();
+updateClock();
+setInterval(updateClock, 30000);
+</script>
+</body>
+</html>
