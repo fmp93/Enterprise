@@ -1182,6 +1182,529 @@ body{font-family:var(--fb);background:var(--c0);color:var(--t1);display:flex;hei
 </div>
 <!-- /Operating Intelligence Snapshot -->
 
+<!-- ── Demo Running Case Card ──────────────────────────────────── -->
+<div id="dfx5-demo-case" style="
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #111318;
+  border: 1px solid #252C3A;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0 0 20px 0;
+  width: 100%;
+  box-sizing: border-box;
+">
+
+  <!-- ── Top header bar ──────────────────────────────────────── -->
+  <div style="
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 18px 13px;
+    border-bottom: 1px solid #252C3A;
+    background: linear-gradient(135deg, #0E1119 0%, #111820 100%);
+    flex-wrap: wrap;
+  ">
+    <!-- Left: title block -->
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="
+          font-family:'IBM Plex Mono','Courier New',monospace;
+          font-size:9px;font-weight:600;
+          letter-spacing:0.14em;text-transform:uppercase;
+          color:#505870;
+        ">Demo Running Case · Revenue Spine</span>
+        <!-- DEMO badge -->
+        <span style="
+          font-family:'IBM Plex Mono',monospace;
+          font-size:8px;font-weight:700;
+          letter-spacing:0.1em;text-transform:uppercase;
+          padding:1px 6px;border-radius:3px;
+          background:rgba(245,158,11,0.12);
+          color:#FBBF24;
+          border:1px solid rgba(245,158,11,0.3);
+        ">Demo · Example only · Not live data</span>
+      </div>
+      <div style="
+        font-size:18px;font-weight:700;
+        color:#E8ECF5;letter-spacing:-0.015em;line-height:1.2;
+      ">CO · ITAU · IVR</div>
+      <div style="font-size:11.5px;color:#505870">
+        Example project moving through the Revenue Spine
+      </div>
+    </div>
+
+    <!-- Right: CTA buttons -->
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0">
+      <a href="../sandbox-process-registry/index.html#spine"
+         target="_blank" rel="noopener noreferrer"
+         style="
+           display:inline-flex;align-items:center;gap:6px;
+           background:rgba(79,126,247,0.10);
+           color:#4F7EF7;
+           border:1px solid rgba(79,126,247,0.28);
+           border-radius:7px;padding:7px 13px;
+           font-size:11.5px;font-weight:600;
+           text-decoration:none;white-space:nowrap;
+         "
+         onmouseover="this.style.background='rgba(79,126,247,0.2)'"
+         onmouseout="this.style.background='rgba(79,126,247,0.10)'"
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+             stroke="currentColor" stroke-width="1.5">
+          <polyline points="1,7 4,4 7,7 10,4"/>
+          <line x1="1" y1="10" x2="10" y2="10"/>
+        </svg>
+        Open Revenue Spine
+      </a>
+      <a href="../sandbox-process-registry/index.html#intelligence"
+         target="_blank" rel="noopener noreferrer"
+         style="
+           display:inline-flex;align-items:center;gap:6px;
+           background:rgba(167,139,250,0.10);
+           color:#A78BFA;
+           border:1px solid rgba(167,139,250,0.28);
+           border-radius:7px;padding:7px 13px;
+           font-size:11.5px;font-weight:600;
+           text-decoration:none;white-space:nowrap;
+         "
+         onmouseover="this.style.background='rgba(167,139,250,0.2)'"
+         onmouseout="this.style.background='rgba(167,139,250,0.10)'"
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+             stroke="currentColor" stroke-width="1.5">
+          <circle cx="6" cy="5" r="2.5"/>
+          <path d="M2 11c0-2.2 1.8-4 4-4s4 1.8 4 4"/>
+        </svg>
+        Open Operating Intelligence
+      </a>
+    </div>
+  </div>
+
+  <!-- ── Stage status bar ────────────────────────────────────── -->
+  <div style="
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    padding:10px 18px;
+    border-bottom:1px solid #252C3A;
+    background:#0D0F15;
+  ">
+    <!-- Current stage pill -->
+    <div style="
+      display:inline-flex;align-items:center;gap:6px;
+      background:rgba(79,126,247,0.14);
+      border:1px solid rgba(79,126,247,0.35);
+      border-radius:6px;padding:5px 11px;
+    ">
+      <!-- Pulsing dot -->
+      <span style="
+        display:inline-block;
+        width:6px;height:6px;border-radius:50%;
+        background:#4F7EF7;
+        box-shadow:0 0 0 3px rgba(79,126,247,0.25);
+        flex-shrink:0;
+      "></span>
+      <span style="
+        font-family:'IBM Plex Mono',monospace;
+        font-size:10px;font-weight:700;
+        letter-spacing:0.06em;color:#4F7EF7;
+      ">P010</span>
+      <span style="font-size:11.5px;font-weight:600;color:#E8ECF5">
+        Milestone Approval
+      </span>
+    </div>
+
+    <!-- Status pill -->
+    <div style="
+      display:inline-flex;align-items:center;gap:5px;
+      background:rgba(245,158,11,0.10);
+      border:1px solid rgba(245,158,11,0.28);
+      border-radius:6px;padding:5px 11px;
+    ">
+      <span style="font-size:11px;color:#FBBF24;font-weight:500">
+        ⏳ Awaiting milestone validation
+      </span>
+    </div>
+
+    <!-- HITL pill -->
+    <div style="
+      display:inline-flex;align-items:center;gap:5px;
+      background:rgba(248,113,113,0.10);
+      border:1px solid rgba(248,113,113,0.28);
+      border-radius:6px;padding:5px 11px;
+      margin-left:auto;
+    ">
+      <span style="
+        font-family:'IBM Plex Mono',monospace;
+        font-size:9px;font-weight:700;
+        letter-spacing:0.08em;color:#F87171;
+      ">HITL</span>
+      <span style="font-size:11px;color:#F87171;font-weight:500">
+        Human approval required
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Mini process flow strip ─────────────────────────────── -->
+  <div style="
+    padding:12px 18px;
+    border-bottom:1px solid #252C3A;
+    overflow-x:auto;
+  ">
+    <div style="
+      font-family:'IBM Plex Mono',monospace;
+      font-size:9px;font-weight:600;
+      letter-spacing:0.1em;text-transform:uppercase;
+      color:#505870;margin-bottom:8px;
+    ">Revenue Execution Chain</div>
+
+    <!-- Flow row -->
+    <div style="
+      display:flex;align-items:center;
+      gap:0;min-width:max-content;
+    ">
+
+      <!-- P010 — CURRENT -->
+      <div style="
+        display:flex;flex-direction:column;align-items:center;gap:3px;
+        padding:7px 11px;
+        background:rgba(79,126,247,0.16);
+        border:1.5px solid rgba(79,126,247,0.5);
+        border-radius:8px;
+        position:relative;
+      ">
+        <div style="
+          display:flex;align-items:center;gap:4px;
+        ">
+          <span style="
+            width:5px;height:5px;border-radius:50%;
+            background:#4F7EF7;flex-shrink:0;
+          "></span>
+          <span style="
+            font-family:'IBM Plex Mono',monospace;
+            font-size:9.5px;font-weight:700;
+            letter-spacing:0.06em;color:#4F7EF7;
+          ">P010</span>
+        </div>
+        <div style="font-size:9px;color:#93A3C0;white-space:nowrap;max-width:80px;text-align:center;line-height:1.3">
+          Milestone<br>Approval
+        </div>
+        <div style="
+          font-family:'IBM Plex Mono',monospace;
+          font-size:7.5px;font-weight:700;
+          letter-spacing:0.08em;
+          color:#4F7EF7;margin-top:1px;
+        ">CURRENT</div>
+      </div>
+
+      <!-- Arrow -->
+      <div style="display:flex;align-items:center;padding:0 4px">
+        <div style="width:16px;height:1.5px;background:#2E374A"></div>
+        <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid #2E374A"></div>
+      </div>
+
+      <!-- P011 -->
+      <div style="
+        display:flex;flex-direction:column;align-items:center;gap:3px;
+        padding:7px 10px;
+        background:#13171F;
+        border:1px solid #252C3A;
+        border-radius:8px;
+      ">
+        <span style="
+          font-family:'IBM Plex Mono',monospace;
+          font-size:9.5px;font-weight:600;
+          letter-spacing:0.06em;color:#4F7EF760;
+        ">P011</span>
+        <div style="font-size:9px;color:#505870;white-space:nowrap;max-width:72px;text-align:center;line-height:1.3">
+          Invoice<br>Readiness
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div style="display:flex;align-items:center;padding:0 4px">
+        <div style="width:16px;height:1.5px;background:#1E2330"></div>
+        <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid #1E2330"></div>
+      </div>
+
+      <!-- P012 -->
+      <div style="
+        display:flex;flex-direction:column;align-items:center;gap:3px;
+        padding:7px 10px;
+        background:#13171F;
+        border:1px solid #252C3A;
+        border-radius:8px;
+      ">
+        <span style="
+          font-family:'IBM Plex Mono',monospace;
+          font-size:9.5px;font-weight:600;
+          letter-spacing:0.06em;color:#4F7EF750;
+        ">P012</span>
+        <div style="font-size:9px;color:#505870;white-space:nowrap;max-width:72px;text-align:center;line-height:1.3">
+          Invoice<br>Submission
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div style="display:flex;align-items:center;padding:0 4px">
+        <div style="width:16px;height:1.5px;background:#1E2330"></div>
+        <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid #1E2330"></div>
+      </div>
+
+      <!-- P013 -->
+      <div style="
+        display:flex;flex-direction:column;align-items:center;gap:3px;
+        padding:7px 10px;
+        background:#13171F;
+        border:1px solid #252C3A;
+        border-radius:8px;
+      ">
+        <span style="
+          font-family:'IBM Plex Mono',monospace;
+          font-size:9.5px;font-weight:600;
+          letter-spacing:0.06em;color:#4F7EF740;
+        ">P013</span>
+        <div style="font-size:9px;color:#505870;white-space:nowrap;max-width:72px;text-align:center;line-height:1.3">
+          AR<br>Follow-up
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div style="display:flex;align-items:center;padding:0 4px">
+        <div style="width:16px;height:1.5px;background:#1E2330"></div>
+        <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid #1E2330"></div>
+      </div>
+
+      <!-- P014 -->
+      <div style="
+        display:flex;flex-direction:column;align-items:center;gap:3px;
+        padding:7px 10px;
+        background:#13171F;
+        border:1px solid #252C3A;
+        border-radius:8px;
+      ">
+        <span style="
+          font-family:'IBM Plex Mono',monospace;
+          font-size:9.5px;font-weight:600;
+          letter-spacing:0.06em;color:#4F7EF730;
+        ">P014</span>
+        <div style="font-size:9px;color:#505870;white-space:nowrap;max-width:72px;text-align:center;line-height:1.3">
+          Payment<br>Reconciliation
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div style="display:flex;align-items:center;padding:0 4px">
+        <div style="width:16px;height:1.5px;background:#1E2330"></div>
+        <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid #1E2330"></div>
+      </div>
+
+      <!-- P016 -->
+      <div style="
+        display:flex;flex-direction:column;align-items:center;gap:3px;
+        padding:7px 10px;
+        background:#13171F;
+        border:1px solid #252C3A;
+        border-radius:8px;
+      ">
+        <span style="
+          font-family:'IBM Plex Mono',monospace;
+          font-size:9.5px;font-weight:600;
+          letter-spacing:0.06em;color:#4F7EF728;
+        ">P016</span>
+        <div style="font-size:9px;color:#505870;white-space:nowrap;max-width:72px;text-align:center;line-height:1.3">
+          Margin<br>Review
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div style="display:flex;align-items:center;padding:0 4px">
+        <div style="width:16px;height:1.5px;background:#1E2330"></div>
+        <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid #1E2330"></div>
+      </div>
+
+      <!-- P017 -->
+      <div style="
+        display:flex;flex-direction:column;align-items:center;gap:3px;
+        padding:7px 10px;
+        background:#13171F;
+        border:1px solid #252C3A;
+        border-radius:8px;
+      ">
+        <span style="
+          font-family:'IBM Plex Mono',monospace;
+          font-size:9.5px;font-weight:600;
+          letter-spacing:0.06em;color:#4F7EF720;
+        ">P017</span>
+        <div style="font-size:9px;color:#505870;white-space:nowrap;max-width:72px;text-align:center;line-height:1.3">
+          Forecast<br>Quality
+        </div>
+      </div>
+
+    </div><!-- /flow row -->
+  </div><!-- /flow strip -->
+
+  <!-- ── Case detail grid ─────────────────────────────────────── -->
+  <div style="
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0;
+    border-bottom:1px solid #252C3A;
+  ">
+
+    <!-- Owner -->
+    <div style="
+      padding:11px 18px;
+      border-right:1px solid #252C3A;
+      border-bottom:1px solid #252C3A;
+    ">
+      <div style="
+        font-family:'IBM Plex Mono',monospace;
+        font-size:9px;font-weight:600;
+        letter-spacing:0.1em;text-transform:uppercase;
+        color:#505870;margin-bottom:5px;
+      ">Owner</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span style="
+          font-size:11px;font-weight:600;
+          padding:3px 9px;border-radius:5px;
+          background:rgba(129,140,248,0.12);
+          color:#818CF8;
+          border:1px solid rgba(129,140,248,0.25);
+        ">Delivery</span>
+        <span style="
+          font-size:11px;font-weight:600;
+          padding:3px 9px;border-radius:5px;
+          background:rgba(16,185,129,0.10);
+          color:#10B981;
+          border:1px solid rgba(16,185,129,0.25);
+        ">Finance</span>
+      </div>
+    </div>
+
+    <!-- Systems -->
+    <div style="
+      padding:11px 18px;
+      border-bottom:1px solid #252C3A;
+    ">
+      <div style="
+        font-family:'IBM Plex Mono',monospace;
+        font-size:9px;font-weight:600;
+        letter-spacing:0.1em;text-transform:uppercase;
+        color:#505870;margin-bottom:5px;
+      ">Systems</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;padding:2px 7px;border-radius:4px;background:#181C24;border:1px solid #2E374A;color:#8B95AA">Kantata</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;padding:2px 7px;border-radius:4px;background:#181C24;border:1px solid #2E374A;color:#8B95AA">Slack</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;padding:2px 7px;border-radius:4px;background:#181C24;border:1px solid #2E374A;color:#8B95AA">SharePoint</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;padding:2px 7px;border-radius:4px;background:#181C24;border:1px solid #2E374A;color:#8B95AA">Zoho</span>
+      </div>
+    </div>
+
+    <!-- Revenue Impact -->
+    <div style="
+      padding:11px 18px;
+      border-right:1px solid #252C3A;
+      border-bottom:1px solid #252C3A;
+    ">
+      <div style="
+        font-family:'IBM Plex Mono',monospace;
+        font-size:9px;font-weight:600;
+        letter-spacing:0.1em;text-transform:uppercase;
+        color:#505870;margin-bottom:5px;
+      ">Revenue Impact</div>
+      <div style="font-size:12px;color:#8B95AA;line-height:1.5">
+        Invoice cannot be prepared until milestone approval is confirmed.
+        <span style="color:#F87171;font-weight:500"> Cashflow is gated at this node.</span>
+      </div>
+    </div>
+
+    <!-- Next Action -->
+    <div style="
+      padding:11px 18px;
+      border-bottom:1px solid #252C3A;
+    ">
+      <div style="
+        font-family:'IBM Plex Mono',monospace;
+        font-size:9px;font-weight:600;
+        letter-spacing:0.1em;text-transform:uppercase;
+        color:#505870;margin-bottom:5px;
+      ">Next Action</div>
+      <div style="font-size:12px;color:#E8ECF5;line-height:1.5;font-weight:500">
+        Validate milestone evidence and confirm billing readiness in Kantata · SharePoint.
+      </div>
+    </div>
+
+    <!-- Next Node -->
+    <div style="padding:11px 18px;border-right:1px solid #252C3A">
+      <div style="
+        font-family:'IBM Plex Mono',monospace;
+        font-size:9px;font-weight:600;
+        letter-spacing:0.1em;text-transform:uppercase;
+        color:#505870;margin-bottom:5px;
+      ">Next Node</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="
+          font-family:'IBM Plex Mono',monospace;
+          font-size:9.5px;font-weight:700;
+          padding:2px 7px;border-radius:4px;
+          background:rgba(16,185,129,0.10);
+          color:#10B981;
+          border:1px solid rgba(16,185,129,0.25);
+        ">P011</span>
+        <span style="font-size:12px;color:#8B95AA">
+          Invoice Readiness Validation
+        </span>
+      </div>
+    </div>
+
+    <!-- HITL -->
+    <div style="padding:11px 18px">
+      <div style="
+        font-family:'IBM Plex Mono',monospace;
+        font-size:9px;font-weight:600;
+        letter-spacing:0.1em;text-transform:uppercase;
+        color:#505870;margin-bottom:5px;
+      ">HITL · Human in the Loop</div>
+      <div style="font-size:12px;color:#8B95AA;line-height:1.5">
+        <span style="color:#FBBF24;font-weight:600">Finance + Delivery</span>
+        approval required before advancing to invoice readiness.
+      </div>
+    </div>
+
+  </div><!-- /detail grid -->
+
+  <!-- ── Footer ──────────────────────────────────────────────── -->
+  <div style="
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 18px;
+    background:#0D0F15;
+    flex-wrap:wrap;gap:8px;
+  ">
+    <div style="
+      font-size:10.5px;color:#505870;
+      display:flex;align-items:center;gap:6px;
+    ">
+      <span style="
+        font-family:'IBM Plex Mono',monospace;
+        font-size:8px;font-weight:700;
+        letter-spacing:0.1em;
+        padding:1px 5px;border-radius:3px;
+        background:rgba(245,158,11,0.12);
+        color:#FBBF24;
+        border:1px solid rgba(245,158,11,0.25);
+      ">DEMO</span>
+      Illustrative case · Based on DFX5 process registry · No live data
+    </div>
+    <div style="
+      font-family:'IBM Plex Mono',monospace;
+      font-size:9px;color:#505870;
+      letter-spacing:0.06em;
+    ">DFX5 Enterprise OS · v1.0 · May 2026</div>
+  </div>
+
+</div>
+<!-- /Demo Running Case Card -->
+
 <div class="ceo-title">Revenue Command</div>
               <div class="ceo-subtitle">Lead to cash, state machines, blockers and execution in one view.</div>
             </div>
