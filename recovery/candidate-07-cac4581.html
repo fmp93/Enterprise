@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise OS Demo | Command Center</title>
+  <style>
+    :root{
+      --bg:#050712;
+      --text:#f7f8ff;
+      --muted:#a8b0c3;
+      --line:rgba(255,255,255,.14);
+      --glass:rgba(255,255,255,.065);
+      --glass2:rgba(255,255,255,.095);
+      --blue:#7cc7ff;
+      --violet:#9b8cff;
+      --green:#75f2bd;
+      --amber:#ffd98a;
+      --red:#ff8a8a;
+      --shadow:0 34px 100px rgba(0,0,0,.42);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 18% 8%,rgba(124,199,255,.22),transparent 30%),
+        radial-gradient(circle at 82% 16%,rgba(155,140,255,.20),transparent 32%),
+        radial-gradient(circle at 55% 90%,rgba(117,242,189,.10),transparent 36%),
+        var(--bg);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+
+    body:before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+      background-size:46px 46px;
+      mask-image:radial-gradient(circle at center,black,transparent 78%);
+    }
+
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:240px minmax(0,1fr) 320px;
+      position:relative;
+      z-index:1;
+    }
+
+    .sidebar{
+      border-right:1px solid var(--line);
+      background:rgba(255,255,255,.035);
+      backdrop-filter:blur(24px);
+      padding:24px 18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:780;
+      margin-bottom:32px;
+    }
+
+    .logo{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--blue),var(--violet));
+      box-shadow:0 0 34px rgba(124,199,255,.38);
+    }
+
+    .nav-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      color:var(--muted);
+      padding:12px 12px;
+      border-radius:14px;
+      font-size:14px;
+      margin-bottom:6px;
+      cursor:pointer;
+    }
+
+    .nav-item.active,
+    .nav-item:hover{
+      background:rgba(124,199,255,.13);
+      color:white;
+    }
+
+    .nav-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:rgba(255,255,255,.25);
+    }
+
+    .nav-item.active .nav-dot{
+      background:var(--green);
+      box-shadow:0 0 18px rgba(117,242,189,.7);
+    }
+
+    main{
+      padding:26px;
+      min-width:0;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:20px;
+      margin-bottom:22px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.055);
+      color:var(--blue);
+      font-size:12px;
+      margin-bottom:12px;
+    }
+
+    .pulse{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 0 0 rgba(117,242,189,.8);
+      animation:pulse 1.8s infinite;
+    }
+
+    @keyframes pulse{
+      70%{box-shadow:0 0 0 14px rgba(117,242,189,0)}
+      100%{box-shadow:0 0 0 0 rgba(117,242,189,0)}
+    }
+
+    h1{
+      margin:0;
+      font-size:38px;
+      letter-spacing:-1.4px;
+      line-height:1.05;
+    }
+
+    .subtitle{
+      color:var(--muted);
+      margin-top:8px;
+      font-size:15px;
+      line-height:1.5;
+      max-width:680px;
+    }
+
+    .btn{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.07);
+      color:white;
+      border-radius:14px;
+      padding:11px 14px;
+      font-weight:750;
+      text-decoration:none;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .btn.primary{
+      background:linear-gradient(135deg,var(--blue),var(--violet));
+      color:#06111f;
+      border:0;
+    }
+
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .panel,
+    .kpi{
+      border:1px solid var(--line);
+      background:linear-gradient(145deg,rgba(255,255,255,.095),rgba(255,255,255,.035));
+      border-radius:24px;
+      backdrop-filter:blur(24px);
+      box-shadow:0 24px 70px rgba(0,0,0,.26);
+    }
+
+    .kpi{
+      padding:16px;
+    }
+
+    .kpi small{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .kpi strong{
+      display:block;
+      font-size:27px;
+      letter-spacing:-.8px;
+      margin-top:6px;
+    }
+
+    .kpi span{
+      display:block;
+      margin-top:6px;
+      font-size:12px;
+      color:var(--green);
+    }
+
+    .workspace{
+      display:grid;
+      grid-template-columns:minmax(0,1.3fr) minmax(320px,.7fr);
+      gap:18px;
+      align-items:start;
+    }
+
+    .panel{
+      padding:18px;
+    }
+
+    .panel-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:16px;
+    }
+
+    .panel h2{
+      margin:0;
+      font-size:17px;
+      letter-spacing:-.45px;
+    }
+
+    .panel p{
+      margin:5px 0 0;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .tag{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.055);
+      border-radius:999px;
+      padding:6px 9px;
+      color:var(--muted);
+      font-size:11px;
+      white-space:nowrap;
+    }
+
+    .flow{
+      position:relative;
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:8px;
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:24px;
+      background:rgba(255,255,255,.045);
+      overflow:hidden;
+    }
+
+    .flow:before{
+      content:"";
+      position:absolute;
+      left:40px;
+      right:40px;
+      top:50%;
+      height:1px;
+      background:linear-gradient(90deg,transparent,rgba(124,199,255,.55),transparent);
+    }
+
+    .stage{
+      position:relative;
+      z-index:1;
+      text-align:center;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:650;
+    }
+
+    .ball{
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      margin:0 auto 9px;
+      background:linear-gradient(135deg,var(--blue),var(--violet));
+      box-shadow:0 0 26px rgba(124,199,255,.42);
+    }
+
+    .ball.warn{
+      background:linear-gradient(135deg,var(--amber),var(--red));
+      box-shadow:0 0 26px rgba(255,138,138,.35);
+    }
+
+    .live-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .case-card{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      border-radius:18px;
+      padding:14px;
+      cursor:pointer;
+    }
+
+    .case-card:hover{
+      background:rgba(255,255,255,.085);
+      transform:translateY(-1px);
+    }
+
+    .case-card b{
+      display:block;
+      font-size:14px;
+      margin-bottom:6px;
+    }
+
+    .case-card small{
+      display:block;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .status{
+      display:inline-flex;
+      margin-top:10px;
+      border-radius:999px;
+      padding:5px 8px;
+      font-size:11px;
+      font-weight:750;
+      border:1px solid var(--line);
+    }
+
+    .status.risk{color:var(--red);background:rgba(255,138,138,.08)}
+    .status.waiting{color:var(--amber);background:rgba(255,217,138,.08)}
+    .status.good{color:var(--green);background:rgba(117,242,189,.08)}
+
+    .action{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:11px;
+    }
+
+    .action-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:8px;
+    }
+
+    .action b{font-size:14px}
+    .action small{color:var(--muted);line-height:1.45}
+    .impact{margin-top:8px;color:var(--green);font-size:12px}
+
+    .decision{
+      margin-top:12px;
+      width:100%;
+      border:0;
+      border-radius:13px;
+      padding:10px;
+      background:linear-gradient(135deg,var(--blue),var(--violet));
+      color:#06111f;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .process-strip{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .process{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.045);
+      border-radius:18px;
+      padding:14px;
+    }
+
+    .process b{
+      display:block;
+      font-size:13px;
+      margin-bottom:6px;
+    }
+
+    .process small{
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    .rightbar{
+      border-left:1px solid var(--line);
+      background:rgba(255,255,255,.032);
+      backdrop-filter:blur(24px);
+      padding:24px 18px;
+      min-width:0;
+    }
+
+    .right-card{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.055);
+      border-radius:22px;
+      padding:16px;
+      margin-bottom:14px;
+    }
+
+    .right-card h3{
+      margin:0 0 10px;
+      font-size:15px;
+    }
+
+    .timeline-row{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      padding:9px 0;
+      border-top:1px solid var(--line);
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .timeline-row b{color:white}
+
+    .bar{
+      height:7px;
+      border-radius:999px;
+      background:rgba(255,255,255,.1);
+      overflow:hidden;
+      margin-top:8px;
+    }
+
+    .bar span{
+      display:block;
+      height:100%;
+      background:linear-gradient(90deg,var(--green),var(--blue),var(--violet));
+      border-radius:999px;
+    }
+
+    .home-link{
+      color:var(--muted);
+      text-decoration:none;
+      font-size:13px;
+      display:inline-flex;
+      margin-top:22px;
+    }
+
+    @media(max-width:1100px){
+      .app{grid-template-columns:1fr}
+      .sidebar,.rightbar{display:none}
+      .workspace{grid-template-columns:1fr}
+      .kpi-grid,.process-strip{grid-template-columns:repeat(2,1fr)}
+    }
+
+    @media(max-width:620px){
+      main{padding:18px}
+      h1{font-size:30px}
+      .kpi-grid,.live-grid,.process-strip{grid-template-columns:1fr}
+      .flow{grid-template-columns:repeat(2,1fr)}
+      .flow:before{display:none}
+      .topbar{display:block}
+      .topbar .btn{margin-top:14px}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="logo"></div>Enterprise OS</div>
+
+      <div class="nav-item active">Command Center <span class="nav-dot"></span></div>
+      <div class="nav-item">Revenue Spine <span class="nav-dot"></span></div>
+      <div class="nav-item">Action Center <span class="nav-dot"></span></div>
+      <div class="nav-item">Process Library <span class="nav-dot"></span></div>
+      <div class="nav-item">Executive View <span class="nav-dot"></span></div>
+
+      <a class="home-link" href="/Enterprise/">Back to Landing</a>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div>
+          <div class="eyebrow"><span class="pulse"></span>Live CEO Command Center</div>
+          <h1>Control revenue, execution and decisions from one operating layer.</h1>
+          <div class="subtitle">
+            A premium command view for CEOs to see what is moving, what is blocked and what decision creates the highest business impact.
+          </div>
+        </div>
+        <a class="btn primary" href="mailto:franco.morante@dfx5.com?subject=Enterprise%20OS%20Demo%20Request">Request Access</a>
+      </div>
+
+      <section class="kpi-grid">
+        <div class="kpi"><small>Revenue at Risk</small><strong>$142K</strong><span>3 blockers detected</span></div>
+        <div class="kpi"><small>Cash Delayed</small><strong>$30K</strong><span>invoice action required</span></div>
+        <div class="kpi"><small>Process Health</small><strong>84%</strong><span>stable operating flow</span></div>
+        <div class="kpi"><small>Actions Today</small><strong>18</strong><span>prioritized by impact</span></div>
+      </section>
+
+      <div class="workspace">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Revenue Spine</h2>
+              <p>Lead-to-cash flow with stages, ownership, bottlenecks and decision points.</p>
+            </div>
+            <div class="tag">Lead → Cash</div>
+          </div>
+
+          <div class="flow">
+            <div class="stage"><div class="ball"></div>Lead</div>
+            <div class="stage"><div class="ball"></div>Qualified</div>
+            <div class="stage"><div class="ball warn"></div>SOW</div>
+            <div class="stage"><div class="ball warn"></div>Contract</div>
+            <div class="stage"><div class="ball"></div>Delivery</div>
+            <div class="stage"><div class="ball warn"></div>Invoice</div>
+            <div class="stage"><div class="ball"></div>Paid</div>
+          </div>
+
+          <div class="live-grid">
+            <div class="case-card">
+              <b>Cloud Migration Program</b>
+              <small>SOW margin review pending · Owner: Finance</small>
+              <span class="status risk">At Risk</span>
+            </div>
+            <div class="case-card">
+              <b>Retail AI Assessment</b>
+              <small>Contract signature pending · Owner: Legal</small>
+              <span class="status waiting">Waiting</span>
+            </div>
+            <div class="case-card">
+              <b>Banking Platform Modernization</b>
+              <small>Delivery execution on track · Owner: Delivery</small>
+              <span class="status good">On Track</span>
+            </div>
+            <div class="case-card">
+              <b>Manufacturing Data Platform</b>
+              <small>Invoice overdue · Owner: Finance</small>
+              <span class="status risk">Delayed Cash</span>
+            </div>
+          </div>
+
+          <div class="process-strip">
+            <div class="process"><b>Lead to Cash</b><small>Core revenue operating process.</small></div>
+            <div class="process"><b>Invoice to Cash</b><small>Billing, AR and reconciliation.</small></div>
+            <div class="process"><b>Delivery Execution</b><small>Milestones, risk and margin.</small></div>
+            <div class="process"><b>Access Management</b><small>Approvals, access and audit.</small></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>CEO Action Center</h2>
+              <p>Only the highest-impact decisions. No noise.</p>
+            </div>
+            <div class="tag">Priority</div>
+          </div>
+
+          <div class="action">
+            <div class="action-top"><b>Approve SOW Rework</b><span class="status risk">High</span></div>
+            <small>Cloud Migration Program has margin below threshold.</small>
+            <div class="impact">$45K revenue protected</div>
+            <button class="decision" onclick="executeDecision(this,'SOW approved. Revenue risk reduced.')">Execute Decision</button>
+          </div>
+
+          <div class="action">
+            <div class="action-top"><b>Follow Up Contract Signature</b><span class="status waiting">High</span></div>
+            <small>Retail AI Assessment is waiting for signature.</small>
+            <div class="impact">$72K moved closer to delivery</div>
+            <button class="decision" onclick="executeDecision(this,'Contract follow-up executed.')">Execute Decision</button>
+          </div>
+
+          <div class="action">
+            <div class="action-top"><b>Escalate Overdue Invoice</b><span class="status risk">High</span></div>
+            <small>Manufacturing Data Platform has delayed cash.</small>
+            <div class="impact">$30K cash acceleration</div>
+            <button class="decision" onclick="executeDecision(this,'Invoice escalation sent.')">Execute Decision</button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <aside class="rightbar">
+      <div class="right-card">
+        <h3>Executive Summary</h3>
+        <div class="timeline-row"><span>Blocked revenue</span><b>$142K</b></div>
+        <div class="timeline-row"><span>Open decisions</span><b>3</b></div>
+        <div class="timeline-row"><span>Critical owners</span><b>Finance, Legal</b></div>
+        <div class="timeline-row"><span>Estimated time saved</span><b>6.4h</b></div>
+      </div>
+
+      <div class="right-card">
+        <h3>Timeline Health</h3>
+        <div class="timeline-row"><span>Lead → Qualified</span><b>2d</b></div>
+        <div class="bar"><span style="width:18%"></span></div>
+
+        <div class="timeline-row"><span>Proposal → Contract</span><b>12d</b></div>
+        <div class="bar"><span style="width:78%"></span></div>
+
+        <div class="timeline-row"><span>Invoice → Payment</span><b>21d</b></div>
+        <div class="bar"><span style="width:92%"></span></div>
+      </div>
+
+      <div class="right-card">
+        <h3>System Logic</h3>
+        <div class="timeline-row"><span>Process rules</span><b>Active</b></div>
+        <div class="timeline-row"><span>State machines</span><b>7</b></div>
+        <div class="timeline-row"><span>Critical paths</span><b>Mapped</b></div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    function executeDecision(button,message){
+      button.innerText = "Executed";
+      button.disabled = true;
+      button.style.opacity = ".55";
+      const action = button.closest(".action");
+      action.style.opacity = ".65";
+      const note = document.createElement("div");
+      note.className = "impact";
+      note.innerText = message;
+      action.appendChild(note);
+    }
+  </script>
+</body>
+</html>
