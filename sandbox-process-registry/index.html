@@ -864,6 +864,291 @@
     }
     .status-dot-active { background: var(--green); }
     .status-dot { width: 5px; height: 5px; border-radius: 50%; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SPINE / CHAIN VIEW
+    ═══════════════════════════════════════════════════════════════ */
+
+    /* ── Spine stats bar ──────────────────────────────────────── */
+    .spine-stats-bar {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 14px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 32px;
+    }
+    .spine-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .spine-stat-val {
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+    .spine-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .spine-stat-divider {
+      width: 1px;
+      height: 32px;
+      background: var(--border);
+    }
+    .spine-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-left: auto;
+    }
+    .spine-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .spine-legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ── Chain section ────────────────────────────────────────── */
+    .chain-section {
+      margin-bottom: 44px;
+    }
+    .chain-section-header {
+      margin-bottom: 16px;
+    }
+    .chain-title-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .chain-stripe {
+      width: 3px;
+      min-height: 38px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .chain-title-text { flex: 1; }
+    .chain-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+    }
+    .chain-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .chain-header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .chain-booklet {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .chain-node-count {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ── Mini node overview strip ─────────────────────────────── */
+    .chain-mini-strip {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 2px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .mini-node {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .mini-node:hover { opacity: 0.7; }
+    .mini-arrow {
+      font-size: 9px;
+      color: var(--border2);
+      flex-shrink: 0;
+      padding: 0 1px;
+    }
+
+    /* ── Scrollable chain row ─────────────────────────────────── */
+    .chain-scroll-outer {
+      position: relative;
+    }
+    .chain-scroll-outer::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 0; bottom: 6px;
+      width: 48px;
+      background: linear-gradient(to right, transparent, var(--bg));
+      pointer-events: none;
+      z-index: 2;
+    }
+    .chain-scroll {
+      overflow-x: auto;
+      overflow-y: visible;
+      padding-bottom: 12px;
+      padding-right: 52px;
+    }
+    .chain-row {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      min-width: max-content;
+    }
+
+    /* ── Process node card ────────────────────────────────────── */
+    .chain-node {
+      width: 172px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .chain-node::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--node-color, var(--accent));
+      opacity: 0;
+      transition: opacity 0.18s;
+    }
+    .chain-node:hover {
+      border-color: var(--node-color, var(--accent));
+      box-shadow: 0 0 0 1px var(--node-color, var(--accent)),
+                  0 8px 24px rgba(0,0,0,0.4);
+      transform: translateY(-2px);
+      z-index: 1;
+    }
+    .chain-node:hover::before { opacity: 1; }
+
+    .chain-node-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+    .chain-node-id {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+    .chain-node-ai {
+      font-family: var(--mono);
+      font-size: 8px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+    .chain-node-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.35;
+      flex: 1;
+    }
+    .chain-node-owners {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chain-node-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+    }
+    .chain-node-stages {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+    .chain-open-hint {
+      font-size: 9px;
+      color: var(--text-muted);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .chain-node:hover .chain-open-hint { opacity: 1; }
+
+    /* ── Arrow connector ──────────────────────────────────────── */
+    .chain-connector {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      padding: 0 4px;
+      align-self: center;
+      margin-top: -6px; /* optical center offset for name text weight */
+    }
+    .arrow-line {
+      width: 18px;
+      height: 1.5px;
+      background: var(--border2);
+    }
+    .arrow-tip {
+      width: 0; height: 0;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 6px solid var(--border2);
+    }
+
+    /* ── Spine view header ────────────────────────────────────── */
+    #spine-view .view-title { margin-bottom: 4px; }
+
+    /* ── Node entrance animation ──────────────────────────────── */
+    @keyframes nodeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .chain-node {
+      animation: nodeIn 0.2s ease both;
+    }
   </style>
 </head>
 <body>
@@ -890,12 +1175,12 @@
         </svg>
         Process Library
       </div>
-      <div class="nav-item" style="opacity:0.45;cursor:not-allowed;" title="Available in Phase 2">
+      <div class="nav-item" id="nav-spine" onclick="showSpine()">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <polyline points="1,8 5,4 9,8 13,4"/>
           <line x1="1" y1="12" x2="13" y2="12"/>
         </svg>
-        Spine / Flow View
+        Spine / Chain View
       </div>
       <div class="nav-item" style="opacity:0.45;cursor:not-allowed;" title="Available in Phase 2">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -960,6 +1245,16 @@
       <!-- DETAIL VIEW -->
       <div id="detail-view"></div>
 
+      <!-- SPINE / CHAIN VIEW -->
+      <div id="spine-view" style="display:none">
+        <div class="view-header">
+          <div class="view-title">Spine / Chain View</div>
+          <div class="view-subtitle">Operating model as connected process chains · Click any node to open the process detail</div>
+        </div>
+        <div id="spine-stats-bar" class="spine-stats-bar"></div>
+        <div id="chain-container"></div>
+      </div>
+
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /app -->
@@ -1010,7 +1305,13 @@ function init() {
   buildFilterChips();
   buildSidebarStats();
   renderLibrary();
-  updateBreadcrumb();
+  // Hash-based routing: index.html#spine auto-opens Spine View
+  // Used by the main demo ⬡ Flow button link
+  if (window.location.hash === '#spine') {
+    showSpine();
+  } else {
+    updateBreadcrumb();
+  }
 }
 
 // ── Sidebar domains ────────────────────────────────────────────
@@ -1160,6 +1461,7 @@ function showDetail(id) {
   currentView = 'detail';
 
   document.getElementById('library-view').style.display = 'none';
+  document.getElementById('spine-view').style.display = 'none';
   const dv = document.getElementById('detail-view');
   dv.style.display = 'block';
   dv.innerHTML = renderDetail(p);
@@ -1431,7 +1733,9 @@ function showLibrary() {
   currentProcess = null;
   document.getElementById('library-view').style.display = 'block';
   document.getElementById('detail-view').style.display = 'none';
+  document.getElementById('spine-view').style.display = 'none';
   document.getElementById('nav-library').classList.add('active');
+  document.getElementById('nav-spine').classList.remove('active');
   updateBreadcrumb();
   updateSidebarDomainActive(null);
   document.getElementById('content').scrollTop = 0;
@@ -1477,21 +1781,240 @@ function updateBreadcrumb() {
       <span class="bc-item" onclick="showLibrary()">Enterprise OS</span>
       <span class="bc-sep">›</span>
       <span class="bc-item current">Process Library</span>`;
-  } else if (currentView === 'detail' && currentProcess) {
-    const p = currentProcess;
-    const cfg = DOMAIN_CONFIG[p.domain] || {};
+
+  } else if (currentView === 'spine') {
     bc.innerHTML = `
       <span class="bc-item" onclick="showLibrary()">Enterprise OS</span>
       <span class="bc-sep">›</span>
       <span class="bc-item" onclick="showLibrary()">Process Library</span>
       <span class="bc-sep">›</span>
-      <span class="bc-item" onclick="filterDomain('${p.domain}',null,true);showLibrary()" style="color:${cfg.color}">${p.domain}</span>
+      <span class="bc-item current">Spine / Chain View</span>`;
+
+  } else if (currentView === 'detail' && currentProcess) {
+    const p = currentProcess;
+    const cfg = DOMAIN_CONFIG[p.domain] || {};
+    const fromSpine = currentProcess._fromSpine;
+    bc.innerHTML = `
+      <span class="bc-item" onclick="showLibrary()">Enterprise OS</span>
+      <span class="bc-sep">›</span>
+      ${fromSpine
+        ? `<span class="bc-item" onclick="showSpine()">Spine / Chain View</span>`
+        : `<span class="bc-item" onclick="showLibrary()">Process Library</span>`
+      }
+      <span class="bc-sep">›</span>
+      <span class="bc-item" style="color:${cfg.color}">${p.domain}</span>
       <span class="bc-sep">›</span>
       <span class="bc-item current">${p.id} · ${p.name}</span>`;
   }
 }
 
-// ── START ──────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+//  SPINE / CHAIN VIEW
+//  Phase 2 · v1.0 May 2026
+// ══════════════════════════════════════════════════════════════
+
+// ── Chain definitions ──────────────────────────────────────────
+// Edit node arrays here to adjust chain order or add new chains.
+// If a process ID is not in the registry, it is skipped silently
+// with a console.warn — no UI error is shown.
+
+const SPINE_CHAINS = [
+  {
+    id: 'revenue',
+    title: 'Revenue Value Chain',
+    subtitle: 'Lead to Cash · End-to-end commercial operating spine',
+    color: '#6366F1',
+    booklet: 'Booklets 1 · 2 · 3 · 6',
+    nodes: ['P001','P002','P003','P004','P005','P006','P007','P008',
+            'P009','P010','P011','P012','P013','P014','P016','P017']
+  },
+  {
+    id: 'people',
+    title: 'People Operations Chain',
+    subtitle: 'Hire to Offboard · Full employee lifecycle',
+    color: '#EC4899',
+    booklet: 'Booklets 5 · 7',
+    nodes: ['P018','P019','P020','P021','P022','P023','P024','P025']
+  },
+  {
+    id: 'service',
+    title: 'Internal Service & Enablement',
+    subtitle: 'Single entry point for all internal employee requests and IT support',
+    color: '#8B5CF6',
+    booklet: 'Booklet 3',
+    nodes: ['P026']
+  }
+];
+
+// ── Show Spine View ────────────────────────────────────────────
+function showSpine() {
+  currentView = 'spine';
+  currentProcess = null;
+
+  document.getElementById('library-view').style.display = 'none';
+  document.getElementById('detail-view').style.display = 'none';
+  document.getElementById('spine-view').style.display = 'block';
+  document.getElementById('nav-library').classList.remove('active');
+  document.getElementById('nav-spine').classList.add('active');
+
+  renderSpineStats();
+  renderSpine();
+  updateBreadcrumb();
+  document.getElementById('content').scrollTop = 0;
+
+  // Update URL hash without triggering reload
+  if (history.replaceState) {
+    history.replaceState(null, '', '#spine');
+  }
+}
+
+// ── Render stats bar ───────────────────────────────────────────
+function renderSpineStats() {
+  const el = document.getElementById('spine-stats-bar');
+  const totalInChains = SPINE_CHAINS.reduce((n, c) => n + c.nodes.length, 0);
+  const counts = getAutomationReadinessCounts();
+
+  el.innerHTML = `
+    <div class="spine-stat">
+      <div class="spine-stat-val">${DFX5_PROCESSES.length}</div>
+      <div class="spine-stat-label">Total Processes</div>
+    </div>
+    <div class="spine-stat-divider"></div>
+    <div class="spine-stat">
+      <div class="spine-stat-val">${SPINE_CHAINS.length}</div>
+      <div class="spine-stat-label">Operating Chains</div>
+    </div>
+    <div class="spine-stat-divider"></div>
+    <div class="spine-stat">
+      <div class="spine-stat-val">${totalInChains}</div>
+      <div class="spine-stat-label">Nodes Mapped</div>
+    </div>
+    <div class="spine-stat-divider"></div>
+    <div class="spine-stat">
+      <div class="spine-stat-val" style="color:var(--green)">${counts['High'] || 0}</div>
+      <div class="spine-stat-label">High AI Readiness</div>
+    </div>
+    <div class="spine-legend">
+      ${SPINE_CHAINS.map(c => `
+        <div class="spine-legend-item">
+          <span class="spine-legend-dot" style="background:${c.color}"></span>
+          ${c.title.split(' ').slice(0,3).join(' ')}
+        </div>`).join('')}
+    </div>`;
+}
+
+// ── Render all chains ──────────────────────────────────────────
+function renderSpine() {
+  const container = document.getElementById('chain-container');
+  container.innerHTML = SPINE_CHAINS.map(chain => renderChain(chain)).join('');
+}
+
+// ── Render one chain ───────────────────────────────────────────
+function renderChain(chain) {
+  // Resolve nodes — skip missing IDs gracefully
+  const resolvedNodes = chain.nodes.map(id => {
+    const p = getProcessById(id);
+    if (!p) {
+      console.warn(`[DFX5 Spine] Process ID "${id}" not found in registry — skipping node in "${chain.title}" chain.`);
+      return null;
+    }
+    return p;
+  }).filter(Boolean);
+
+  if (resolvedNodes.length === 0) {
+    return `<div class="chain-section" style="color:var(--text-muted);font-size:12px">
+      Chain "${chain.title}" has no resolvable nodes.
+    </div>`;
+  }
+
+  // Mini strip — overview of all node IDs above the scrollable row
+  const miniStrip = resolvedNodes.map((p, i) => {
+    const cfg = DOMAIN_CONFIG[p.domain] || { color: chain.color };
+    const isLast = i === resolvedNodes.length - 1;
+    return `
+      <span class="mini-node"
+            style="color:${cfg.color};background:${cfg.color}14;border:1px solid ${cfg.color}28"
+            onclick="showDetailFromSpine('${p.id}')"
+            title="${p.name}">${p.id}</span>
+      ${isLast ? '' : '<span class="mini-arrow">›</span>'}`;
+  }).join('');
+
+  // Full node cards row
+  const nodesHtml = resolvedNodes.map((p, i) => {
+    const isLast = i === resolvedNodes.length - 1;
+    return renderChainNode(p, chain.color, i, isLast);
+  }).join('');
+
+  return `
+    <div class="chain-section" id="chain-${chain.id}">
+      <div class="chain-section-header">
+        <div class="chain-title-row">
+          <div class="chain-stripe" style="background:${chain.color}"></div>
+          <div class="chain-title-text">
+            <div class="chain-title" style="color:${chain.color}">${chain.title}</div>
+            <div class="chain-subtitle">${chain.subtitle}</div>
+          </div>
+          <div class="chain-header-right">
+            <span class="chain-booklet">${chain.booklet}</span>
+            <span class="chain-node-count">${resolvedNodes.length} process${resolvedNodes.length !== 1 ? 'es' : ''}</span>
+          </div>
+        </div>
+      </div>
+      <div class="chain-mini-strip">${miniStrip}</div>
+      <div class="chain-scroll-outer">
+        <div class="chain-scroll">
+          <div class="chain-row">${nodesHtml}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Render one chain node card ─────────────────────────────────
+function renderChainNode(p, chainColor, index, isLast) {
+  const cfg = DOMAIN_CONFIG[p.domain] || { color: chainColor };
+  const nodeColor = cfg.color;
+  const readinessClass = `readiness-${p.automationReadiness.toLowerCase()}`;
+  const owners = p.primaryOwners.slice(0, 2).join(' · ')
+               + (p.primaryOwners.length > 2 ? ` +${p.primaryOwners.length - 2}` : '');
+
+  // Stagger animation delay for cascade entrance
+  const delay = Math.min(index * 0.04, 0.6);
+
+  const connector = isLast ? '' : `
+    <div class="chain-connector">
+      <div class="arrow-line"></div>
+      <div class="arrow-tip"></div>
+    </div>`;
+
+  return `
+    <div class="chain-node"
+         style="--node-color:${nodeColor};animation-delay:${delay}s"
+         onclick="showDetailFromSpine('${p.id}')"
+         title="${p.id} · ${p.name}">
+      <div class="chain-node-top">
+        <span class="chain-node-id" style="color:${nodeColor}">${p.id}</span>
+        <span class="chain-node-ai ${readinessClass}">AI ${p.automationReadiness}</span>
+      </div>
+      <div class="chain-node-name">${p.name}</div>
+      <div class="chain-node-owners">${owners}</div>
+      <div class="chain-node-foot">
+        <span class="chain-node-stages">8 stages</span>
+        <span class="chain-open-hint">Open →</span>
+      </div>
+    </div>
+    ${connector}`;
+}
+
+// ── Show detail, remembering we came from spine ────────────────
+function showDetailFromSpine(id) {
+  showDetail(id);
+  if (currentProcess) {
+    currentProcess._fromSpine = true;
+    updateBreadcrumb(); // re-render breadcrumb with spine back-link
+  }
+}
+
+// ── Boot ───────────────────────────────────────────────────────
 init();
 </script>
 </body>
